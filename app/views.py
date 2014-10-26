@@ -1,5 +1,5 @@
 # coding=utf-8
-from flask import render_template, flash, redirect
+from flask import render_template, flash, redirect, url_for, session
 from forms import LoginForm
 from app import app
 
@@ -17,7 +17,7 @@ from app import app
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        flash('Login requested for user: %s, password: %s, remember: %s' % (form.username, form.password,
-                                                                            str(form.remember_me)))
-        return redirect('/index')
-    return render_template('login.html', title=u'Войти в систему', form=form)
+        flash(u'Successfully logged in as %s' % form.user.username)
+        session['user_id'] = form.user.id
+        return redirect(url_for('index'))
+    return render_template('login.html', form=form)
