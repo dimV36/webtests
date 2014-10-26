@@ -1,0 +1,30 @@
+<!-- extend from base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Войти в систему</h1>
+<form action="" method="post" name="login">
+    {{form.hidden_tag()}}
+    <table>
+        <tr>
+            <td>
+                Логин:
+            </td>
+            <td>
+                 {{form.username(size=40)}}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Пароль:
+            </td>
+            <td>
+                {{form.password(size=40)}}
+            </td>
+
+        </tr>
+    </table>
+    <p>{{form.remember_me}} Запомнить меня</p>
+    <p><input type="submit" value="Войти"></p>
+</form>
+{% endblock %}
