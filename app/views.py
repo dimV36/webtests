@@ -1,7 +1,7 @@
 # coding=utf-8
 from flask import render_template, flash, redirect, url_for, session
 from forms import LoginForm
-from app import app
+from app import app, db
 
 
 # @app.route('/')
@@ -21,3 +21,6 @@ def login():
         session['user_id'] = form.user.id
         return redirect(url_for('index'))
     return render_template('login.html', form=form)
+
+@app.af
+def after_login():
