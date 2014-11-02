@@ -2,18 +2,20 @@ from flask import Flask
 
 from auth import login_manager
 from data import db
-from tracking.views import tracking
-from users.views import users
+from webtests.users.admin import create_admin
+from webtests.users.views import users
+#from users.views import users
 
 app = Flask(__name__)
 app.config.from_object('config')
 
 db.init_app(app)
+db.app = app
+
 login_manager.init_app(app)
 
-@app.context_processor
-def provide_constants():
-    return {"constants": {"TUTORIAL_PART": 2}}
-
-app.register_blueprint(tracking)
+#app.register_blueprint(tracking)
 app.register_blueprint(users)
+
+db.create_all(app=app)
+create_admin()

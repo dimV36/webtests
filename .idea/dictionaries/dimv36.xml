@@ -3,6 +3,7 @@
     <words>
       <w>postgresql</w>
       <w>sqlalchemy</w>
+      <w>tablename</w>
       <w>webadmin</w>
       <w>webtests</w>
     </words>

@@ -8,10 +8,9 @@ from webtests.data import CRUDMixin, db
 
 
 class User(UserMixin, CRUDMixin, db.Model):
-        __tablename__ = 'users'
-
-    name = db.Column(db.String(50))
-    email = db.Column(db.String(120), unique=True)
+    __tablename__ = 'users'
+    username = db.Column(db.String(50), unique=True)
+    role = db.Column(db.String(120))
     _password = db.Column(db.LargeBinary(120))
     _salt = db.Column(db.String(120))
 #    sites = db.relationship('Site', backref='owner', lazy='dynamic')

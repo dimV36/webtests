@@ -1,16 +1,22 @@
 {% macro render(form) %}
-<dl>
+<table>
 {% for field in form if field.type not in ["HiddenField", "CSRFTokenField"] %}
-<dt>{{ field.label }}</dt>
-<dd>{{ field }}
-{% if field.errors %}
-<ul class="errors">
-{% for error in field.errors %}
-<li>{{error}}</li>
+    <tr>
+        <td> {{ field.label }} </td>
+        <td> {{ field }} </td>
+    </tr>
 {% endfor %}
-</ul>
-{% endif %}</dd>
+</table>
+
+{% for field in form if field.type not in ["HiddenField", "CSRFTokenField"] %}
+    {% if field.errors %}
+        <ul class="errors">
+            {% for error in field.errors %}
+            <li>{{error}}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 {% endfor %}
-</dl>
+
 {{ form.hidden_tag() }}
 {% endmacro %}

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-from webtests import app, db
+from webtests import app
+
 
 if __name__ == "__main__":
     app.debug = True
@@ -7,5 +8,4 @@ if __name__ == "__main__":
     # it will use `current_app` instead.  Since we are not in an application
     # context right now, we will instead pass in the configured application
     # into our `create_all` call.
-    db.create_all(app=app)
     app.run()

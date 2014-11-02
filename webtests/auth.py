@@ -1,6 +1,5 @@
 from flask_login import AnonymousUserMixin, LoginManager
-
-from webtests.users.models import User
+from users.models import User
 
 login_manager = LoginManager()
 
