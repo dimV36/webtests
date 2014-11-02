@@ -4,8 +4,8 @@ from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from wtforms import fields
 from webtests.validators.validators import MyInputRequired
 from wtforms.validators import ValidationError
-
 from models import User
+from roles import ROLES
 
 
 class LoginForm(Form):
@@ -36,12 +36,17 @@ class RegistrationForm(Form):
     username = fields.StringField(u'Логин', validators=[MyInputRequired()])
     password = fields.PasswordField(u'Пароль', validators=[MyInputRequired()])
     retry_password = fields.PasswordField(u'Повтор пароля', validators=[MyInputRequired()])
-    role = fields.SelectField(u'Роль', choices=[(u'роль1', u'роль1'), (u'роль2', u'роль2'), (u'роль3', u'роль3')])
+    role = fields.SelectField(u'Роль', choices=ROLES)
 
     def validate_username(self, field):
         user = User.query.filter(User.username == field.data).first()
         if user is not None:
             raise ValidationError(u'Пользователь %s уже зарегистрирован в системе' % self.username.data)
+
+    def validate_role(self, field):
+        user = User.query.filter(User.role == field.data).first()
+        if user is not None:
+            raise ValidationError(u'%s уже зарегистрирован в системе' % self.role.data)
 
     def validate_password(self, field):
         retry_password = self.retry_password.data

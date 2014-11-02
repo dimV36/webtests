@@ -1,0 +1,5 @@
+{% macro create_navigate(username) %}
+<div>
+    Вы вошли как пользователь {{ username }}. <a href="{{ url_for('users.logout') }}">Выйти</a>
+</div>
+{% endmacro %}

@@ -53,6 +53,6 @@ def user_page(username=None):
         form = RegistrationForm()
         if form.validate_on_submit():
             User.create(**form.data)
-        return render_template('users/register.html', form=form)
+        return render_template('users/register.html', form=form, username=g.user.username.data)
     else:
         return render_template('users/user.html', username=username)
