@@ -10,7 +10,7 @@ from webtests.data import CRUDMixin, db
 class User(UserMixin, CRUDMixin, db.Model):
     __tablename__ = 'users'
     username = db.Column(db.String(50), unique=True)
-    role = db.Column(db.String(120))
+    role = db.Column(db.String(50))
     _password = db.Column(db.LargeBinary(120))
     _salt = db.Column(db.String(120))
 #    sites = db.relationship('Site', backref='owner', lazy='dynamic')
@@ -43,10 +43,18 @@ class User(UserMixin, CRUDMixin, db.Model):
         return compare_digest(new_hash, self._password)
 
     def _hash_password(self, password):
-        pwd = password.encode("utf-8")
+        pwd = password.encode('utf-8')
         salt = bytes(self._salt)
-        buff = pbkdf2_hmac("sha512", pwd, salt, iterations=100000)
+        buff = pbkdf2_hmac('sha512', pwd, salt, iterations=100000)
         return bytes(buff)
 
     def __repr__(self):
-        return "<User #{:d}>".format(self.id)
+        return '<User #{:d}>'.format(self.id)
+
+
+class InvestmentLevel(CRUDMixin, db.Model):
+    __tablename__ = 'investment_level'
+    investment_level = db.Column(db.String(120), unique=True)
+
+    def __repr__(self):
+        return '<InvestmentLevel #{:d}>'.format(self.id)

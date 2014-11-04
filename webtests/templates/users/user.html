@@ -1,5 +1,12 @@
 {% extends "layout.html" %}
-{% block tittle %} webtests - {{ username }} {% endblock %}
+{% import "helpers/forms.html" as forms %}
+{% block tittle %} webtests - {{ g.user.username }} {% endblock %}
+{% block content %}
+{{ super() }}
 <section>
-    {% block content %}{% endblock %}
+        <div>
+            Вы вошли как пользователь {{ g.user.username }}. <a href="{{ url_for('users.logout') }}">Выйти</a><br/>
+        </div>
 </section>
+{% endblock %}
+
