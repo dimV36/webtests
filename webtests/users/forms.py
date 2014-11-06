@@ -4,7 +4,9 @@ from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from wtforms import fields
 from webtests.validators.validators import MyInputRequired
 from wtforms.validators import ValidationError
-from models import User
+
+from admin import HEADMASTER_START_TESTING
+from models import User, ApplicationData
 from roles import ROLES
 
 
@@ -52,3 +54,7 @@ class RegistrationForm(Form):
         retry_password = self.retry_password.data
         if not field.data == retry_password:
             raise ValidationError(u'Пароли не совпадают')
+
+
+class HeadmasterForm(Form):
+    start_testing = fields.BooleanField(u'Включить тестирование')

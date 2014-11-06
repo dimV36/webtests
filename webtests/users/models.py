@@ -58,3 +58,9 @@ class InvestmentLevel(CRUDMixin, db.Model):
 
     def __repr__(self):
         return '<InvestmentLevel #{:d}>'.format(self.id)
+
+
+class ApplicationData(CRUDMixin, db.Model):
+    __tablename__ = 'application_data'
+    description = db.Column(db.String(120), unique=True)
+    status = db.Column(db.Boolean)

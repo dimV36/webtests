@@ -4,7 +4,6 @@ from auth import login_manager
 from data import db
 from webtests.users.admin import create_entities
 from webtests.users.views import users
-#from users.views import users
 
 app = Flask(__name__)
 app.config.from_object('config')

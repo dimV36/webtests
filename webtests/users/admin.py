@@ -1,16 +1,20 @@
 # coding=utf-8
 __author__ = 'dimv36'
 from sqlalchemy.orm.exc import NoResultFound
-from models import User, InvestmentLevel
+from models import User, InvestmentLevel, ApplicationData
 from roles import ROLE_ADMIN
 
 __ADMIN_USER = 'admin'
-__INVESTMENT_LEVELS = {u'Инвестиционный уровень 1', u'Инвестиционный уровень 2', u'Инвестиционный уровень 3'}
+__INVESTMENT_LEVELS = [u'Инвестиционный уровень 1', u'Инвестиционный уровень 2', u'Инвестиционный уровень 3']
+
+HEADMASTER_START_TESTING = 'is_headmaster_start_testing'
+__APPLICATION_FIELD_DATA = [HEADMASTER_START_TESTING]
 
 
 def create_entities():
     __create_admin()
     __create_investment_level()
+    __init_application_data()
 
 
 def __create_admin():
@@ -32,3 +36,14 @@ def __create_investment_level():
             pass
         if investment_level is None:
             InvestmentLevel.create(investment_level=level)
+
+
+def __init_application_data():
+    data = None
+    for field in __APPLICATION_FIELD_DATA:
+        try:
+            data = ApplicationData.query.filter(ApplicationData.description == field).one()
+        except NoResultFound:
+            pass
+        if data is None:
+            ApplicationData.create(description=field, status=False)
