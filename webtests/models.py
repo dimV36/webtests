@@ -64,3 +64,9 @@ class ApplicationData(CRUDMixin, db.Model):
     __tablename__ = 'application_data'
     description = db.Column(db.String(120), unique=True)
     status = db.Column(db.Boolean)
+
+
+class WebtestsChoices(CRUDMixin, db.Model):
+    __tablename__ = 'users_choices'
+    description = db.Column(db.String(120), unique=True)
+    variant = db.Column(db.Integer)

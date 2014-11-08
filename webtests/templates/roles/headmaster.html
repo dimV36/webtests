@@ -3,19 +3,15 @@
 {% block tittle %} webtests - {{ g.user.username }} {% endblock %}
 {% block content %}
 {{ super() }}
-<section>
-    <div>
-        Вы вошли как пользователь {{ g.user.username }}. <a href="{{ url_for('users.logout') }}">Выйти</a><br/>
-    </div>
-</section>
-<form action="{{url_for('users.headmaster')}}" method="POST">
-{{ forms.render(form) }}
+{{ forms.navigation() }}
+<form action="{{url_for('headmaster')}}" method="POST">
 {% if testing_is_started %}
     <p>
         <input type="Submit" value="Закончить тестирование">
     </p>
 {% else %}
     <p>
+        {{ forms.render_choices(form) }}
         <input type="Submit" value="Начать тестирование">
     </p>
 {% endif %}

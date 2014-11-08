@@ -5,7 +5,7 @@
 {{ super() }}
 <section>
         <div>
-            Вы вошли как пользователь {{ g.user.username }}. <a href="{{ url_for('users.logout') }}">Выйти</a><br/>
+            Вы вошли как пользователь {{ g.user.username }}. <a href="{{ url_for('logout') }}">Выйти</a><br/>
         </div>
 </section>
 {% endblock %}

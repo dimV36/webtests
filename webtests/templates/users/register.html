@@ -4,9 +4,9 @@
 {% block content %}
 {{super()}}
 <div>
-        Вы вошли как пользователь {{ g.user.username }}. <a href="{{ url_for('users.logout') }}">Выйти</a><br/>
+        Вы вошли как пользователь {{ g.user.username }}. <a href="{{ url_for('logout') }}">Выйти</a><br/>
 </div>
-<form action="{{url_for('users.register')}}" method="POST">
+<form action="{{url_for('register')}}" method="POST">
 {{ forms.render(form) }}
 <p><input type="Submit" value="Зарегистрировать"></p>
 </form>

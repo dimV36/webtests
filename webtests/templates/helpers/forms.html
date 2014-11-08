@@ -20,3 +20,34 @@
 
 {{ form.hidden_tag() }}
 {% endmacro %}
+
+{% macro render_choices(form) %}
+<table>
+{% for subfield in form.choices %}
+    <tr>
+        <td>{{ subfield }}</td>
+        <td>{{ subfield.label }}</td>
+    </tr>
+{% endfor %}
+</table>
+
+{% for field in form if field.type not in ["HiddenField", "CSRFTokenField"] %}
+    {% if field.errors %}
+        <ul class="errors">
+            {% for error in field.errors %}
+            <li>{{error}}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endfor %}
+
+{{ form.hidden_tag() }}
+{% endmacro %}
+
+{% macro navigation() %}
+<section>
+    <div>
+        Вы вошли как пользователь <b>{{ g.user.username }}</b>. <a href="{{ url_for('logout') }}">Выйти</a><br>
+    </div>
+</section>
+{% endmacro %}

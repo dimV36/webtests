@@ -1,11 +1,14 @@
 # coding=utf-8
 __author__ = 'dimv36'
 from sqlalchemy.orm.exc import NoResultFound
+
 from models import User, InvestmentLevel, ApplicationData
-from roles import ROLE_ADMIN
+from webtests.roles import ROLE_ADMIN
+
 
 __ADMIN_USER = 'admin'
 __INVESTMENT_LEVELS = [u'Инвестиционный уровень 1', u'Инвестиционный уровень 2', u'Инвестиционный уровень 3']
+INVESTMENT_LEVELS = [u'Инвестиционный уровень 1', u'Инвестиционный уровень 2', u'Инвестиционный уровень 3']
 
 HEADMASTER_START_TESTING = 'is_headmaster_start_testing'
 __APPLICATION_FIELD_DATA = [HEADMASTER_START_TESTING]
@@ -47,3 +50,22 @@ def __init_application_data():
             pass
         if data is None:
             ApplicationData.create(description=field, status=False)
+
+
+def get_application_data(field):
+    try:
+        app_data = ApplicationData.query.filter(ApplicationData.description == field).one()
+    except NoResultFound:
+        raise LookupError(u'Не найдено значение переменной %s', field)
+    return app_data
+
+
+def get_investment_levels():
+    try:
+        investment_levels = InvestmentLevel.query.all()
+    except NoResultFound:
+        raise LookupError(u'Не найдены значения инвестиционных уровней')
+    levels = list()
+    for i in range(0, len(investment_levels)):
+        levels.append((i, investment_levels[i].investment_level))
+    return levels

@@ -2,9 +2,9 @@
 from flask_wtf import Form
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from wtforms import fields
-from webtests.validators.validators import MyInputRequired
+from webtests.validators.validators import MyInputRequired, choices_validator
 from wtforms.validators import ValidationError
-
+from admin import get_investment_levels, get_application_data
 from admin import HEADMASTER_START_TESTING
 from models import User, ApplicationData
 from roles import ROLES
@@ -14,11 +14,11 @@ class LoginForm(Form):
     username = fields.StringField(u'Логин', validators=[MyInputRequired()])
     password = fields.PasswordField(u'Пароль', validators=[MyInputRequired()])
     user = None
-
     # WTForms supports "inline" validators
     # of the form `validate_[fieldname]`.
     # This validator will run after all the
     # other validators have passed.
+
     def validate_password(self, field):
         try:
             user = User.query.filter(User.username == self.username.data).one()
@@ -28,7 +28,6 @@ class LoginForm(Form):
             raise ValidationError(u'Пользователь %s не зарегистрирован в системе' % self.username.data)
         if not user.is_valid_password(self.password.data):
             raise ValidationError(u'Неверный пароль')
-
         # Make the current user available
         # to calling code.
         self.user = user
@@ -57,4 +56,5 @@ class RegistrationForm(Form):
 
 
 class HeadmasterForm(Form):
-    start_testing = fields.BooleanField(u'Включить тестирование')
+    choices = fields.RadioField(u'Инвестиционные уровни', coerce=int, choices=get_investment_levels(),
+                                validators=[choices_validator])
