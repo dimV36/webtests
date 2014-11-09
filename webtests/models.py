@@ -55,9 +55,30 @@ class User(UserMixin, CRUDMixin, db.Model):
 class InvestmentLevel(CRUDMixin, db.Model):
     __tablename__ = 'investment_level'
     investment_level = db.Column(db.String(120), unique=True)
+    process = db.relationship('Process', backref='investment_level', lazy='dynamic')
 
     def __repr__(self):
         return '<InvestmentLevel #{:d}>'.format(self.id)
+
+
+class Process(CRUDMixin, db.Model):
+    __tablename__ = 'process'
+    name = db.Column(db.String(120), unique=True)
+    investment_level_id = db.Column(db.Integer, db.ForeignKey('investment_level.id'))
+    questionnaire_id = db.relationship('Questionnaire', backref='questionnaire', lazy='dynamic')
+
+    def __repr__(self):
+        return '<Process #{:d}>'.format(self.id)
+
+
+class Questionnaire(CRUDMixin, db.Model):
+    __tablename__ = 'questionnaire'
+    question = db.Column(db.Text, unique=True)
+    answer1 = db.Column(db.Text)
+    answer2 = db.Column(db.Text)
+    answer3 = db.Column(db.Text)
+    answer4 = db.Column(db.Text)
+    process_id = db.Column(db.Integer, db.ForeignKey('process.id'))
 
 
 class ApplicationData(CRUDMixin, db.Model):
@@ -66,7 +87,8 @@ class ApplicationData(CRUDMixin, db.Model):
     status = db.Column(db.Boolean)
 
 
-class WebtestsChoices(CRUDMixin, db.Model):
+class UsersChoices(CRUDMixin, db.Model):
     __tablename__ = 'users_choices'
-    description = db.Column(db.String(120), unique=True)
+    username = db.Column(db.String(120))
+    description = db.Column(db.String(120))
     variant = db.Column(db.Integer)

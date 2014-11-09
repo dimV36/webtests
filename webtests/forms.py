@@ -1,13 +1,17 @@
 # coding=utf-8
 from flask_wtf import Form
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
-from wtforms import fields
-from webtests.validators.validators import MyInputRequired, choices_validator
+from wtforms import fields, widgets
+from webtests.validators.validators import MyInputRequired
 from wtforms.validators import ValidationError
-from admin import get_investment_levels, get_application_data
-from admin import HEADMASTER_START_TESTING
-from models import User, ApplicationData
+from admin import get_investment_levels, get_organization_processes
+from models import User
 from roles import ROLES
+
+
+class MultiCheckboxField(fields.SelectMultipleField):
+    widget = widgets.ListWidget(prefix_label=False)
+    option_widget = widgets.CheckboxInput()
 
 
 class LoginForm(Form):
@@ -56,5 +60,12 @@ class RegistrationForm(Form):
 
 
 class HeadmasterForm(Form):
-    choices = fields.RadioField(u'Инвестиционные уровни', coerce=int, choices=get_investment_levels(),
-                                validators=[choices_validator])
+    choices = fields.RadioField(u'Инвестиционные уровни', coerce=int, choices=get_investment_levels(), default=0)
+
+
+class CSOForm(Form):
+    choices = MultiCheckboxField(u'Процессы организации', choices=get_organization_processes(), coerce=int)
+
+
+class GMForm(Form):
+    choices = MultiCheckboxField(choices=get_organization_processes(), coerce=int)

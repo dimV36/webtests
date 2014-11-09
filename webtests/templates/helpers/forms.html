@@ -47,7 +47,11 @@
 {% macro navigation() %}
 <section>
     <div>
-        Вы вошли как пользователь <b>{{ g.user.username }}</b>. <a href="{{ url_for('logout') }}">Выйти</a><br>
+        Вы вошли как пользователь <b>{{ g.user.username }}</b>. <a href="{{ url_for('logout') }}">Выйти</a><br><br>
     </div>
 </section>
+{% endmacro %}
+
+{% macro whoami() %}
+    {% block title %} webtests - {{ g.user.username }} {% endblock %}
 {% endmacro %}

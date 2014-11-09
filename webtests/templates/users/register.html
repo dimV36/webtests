@@ -1,11 +1,9 @@
-{% extends "layout.html" %}
+{% extends "helpers/layout.html" %}
 {% import "helpers/forms.html" as forms %}
-{% block title %}Зарегистрировать пользователей системы{% endblock %}
+{% block title %} Зарегистрировать пользователей системы {% endblock %}
 {% block content %}
 {{super()}}
-<div>
-        Вы вошли как пользователь {{ g.user.username }}. <a href="{{ url_for('logout') }}">Выйти</a><br/>
-</div>
+{{ forms.navigation() }}
 <form action="{{url_for('register')}}" method="POST">
 {{ forms.render(form) }}
 <p><input type="Submit" value="Зарегистрировать"></p>

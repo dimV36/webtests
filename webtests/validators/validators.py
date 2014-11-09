@@ -19,11 +19,3 @@ class MyInputRequired(object):
 
             field.errors[:] = []
             raise StopValidation(message)
-
-
-def choices_validator(self, field):
-    is_testing_started = get_application_data(HEADMASTER_START_TESTING).status
-    if is_testing_started:
-        print('Valid')
-    else:
-        print('Invalid')

@@ -1,0 +1,16 @@
+{% extends "helpers/layout.html" %}
+{% import "helpers/forms.html" as forms %}
+{{ forms.whoami() }}
+{% block content %}
+{{ super() }}
+{{ forms.navigation() }}
+<form action="{{url_for('cso')}}" method="POST">
+{% if is_headmaster_start_testing %}
+    {% if not is_cso_choose_processes %}
+            Выбрать процессы организации:
+            {{ forms.render_choices(form) }}
+            <input type="Submit" value="Отправить">
+    {% endif %}
+{% endif %}
+</form>
+{% endblock %}

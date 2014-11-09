@@ -1,19 +1,23 @@
 # coding=utf-8
-from flask import redirect, render_template, url_for, g, flash
+from flask import redirect, render_template, url_for, g
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.orm.exc import NoResultFound
 
-from admin import __ADMIN_USER, HEADMASTER_START_TESTING
-from admin import get_application_data, get_investment_levels
-from webtests.roles import ROLE_HEAD_OF_ORGANIZATION
-from forms import LoginForm, RegistrationForm, HeadmasterForm
-from models import User
+from admin import __ADMIN_USER, HEADMASTER_START_TESTING, CSO_CHOOSE_PROCESSES, GM_ANSWERED_ON_QUESTIONS
+from admin import get_application_data, get_user_choice, reset_application_data
+from webtests.roles import ROLE_HEAD_OF_ORGANIZATION, ROLE_HEAD_OF_INFORMATION_SECURITY, ROLE_HEAD_OF_STRATEGIC_LEVEL
+from forms import LoginForm, RegistrationForm, HeadmasterForm, CSOForm, GMForm
+from models import User, UsersChoices
 from webtests import app
 
 
 @app.before_request
 def before_request():
     g.user = current_user
+    app_data = get_application_data(HEADMASTER_START_TESTING)
+    if not app_data.status:
+        reset_application_data()
+
 
 @app.route('/admin/', methods=('GET', 'POST'))
 @login_required
@@ -34,10 +38,61 @@ def headmaster():
         form = HeadmasterForm()
         app_data = get_application_data(HEADMASTER_START_TESTING)
         if form.validate_on_submit():
-            print(form.data)
+            if not app_data.status:
+                UsersChoices.create(username=g.user.username, description='investment_level',
+                                    variant=form.choices.data)
+            else:
+                form.choices.process_data(get_user_choice('investment_level').variant)
+                choices = UsersChoices.query.all()
+                for choice in choices:
+                    UsersChoices.delete(choice)
             app_data.status = bool(not app_data.status)
             app_data.update()
+        else:
+            print(form.errors)
         return render_template('roles/headmaster.html', form=form, testing_is_started=app_data.status)
+    else:
+        return u'Вы не можете получить доступ к этой странице'
+
+
+@app.route('/cso/', methods=('GET', 'POST'))
+@login_required
+def cso():
+    if g.user.role == ROLE_HEAD_OF_INFORMATION_SECURITY:
+        form = CSOForm()
+        app_data = get_application_data(CSO_CHOOSE_PROCESSES)
+        if form.validate_on_submit():
+            if not app_data.status:
+                for choice in form.choices.data:
+                    UsersChoices.create(username=g.user.username, description='processes', variant=choice)
+            app_data.status = bool(not app_data.status)
+            app_data.update()
+        else:
+            print(form.errors)
+        return render_template('roles/cso.html', form=form, is_cso_choose_processes=app_data.status,
+                               is_headmaster_start_testing=get_application_data(HEADMASTER_START_TESTING))
+    else:
+        return u'Вы не можете получить доступ к этой странице'
+
+
+@app.route('/gm/', methods=('GET', 'POST'))
+@login_required
+def gm():
+    if g.user.role == ROLE_HEAD_OF_STRATEGIC_LEVEL:
+        form = GMForm()
+        app_data = get_application_data(GM_ANSWERED_ON_QUESTIONS)
+        if form.validate_on_submit():
+            if not app_data.status:
+                for form_choice in form.choices:
+                    for choice in form_choice.choices.data:
+                        UsersChoices.create(username=g.user.username, description='gm_answers', variant=choice)
+            app_data.status = bool(not app_data.status)
+            app_data.update()
+        else:
+            print(form.errors)
+        return render_template('roles/gm.html', form=form,
+                               is_cso_choose_processes=get_application_data(CSO_CHOOSE_PROCESSES),
+                               is_gm_answered_on_questions=app_data.status)
     else:
         return u'Вы не можете получить доступ к этой странице'
 
@@ -71,3 +126,7 @@ def user_page(username):
     if user is not None:
         if user.role == ROLE_HEAD_OF_ORGANIZATION:
             redirect(url_for('headmaster'))
+        elif user.role == ROLE_HEAD_OF_INFORMATION_SECURITY:
+            redirect(url_for('cso'))
+        elif user.role == ROLE_HEAD_OF_STRATEGIC_LEVEL:
+            redirect(url_for('gm'))
