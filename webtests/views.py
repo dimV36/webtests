@@ -1,5 +1,5 @@
 # coding=utf-8
-from flask import redirect, render_template, url_for, g
+from flask import redirect, render_template, url_for, g, flash
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -80,12 +80,12 @@ def cso():
 def gm():
     if g.user.role == ROLE_HEAD_OF_STRATEGIC_LEVEL:
         form = GMForm()
+        print('\nlen(form.tests) is ' + str(len(form.tests)) + '\n')
         app_data = get_application_data(GM_ANSWERED_ON_QUESTIONS)
         if form.validate_on_submit():
             if not app_data.status:
-                for form_choice in form.choices:
-                    for choice in form_choice.choices.data:
-                        UsersChoices.create(username=g.user.username, description='gm_answers', variant=choice)
+                for test in form.tests:
+                    UsersChoices.create(username=g.user.username, description='gm_answers', variant=test.data)
             app_data.status = bool(not app_data.status)
             app_data.update()
         else:

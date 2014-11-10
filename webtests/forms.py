@@ -68,4 +68,4 @@ class CSOForm(Form):
 
 
 class GMForm(Form):
-    choices = MultiCheckboxField(choices=get_organization_processes(), coerce=int)
+    tests = [fields.RadioField(choices=get_organization_processes(), coerce=int), fields.RadioField(choices=get_organization_processes(), coerce=int)]
