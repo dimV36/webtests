@@ -6,7 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from admin import __ADMIN_USER, HEADMASTER_START_TESTING, CSO_CHOOSE_PROCESSES, GM_ANSWERED_ON_QUESTIONS
 from admin import get_application_data, get_user_choice, reset_application_data
 from webtests.roles import ROLE_HEAD_OF_ORGANIZATION, ROLE_HEAD_OF_INFORMATION_SECURITY, ROLE_HEAD_OF_STRATEGIC_LEVEL
-from forms import LoginForm, RegistrationForm, HeadmasterForm, CSOForm, GMForm
+from forms import LoginForm, RegistrationForm, HeadmasterForm, CSOForm, GMForm, HeadmasterFormDynamic
 from models import User, UsersChoices
 from webtests import app
 
@@ -35,7 +35,7 @@ def register():
 @login_required
 def headmaster():
     if g.user.role == ROLE_HEAD_OF_ORGANIZATION:
-        form = HeadmasterForm()
+        form = HeadmasterFormDynamic()
         app_data = get_application_data(HEADMASTER_START_TESTING)
         if form.validate_on_submit():
             if not app_data.status:

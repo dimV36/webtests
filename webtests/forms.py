@@ -5,7 +5,7 @@ from wtforms import fields, widgets
 from webtests.validators.validators import MyInputRequired
 from wtforms.validators import ValidationError
 from admin import get_investment_levels, get_organization_processes
-from models import User
+from models import User, InvestmentLevel
 from roles import ROLES
 
 
@@ -60,7 +60,14 @@ class RegistrationForm(Form):
 
 
 class HeadmasterForm(Form):
-    choices = fields.RadioField(u'Инвестиционные уровни', coerce=int, choices=get_investment_levels(), default=0)
+    variants = fields.RadioField(label=u'Инвестиционные уровни', coerce=int)
+
+
+def HeadmasterFormDynamic():
+    choices = [(level.id, level.name) for level in InvestmentLevel.query.all()]
+    form = HeadmasterForm()
+    form.variants.choices = choices
+    return form
 
 
 class CSOForm(Form):

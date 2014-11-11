@@ -23,7 +23,8 @@
 
 {% macro render_choices(form) %}
 <table>
-{% for subfield in form.choices %}
+<!--{{ form.variants.label }}-->
+{% for subfield in form.variants %}
     <tr>
         <td>{{ subfield }}</td>
         <td>{{ subfield.label }}</td>

@@ -41,11 +41,11 @@ def __create_investment_level():
     investment_level = None
     for level in __INVESTMENT_LEVELS:
         try:
-            investment_level = InvestmentLevel.query.filter(InvestmentLevel.investment_level == level).one()
+            investment_level = InvestmentLevel.query.filter(InvestmentLevel.name == level).one()
         except NoResultFound:
             pass
         if investment_level is None:
-            InvestmentLevel.create(investment_level=level)
+            InvestmentLevel.create(name=level)
 
 
 def __create_processes():
@@ -54,7 +54,7 @@ def __create_processes():
     for i in range(0, len(__PROCESSES)):
         try:
             investment_level = InvestmentLevel.query.filter(
-                InvestmentLevel.investment_level == __INVESTMENT_LEVELS[i]
+                InvestmentLevel.name == __INVESTMENT_LEVELS[i]
             ).one()
             process = Process.query.filter(Process.name == __PROCESSES[i]).one()
         except NoResultFound:
@@ -114,7 +114,7 @@ def get_investment_levels():
         raise LookupError(u'Не найдены значения инвестиционных уровней')
     levels = list()
     for i in range(0, len(investment_levels)):
-        levels.append((i, investment_levels[i].investment_level))
+        levels.append((i, investment_levels[i].name))
     return levels
 
 

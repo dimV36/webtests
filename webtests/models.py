@@ -54,11 +54,14 @@ class User(UserMixin, CRUDMixin, db.Model):
 
 class InvestmentLevel(CRUDMixin, db.Model):
     __tablename__ = 'investment_level'
-    investment_level = db.Column(db.String(120), unique=True)
+    name = db.Column(db.String(120), unique=True)
     process = db.relationship('Process', backref='investment_level', lazy='dynamic')
 
     def __repr__(self):
         return '<InvestmentLevel #{:d}>'.format(self.id)
+
+    def __unicode__(self):
+        return unicode('id: %i, name: %s, process_id: %i' % (self.id, self.name.data, self.process.id))
 
 
 class Process(CRUDMixin, db.Model):
