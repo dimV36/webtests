@@ -4,8 +4,9 @@ from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from wtforms import fields, widgets
 from webtests.validators.validators import MyInputRequired
 from wtforms.validators import ValidationError
-from admin import get_investment_levels, get_organization_processes
-from models import User, InvestmentLevel
+# from admin import get_investment_levels, get_organization_processes
+from dbquery import get_investment_levels, get_organization_processes, get_user_choice
+from models import User, InvestmentLevel, UsersChoices, Process
 from roles import ROLES
 
 
@@ -60,19 +61,30 @@ class RegistrationForm(Form):
 
 
 class HeadmasterForm(Form):
-    variants = fields.RadioField(label=u'Инвестиционные уровни', coerce=int)
+    variants = fields.RadioField(coerce=int, default=0)
 
 
-def HeadmasterFormDynamic():
-    choices = [(level.id, level.name) for level in InvestmentLevel.query.all()]
+def HeadmasterFormDynamic(is_headmaster_start_testing):
     form = HeadmasterForm()
-    form.variants.choices = choices
+    form.variants.choices = [(level.id, level.name) for level in get_investment_levels()]
+    if is_headmaster_start_testing:
+        form.variants.process_data(get_user_choice('investment_level').variant)
     return form
 
 
 class CSOForm(Form):
-    choices = MultiCheckboxField(u'Процессы организации', choices=get_organization_processes(), coerce=int)
+    variants = MultiCheckboxField(coerce=int, default=0)
 
 
-class GMForm(Form):
-    tests = [fields.RadioField(choices=get_organization_processes(), coerce=int), fields.RadioField(choices=get_organization_processes(), coerce=int)]
+def CSOFormDynamic():
+    form = CSOForm()
+    form.variants.choices = [(process.id, process.name) for process in get_organization_processes()]
+    return form
+
+
+class TestForm(Form):
+    tests = fields.FieldList(MultiCheckboxField(coerce=int, default=0))
+
+
+def TestFormDynamic():
+    pass

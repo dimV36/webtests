@@ -118,14 +118,6 @@ def get_investment_levels():
     return levels
 
 
-def get_user_choice(description):
-    try:
-        user_choice = UsersChoices.query.filter(UsersChoices.description == description).one()
-    except NoResultFound:
-        raise LookupError(u'Не найден выбор пользователя')
-    return user_choice
-
-
 def get_organization_processes():
     try:
         organization_processes = Process.query.all()

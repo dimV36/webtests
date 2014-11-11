@@ -4,9 +4,9 @@ from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.orm.exc import NoResultFound
 
 from admin import __ADMIN_USER, HEADMASTER_START_TESTING, CSO_CHOOSE_PROCESSES, GM_ANSWERED_ON_QUESTIONS
-from admin import get_application_data, get_user_choice, reset_application_data
+from admin import get_application_data, reset_application_data#, get_user_choice
 from webtests.roles import ROLE_HEAD_OF_ORGANIZATION, ROLE_HEAD_OF_INFORMATION_SECURITY, ROLE_HEAD_OF_STRATEGIC_LEVEL
-from forms import LoginForm, RegistrationForm, HeadmasterForm, CSOForm, GMForm, HeadmasterFormDynamic
+from forms import LoginForm, RegistrationForm, GMForm, HeadmasterFormDynamic, CSOFormDynamic
 from models import User, UsersChoices
 from webtests import app
 
@@ -35,19 +35,19 @@ def register():
 @login_required
 def headmaster():
     if g.user.role == ROLE_HEAD_OF_ORGANIZATION:
-        form = HeadmasterFormDynamic()
         app_data = get_application_data(HEADMASTER_START_TESTING)
+        form = HeadmasterFormDynamic(app_data.status)
         if form.validate_on_submit():
             if not app_data.status:
                 UsersChoices.create(username=g.user.username, description='investment_level',
-                                    variant=form.choices.data)
+                                    variant=form.variants.data)
             else:
-                form.choices.process_data(get_user_choice('investment_level').variant)
                 choices = UsersChoices.query.all()
                 for choice in choices:
                     UsersChoices.delete(choice)
             app_data.status = bool(not app_data.status)
             app_data.update()
+            return redirect(url_for('headmaster'))
         else:
             print(form.errors)
         return render_template('roles/headmaster.html', form=form, testing_is_started=app_data.status)
@@ -59,12 +59,12 @@ def headmaster():
 @login_required
 def cso():
     if g.user.role == ROLE_HEAD_OF_INFORMATION_SECURITY:
-        form = CSOForm()
+        form = CSOFormDynamic()
         app_data = get_application_data(CSO_CHOOSE_PROCESSES)
         if form.validate_on_submit():
             if not app_data.status:
-                for choice in form.choices.data:
-                    UsersChoices.create(username=g.user.username, description='processes', variant=choice)
+                for variant in form.variants.data:
+                    UsersChoices.create(username=g.user.username, description='processes', variant=variant)
             app_data.status = bool(not app_data.status)
             app_data.update()
         else:
@@ -80,7 +80,6 @@ def cso():
 def gm():
     if g.user.role == ROLE_HEAD_OF_STRATEGIC_LEVEL:
         form = GMForm()
-        print('\nlen(form.tests) is ' + str(len(form.tests)) + '\n')
         app_data = get_application_data(GM_ANSWERED_ON_QUESTIONS)
         if form.validate_on_submit():
             if not app_data.status:
