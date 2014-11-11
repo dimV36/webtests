@@ -67,6 +67,7 @@ class InvestmentLevel(CRUDMixin, db.Model):
 class Process(CRUDMixin, db.Model):
     __tablename__ = 'process'
     name = db.Column(db.String(120), unique=True)
+    role = db.Column(db.String(120))
     investment_level_id = db.Column(db.Integer, db.ForeignKey('investment_level.id'))
     questionnaire_id = db.relationship('Questionnaire', backref='questionnaire', lazy='dynamic')
 

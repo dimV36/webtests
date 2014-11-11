@@ -7,7 +7,8 @@ from webtests.roles import ROLE_ADMIN
 
 
 __ADMIN_USER = 'admin'
-__INVESTMENT_LEVELS = [u'Инвестиционный уровень 1', u'Инвестиционный уровень 2', u'Инвестиционный уровень 3']
+# __INVESTMENT_LEVELS = [u'Инвестиционный уровень 1', u'Инвестиционный уровень 2', u'Инвестиционный уровень 3']
+__INVESTMENT_LEVELS = [u'Инвестиционный уровень ' + str(i) for i in range(0, 10)]
 __PROCESSES = [u'Процесс 1', u'Процесс 2', u'Процесс 3']
 __QUESTIONS = [u'Вопрос 1', u'Вопрос 2', u'Вопрос 3']
 __ANSWERS = [u'Ответ 1', u'Ответ 2', u'Ответ 3', u'Ответ 4']
@@ -51,16 +52,13 @@ def __create_investment_level():
 def __create_processes():
     process = None
     investment_level = None
-    for i in range(0, len(__PROCESSES)):
-        try:
-            investment_level = InvestmentLevel.query.filter(
-                InvestmentLevel.name == __INVESTMENT_LEVELS[i]
-            ).one()
-            process = Process.query.filter(Process.name == __PROCESSES[i]).one()
-        except NoResultFound:
-            pass
-        if process is None and investment_level is not None:
-            Process.create(name=__PROCESSES[i], investment_level_id=investment_level.id)
+    try:
+        investment_level = InvestmentLevel.query.all()
+    except NoResultFound:
+        pass
+    for 
+    if process is None and investment_level is not None:
+        Process.create(name=__PROCESSES[i], investment_level_id=investment_level.id)
 
 
 def __create_questionnaire():
