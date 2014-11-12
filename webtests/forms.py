@@ -88,7 +88,7 @@ class QuestionForm(Form):
 
 def QuestionFormDynamic(choices):
     form = QuestionForm()
-    form.question = choices
+    form.question.choices = choices
     return form
 
 
@@ -97,7 +97,11 @@ class TestForm(Form):
 
 
 def TestFormDynamic(process):
-    pass
+    form = TestForm()
+    if process is Process:
+        questions_by_process = questions()
+        for question in questions_by_process:
+            question_form = QuestionFormDynamic()
 
 
 def GMFormDynamic():

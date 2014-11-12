@@ -35,9 +35,9 @@ def organization_processes():
     return processes
 
 
-def questions(number):
+def questions():
     try:
-        process = UsersChoices.query.filter(UsersChoices.description == 'processes')[number]
+        process = UsersChoices.query.filter(UsersChoices.description == 'processes')
     except NoResultFound:
         raise LookupError(u'Не найден выбор процессов пользователя')
     try:
@@ -45,6 +45,11 @@ def questions(number):
     except NoResultFound:
         raise LookupError(u'Не найдены вопросы для анкеты')
     return questions
+
+
+def question_variants(question):
+    if question is Question:
+        return 
 
 
 # def questionnaires():
