@@ -2,14 +2,13 @@
 __author__ = 'dimv36'
 from sqlalchemy.orm.exc import NoResultFound
 
-from models import User, InvestmentLevel, ApplicationData, UsersChoices, Process, Questionnaire
-from webtests.roles import ROLE_ADMIN
+from models import User, InvestmentLevel, ApplicationData, UsersChoices, Process, Question
+from webtests.roles import ROLE_ADMIN, ROLES_FOR_TESTING
+from random import randint
 
 
 __ADMIN_USER = 'admin'
-# __INVESTMENT_LEVELS = [u'Инвестиционный уровень 1', u'Инвестиционный уровень 2', u'Инвестиционный уровень 3']
-__INVESTMENT_LEVELS = [u'Инвестиционный уровень ' + str(i) for i in range(0, 10)]
-__PROCESSES = [u'Процесс 1', u'Процесс 2', u'Процесс 3']
+__INVESTMENT_LEVELS = [u'Инвестиционный уровень ' + str(i) for i in range(1, 6)]
 __QUESTIONS = [u'Вопрос 1', u'Вопрос 2', u'Вопрос 3']
 __ANSWERS = [u'Ответ 1', u'Ответ 2', u'Ответ 3', u'Ответ 4']
 
@@ -50,29 +49,41 @@ def __create_investment_level():
 
 
 def __create_processes():
-    process = None
-    investment_level = None
+    processes = None
     try:
-        investment_level = InvestmentLevel.query.all()
+        investment_levels = InvestmentLevel.query.all()
+    except NoResultFound:
+        raise LookupError(u'Не найдены значения инвестиционных уровней')
+    try:
+        processes = Process.query.all()
     except NoResultFound:
         pass
-    for 
-    if process is None and investment_level is not None:
-        Process.create(name=__PROCESSES[i], investment_level_id=investment_level.id)
+    if len(processes) == 0:
+        for i in range(1, len(__INVESTMENT_LEVELS)):
+            investment_level = investment_levels[i - 1]
+            for j in range(1, 3):
+                process_name = u'Процесс ' + str(i) + '.' + str(j)
+                role = ROLES_FOR_TESTING[randint(0, len(ROLES_FOR_TESTING) - 1)]
+                Process.create(name=process_name, investment_level_id=investment_level.id, role=role)
 
 
 def __create_questionnaire():
-    process = None
-    questionnaire = None
-    for i in range(0, len(__QUESTIONS)):
-        try:
-            process = Process.query.filter(Process.name == __PROCESSES[i]).one()
-            questionnaire = Questionnaire.query.filter(Questionnaire.question == __QUESTIONS[i]).one()
-        except NoResultFound:
-            pass
-        if questionnaire is None:
-            Questionnaire.create(question=__QUESTIONS[i], answer1=__ANSWERS[0], answer2=__ANSWERS[1],
-                                 answer3=__ANSWERS[2], answer4=__ANSWERS[3], process_id=process.id)
+    questionnaires = None
+    try:
+        processes = Process.query.all()
+    except NoResultFound:
+        raise LookupError(u'Не найдены значения процессов')
+    try:
+        questionnaires = Question.query.all()
+    except NoResultFound:
+        pass
+    if len(questionnaires) == 0:
+        for i in range(1, len(processes)):
+            process = processes[i - 1]
+            for j in range(1, 5):
+                question = u'Вопрос ' + str(i) + '.' + str(j)
+                Question.create(name=question, answer1=u'Ответ 1', answer2=u'Ответ 2',
+                                     answer3=u'Ответ 3', answer4=u'Ответ 4', process_id=process.id)
 
 
 def __init_application_data():

@@ -69,15 +69,15 @@ class Process(CRUDMixin, db.Model):
     name = db.Column(db.String(120), unique=True)
     role = db.Column(db.String(120))
     investment_level_id = db.Column(db.Integer, db.ForeignKey('investment_level.id'))
-    questionnaire_id = db.relationship('Questionnaire', backref='questionnaire', lazy='dynamic')
+    questionnaire_id = db.relationship('Question', backref='questionnaire', lazy='dynamic')
 
     def __repr__(self):
         return '<Process #{:d}>'.format(self.id)
 
 
-class Questionnaire(CRUDMixin, db.Model):
-    __tablename__ = 'questionnaire'
-    question = db.Column(db.Text, unique=True)
+class Question(CRUDMixin, db.Model):
+    __tablename__ = 'questions'
+    name = db.Column(db.Text, unique=True)
     answer1 = db.Column(db.Text)
     answer2 = db.Column(db.Text)
     answer3 = db.Column(db.Text)

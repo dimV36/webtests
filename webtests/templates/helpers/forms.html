@@ -45,25 +45,8 @@
 
 
 {% macro render_tests(form) %}
-    {% for test in form.tests %}
-        <table>
-        {% for subfield in test.choices %}
-            <tr>
-                <td>{{ subfield }}</td>
-                <td>{{ subfield.label }}</td>
-            </tr>
-        {% endfor %}
-        </table>
-        {% for field in form if field.type not in ["HiddenField", "CSRFTokenField"] %}
-            {% if field.errors %}
-                <ul class="errors">
-                    {% for error in field.errors %}
-                    <li>{{error}}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        {% endfor %}
-        {{ form.hidden_tag() }}
+    {% for entry in form.questions.entries %}
+
     {% endfor %}
 {% endmacro %}
 

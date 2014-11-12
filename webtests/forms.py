@@ -5,7 +5,7 @@ from wtforms import fields, widgets
 from webtests.validators.validators import MyInputRequired
 from wtforms.validators import ValidationError
 # from admin import get_investment_levels, get_organization_processes
-from dbquery import get_investment_levels, get_organization_processes, get_user_choice
+from dbquery import investment_levels, organization_processes, user_choice, questions
 from models import User, InvestmentLevel, UsersChoices, Process
 from roles import ROLES
 
@@ -66,9 +66,9 @@ class HeadmasterForm(Form):
 
 def HeadmasterFormDynamic(is_headmaster_start_testing):
     form = HeadmasterForm()
-    form.variants.choices = [(level.id, level.name) for level in get_investment_levels()]
+    form.variants.choices = [(level.id, level.name) for level in investment_levels()]
     if is_headmaster_start_testing:
-        form.variants.process_data(get_user_choice('investment_level').variant)
+        form.variants.process_data(user_choice('investment_level').variant)
     return form
 
 
@@ -78,13 +78,39 @@ class CSOForm(Form):
 
 def CSOFormDynamic():
     form = CSOForm()
-    form.variants.choices = [(process.id, process.name) for process in get_organization_processes()]
+    form.variants.choices = [(process.id, process.name) for process in organization_processes()]
+    return form
+
+
+class QuestionForm(Form):
+    question = fields.RadioField(coerce=int, default=0)
+
+
+def QuestionFormDynamic(choices):
+    form = QuestionForm()
+    form.question = choices
     return form
 
 
 class TestForm(Form):
-    tests = fields.FieldList(MultiCheckboxField(coerce=int, default=0))
+    tests = fields.FieldList(fields.FormField(QuestionForm))
 
 
-def TestFormDynamic():
+def TestFormDynamic(process):
     pass
+
+
+def GMFormDynamic():
+    pass
+    # form = TestForm()
+    # for test in get_questionnaires():
+    #     for question in test:
+    #         questionnaire = MultiCheckboxField(label=question.question, coerce=int, choices=[question.answer1,
+    #                                                                                          question.answer2,
+    #                                                                                          question.answer3,
+    #                                                                                          question.answer3])
+    #         form.tests.append_entry(questionnaire)
+    # for entry in form.tests.entries:
+    #     print(entry.choices)
+    # # print(len(form.tests.entries))
+    # return form

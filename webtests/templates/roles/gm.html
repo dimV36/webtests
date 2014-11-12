@@ -8,7 +8,7 @@
 {% if is_cso_choose_processes %}
     {% if not is_gm_answered_on_questions %}
             Выбрать процессы организации:
-            {{ forms.render_tests(form) }}
+            {{ forms.render(form) }}
             <input type="Submit" value="Отправить">
     {% endif %}
 {% endif %}

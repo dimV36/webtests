@@ -2,10 +2,10 @@
 __author__ = 'dimv36'
 
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
-from models import UsersChoices, InvestmentLevel, Process
+from models import UsersChoices, InvestmentLevel, Process, Question
 
 
-def get_user_choice(description):
+def user_choice(description):
     try:
         user_choice = UsersChoices.query.filter(UsersChoices.description == description).one()
     except NoResultFound:
@@ -13,7 +13,7 @@ def get_user_choice(description):
     return user_choice
 
 
-def get_investment_levels():
+def investment_levels():
     try:
         investment_levels = InvestmentLevel.query.all()
     except NoResultFound:
@@ -21,7 +21,7 @@ def get_investment_levels():
     return investment_levels
 
 
-def get_organization_processes():
+def organization_processes():
     try:
         chosen_investment_level = UsersChoices.query.filter(UsersChoices.description == 'investment_level').one()
     except NoResultFound:
@@ -33,3 +33,31 @@ def get_organization_processes():
     except NoResultFound:
         raise LookupError(u'Не найдены значения процессов')
     return processes
+
+
+def questions(number):
+    try:
+        process = UsersChoices.query.filter(UsersChoices.description == 'processes')[number]
+    except NoResultFound:
+        raise LookupError(u'Не найден выбор процессов пользователя')
+    try:
+        questions = Question.query.filter(Question.process_id == process.id).all()
+    except NoResultFound:
+        raise LookupError(u'Не найдены вопросы для анкеты')
+    return questions
+
+
+# def questionnaires():
+#     questionnaires = list()
+#     try:
+#         processes = UsersChoices.query.filter(UsersChoices.description == 'processes').all()
+#     except NoResultFound:
+#         raise LookupError(u'Не найден выбор процессов пользователя')
+#     for process in processes:
+#         try:
+#             questionnaire = Questionnaire.query.filter(Questionnaire.process_id == process.id).all()
+#         except NoResultFound:
+#             raise LookupError(u'Не найдены анкеты по выбранному процессу')
+#         else:
+#             questionnaires.append(questionnaire)
+#     return questionnaires
