@@ -44,9 +44,20 @@
 {% endmacro %}
 
 
-{% macro render_tests(form) %}
+{% macro render_tests(form, process_name) %}
+    <h1>Тест пользователя {{g.user.username }} по процессу "{{ process_name }}"</h1>
     {% for entry in form.questions.entries %}
-
+        {{ entry.label }}
+        <table>
+        {% for subfield in entry.variants %}
+            <tr>
+                <td> {{ subfield }} </td>
+                <td> {{ subfield.label }} </td>
+            </tr>
+        {% endfor %}
+        </table>
+        <br/>
+        <!--{{ form.hidden_tag() }}-->
     {% endfor %}
 {% endmacro %}
 

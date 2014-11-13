@@ -7,7 +7,7 @@ from models import UsersChoices, InvestmentLevel, Process, Question
 
 def user_choice(description):
     try:
-        user_choice = UsersChoices.query.filter(UsersChoices.description == description).one()
+        user_choice = UsersChoices.query.filter(UsersChoices.description == description).all()
     except NoResultFound:
         raise LookupError(u'Не найден выбор пользователя')
     return user_choice
@@ -35,11 +35,7 @@ def organization_processes():
     return processes
 
 
-def questions():
-    try:
-        process = UsersChoices.query.filter(UsersChoices.description == 'processes')
-    except NoResultFound:
-        raise LookupError(u'Не найден выбор процессов пользователя')
+def questions(process):
     try:
         questions = Question.query.filter(Question.process_id == process.id).all()
     except NoResultFound:
@@ -48,21 +44,13 @@ def questions():
 
 
 def question_variants(question):
-    if question is Question:
-        return 
+    return [(1, question.answer1), (2, question.answer2),
+            (3, question.answer3), (4, question.answer4)]
 
 
-# def questionnaires():
-#     questionnaires = list()
-#     try:
-#         processes = UsersChoices.query.filter(UsersChoices.description == 'processes').all()
-#     except NoResultFound:
-#         raise LookupError(u'Не найден выбор процессов пользователя')
-#     for process in processes:
-#         try:
-#             questionnaire = Questionnaire.query.filter(Questionnaire.process_id == process.id).all()
-#         except NoResultFound:
-#             raise LookupError(u'Не найдены анкеты по выбранному процессу')
-#         else:
-#             questionnaires.append(questionnaire)
-#     return questionnaires
+def process(process_id):
+    try:
+        process = Process.query.filter(Process.process_id == process_id).one()
+    except NoResultFound:
+        raise LookupError(u'Не найден процесс в таблице процессов')
+    return process

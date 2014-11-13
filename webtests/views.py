@@ -5,9 +5,9 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from admin import __ADMIN_USER, HEADMASTER_START_TESTING, CSO_CHOOSE_PROCESSES, GM_ANSWERED_ON_QUESTIONS
 from admin import get_application_data, reset_application_data
-from dbquery import user_choice
+from dbquery import user_choice, process
 from webtests.roles import ROLE_HEAD_OF_ORGANIZATION, ROLE_HEAD_OF_INFORMATION_SECURITY, ROLE_HEAD_OF_STRATEGIC_LEVEL
-from forms import LoginForm, RegistrationForm, HeadmasterFormDynamic, CSOFormDynamic, GMFormDynamic, QuestionnaireFormDynamic, TestForm
+from forms import LoginForm, RegistrationForm, HeadmasterFormDynamic, CSOFormDynamic, TestFormDynamic
 from models import User, UsersChoices
 from webtests import app
 
@@ -80,23 +80,20 @@ def cso():
 @login_required
 def gm():
     if g.user.role == ROLE_HEAD_OF_STRATEGIC_LEVEL:
-        processes = user_choice('processes')
-        for i in range(0, len(processes)):
-            process = processes[i]
-
-        # form = TestForm()
-        # app_data = get_application_data(GM_ANSWERED_ON_QUESTIONS)
-        # if form.validate_on_submit():
-        #     if not app_data.status:
-        #         for test in form.tests:
-        #             UsersChoices.create(username=g.user.username, description='gm_answers', variant=test.data)
-        #     app_data.status = bool(not app_data.status)
-        #     app_data.update()
-        # else:
-        #     print(form.errors)
-        # return render_template('roles/gm.html', form=form,
-        #                        is_cso_choose_processes=get_application_data(CSO_CHOOSE_PROCESSES),
-        #                        is_gm_answered_on_questions=app_data.status)
+        chosen_processes = user_choice('processes')
+        process = chosen_processes[0]
+        form = TestFormDynamic(process)
+        app_data = get_application_data(GM_ANSWERED_ON_QUESTIONS)
+        if form.validate_on_submit():
+            if not app_data.status:
+                pass
+            app_data.status = bool(not app_data.status)
+            app_data.update()
+        else:
+            print(form.errors)
+        return render_template('roles/gm.html', form=form, process_name=u'Процесс ',
+                                   is_cso_choose_processes=get_application_data(CSO_CHOOSE_PROCESSES),
+                                   is_gm_answered_on_questions=app_data.status)
     else:
         return u'Вы не можете получить доступ к этой странице'
 

@@ -5,14 +5,30 @@ from wtforms import fields, widgets
 from webtests.validators.validators import MyInputRequired
 from wtforms.validators import ValidationError
 # from admin import get_investment_levels, get_organization_processes
-from dbquery import investment_levels, organization_processes, user_choice, questions
+from dbquery import investment_levels, organization_processes, user_choice, questions, question_variants
 from models import User, InvestmentLevel, UsersChoices, Process
 from roles import ROLES
 
 
-class MultiCheckboxField(fields.SelectMultipleField):
+class _MultiCheckboxField(fields.SelectMultipleField):
     widget = widgets.ListWidget(prefix_label=False)
     option_widget = widgets.CheckboxInput()
+
+
+class _HeadmasterForm(Form):
+    variants = fields.RadioField(coerce=int, default=0)
+
+
+class _CSOForm(Form):
+    variants = _MultiCheckboxField(coerce=int, default=0)
+
+
+class _QuestionForm(Form):
+    variants = fields.RadioField(coerce=int, default=0, choices=[])
+
+
+class _QuestionFormList(Form):
+    questions = fields.FieldList(fields.FormField(_QuestionForm))
 
 
 class LoginForm(Form):
@@ -60,61 +76,30 @@ class RegistrationForm(Form):
             raise ValidationError(u'Пароли не совпадают')
 
 
-class HeadmasterForm(Form):
-    variants = fields.RadioField(coerce=int, default=0)
-
-
 def HeadmasterFormDynamic(is_headmaster_start_testing):
-    form = HeadmasterForm()
+    form = _HeadmasterForm()
     form.variants.choices = [(level.id, level.name) for level in investment_levels()]
     if is_headmaster_start_testing:
         form.variants.process_data(user_choice('investment_level').variant)
     return form
 
 
-class CSOForm(Form):
-    variants = MultiCheckboxField(coerce=int, default=0)
-
-
 def CSOFormDynamic():
-    form = CSOForm()
+    form = _CSOForm()
     form.variants.choices = [(process.id, process.name) for process in organization_processes()]
     return form
 
 
-class QuestionForm(Form):
-    question = fields.RadioField(coerce=int, default=0)
-
-
-def QuestionFormDynamic(choices):
-    form = QuestionForm()
-    form.question.choices = choices
-    return form
-
-
-class TestForm(Form):
-    tests = fields.FieldList(fields.FormField(QuestionForm))
-
-
 def TestFormDynamic(process):
-    form = TestForm()
-    if process is Process:
-        questions_by_process = questions()
-        for question in questions_by_process:
-            question_form = QuestionFormDynamic()
-
-
-def GMFormDynamic():
-    pass
-    # form = TestForm()
-    # for test in get_questionnaires():
-    #     for question in test:
-    #         questionnaire = MultiCheckboxField(label=question.question, coerce=int, choices=[question.answer1,
-    #                                                                                          question.answer2,
-    #                                                                                          question.answer3,
-    #                                                                                          question.answer3])
-    #         form.tests.append_entry(questionnaire)
-    # for entry in form.tests.entries:
-    #     print(entry.choices)
-    # # print(len(form.tests.entries))
-    # return form
+    form = _QuestionFormList()
+    questions_by_process = questions(process)
+    for i in range(0, len(questions_by_process)):
+        question = questions_by_process[i]
+        question_form = _QuestionForm()
+        form.questions.append_entry(question_form)
+        form.questions.entries[i].label = question.name
+        form.questions.entries[i].variants.choices = question_variants(question)
+    print('\n')
+    print(len(form.questions.entries))
+    form.questions.max_entries = len(questions_by_process)
+    return form
