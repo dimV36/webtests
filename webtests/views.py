@@ -5,10 +5,9 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from admin import __ADMIN_USER, HEADMASTER_START_TESTING, CSO_CHOOSE_PROCESSES, GM_ANSWERED_ON_QUESTIONS
 from admin import get_application_data, reset_application_data
-from dbquery import user_choice, process
 from webtests.roles import ROLE_HEAD_OF_ORGANIZATION, ROLE_HEAD_OF_INFORMATION_SECURITY, ROLE_HEAD_OF_STRATEGIC_LEVEL
 from forms import LoginForm, RegistrationForm, HeadmasterFormDynamic, CSOFormDynamic, TestFormDynamic
-from models import User, UsersChoices
+from models import User, UsersChoices, Process, Question
 from webtests import app
 
 
@@ -77,21 +76,28 @@ def cso():
 
 
 @app.route('/gm/', methods=('GET', 'POST'))
+@app.route('/gm/<int:page>', methods=['GET', 'POST'])
 @login_required
 def gm():
     if g.user.role == ROLE_HEAD_OF_STRATEGIC_LEVEL:
-        chosen_processes = user_choice('processes')
-        process = chosen_processes[0]
-        form = TestFormDynamic(process)
+        chosen_process = UsersChoices.user_choice('processes').all()[0]
+        print('chosen_process: ' + str(chosen_process))
+        form = TestFormDynamic(chosen_process.variant)
+        print('after create: ' + str(len(form.questions.entries)))
         app_data = get_application_data(GM_ANSWERED_ON_QUESTIONS)
         if form.validate_on_submit():
+            print('form submit')
+            print(form.data)
             if not app_data.status:
                 pass
             app_data.status = bool(not app_data.status)
             app_data.update()
+            # return redirect(url_for('gm'))
         else:
+            print('len after error: %s' % str(len(form.questions)))
+            print(form.data)
             print(form.errors)
-        return render_template('roles/gm.html', form=form, process_name=u'Процесс ',
+        return render_template('roles/gm.html', form=form, process_name=Process.process(chosen_process.variant).name,
                                    is_cso_choose_processes=get_application_data(CSO_CHOOSE_PROCESSES),
                                    is_gm_answered_on_questions=app_data.status)
     else:

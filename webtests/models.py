@@ -1,9 +1,10 @@
+# coding=utf-8
+__author__ = 'dimv36'
 from random import SystemRandom
-
 from backports.pbkdf2 import pbkdf2_hmac, compare_digest
 from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_property
-
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from webtests.data import CRUDMixin, db
 
 
@@ -13,16 +14,12 @@ class User(UserMixin, CRUDMixin, db.Model):
     role = db.Column(db.String(50))
     _password = db.Column(db.LargeBinary(120))
     _salt = db.Column(db.String(120))
-#    sites = db.relationship('Site', backref='owner', lazy='dynamic')
+    # sites = db.relationship('Site', backref='owner', lazy='dynamic')
 
     @hybrid_property
     def password(self):
         return self._password
 
-    # In order to ensure that passwords are always stored
-    # hashed and salted in our database we use a descriptor
-    # here which will automatically hash our password
-    # when we provide it (i. e. user.password = "12345")
     @password.setter
     def password(self, value):
         # When a user is first created, give them a salt
@@ -31,14 +28,6 @@ class User(UserMixin, CRUDMixin, db.Model):
         self._password = self._hash_password(value)
 
     def is_valid_password(self, password):
-        """Ensure that the provided password is valid.
-
-        We are using this instead of a ``sqlalchemy.types.TypeDecorator``
-        (which would let us write ``User.password == password`` and have the incoming
-        ``password`` be automatically hashed in a SQLAlchemy query)
-        because ``compare_digest`` properly compares **all***
-        the characters of the hash even when they do not match in order to
-        avoid timing oracle side-channel attacks."""
         new_hash = self._hash_password(password)
         return compare_digest(new_hash, self._password)
 
@@ -57,11 +46,11 @@ class InvestmentLevel(CRUDMixin, db.Model):
     name = db.Column(db.String(120), unique=True)
     process = db.relationship('Process', backref='investment_level', lazy='dynamic')
 
+    def investment_levels(self):
+        return self.query
+
     def __repr__(self):
         return '<InvestmentLevel #{:d}>'.format(self.id)
-
-    def __unicode__(self):
-        return unicode('id: %i, name: %s, process_id: %i' % (self.id, self.name.data, self.process.id))
 
 
 class Process(CRUDMixin, db.Model):
@@ -70,6 +59,20 @@ class Process(CRUDMixin, db.Model):
     role = db.Column(db.String(120))
     investment_level_id = db.Column(db.Integer, db.ForeignKey('investment_level.id'))
     questionnaire_id = db.relationship('Question', backref='questionnaire', lazy='dynamic')
+
+    @staticmethod
+    def process(process_id):
+        return Process.query.filter(Process.id == process_id).one()
+
+    @staticmethod
+    def chosen_processes():
+        try:
+            chosen_investment_level = UsersChoices.user_choice('investment_level').one()
+        except NoResultFound:
+            raise LookupError(u'Не найдено значение investment_level')
+        except MultipleResultsFound:
+            raise LookupError(u'Найдено несколько значений investment_level')
+        return Process.query.filter(Process.investment_level_id == chosen_investment_level.variant)
 
     def __repr__(self):
         return '<Process #{:d}>'.format(self.id)
@@ -84,6 +87,14 @@ class Question(CRUDMixin, db.Model):
     answer4 = db.Column(db.Text)
     process_id = db.Column(db.Integer, db.ForeignKey('process.id'))
 
+    @staticmethod
+    def chosen_questions(process_id):
+        return Question.query.filter(Question.process_id == process_id)
+
+    def question_variants(self):
+        return [(1, self.answer1), (2, self.answer2),
+                (3, self.answer3), (4, self.answer4)]
+
 
 class ApplicationData(CRUDMixin, db.Model):
     __tablename__ = 'application_data'
@@ -96,3 +107,8 @@ class UsersChoices(CRUDMixin, db.Model):
     username = db.Column(db.String(120))
     description = db.Column(db.String(120))
     variant = db.Column(db.Integer)
+
+    @staticmethod
+    def user_choice(description):
+        return UsersChoices.query.filter(UsersChoices.description == description)
+

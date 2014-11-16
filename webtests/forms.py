@@ -4,9 +4,7 @@ from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from wtforms import fields, widgets
 from webtests.validators.validators import MyInputRequired
 from wtforms.validators import ValidationError
-# from admin import get_investment_levels, get_organization_processes
-from dbquery import investment_levels, organization_processes, user_choice, questions, question_variants
-from models import User, InvestmentLevel, UsersChoices, Process
+from models import User, UsersChoices, InvestmentLevel, Process, Question
 from roles import ROLES
 
 
@@ -24,10 +22,10 @@ class _CSOForm(Form):
 
 
 class _QuestionForm(Form):
-    variants = fields.RadioField(coerce=int, default=0, choices=[])
+    variants = fields.RadioField(coerce=int, default=0, choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4')])
 
 
-class _QuestionFormList(Form):
+class _TestForm(Form):
     questions = fields.FieldList(fields.FormField(_QuestionForm))
 
 
@@ -78,28 +76,26 @@ class RegistrationForm(Form):
 
 def HeadmasterFormDynamic(is_headmaster_start_testing):
     form = _HeadmasterForm()
-    form.variants.choices = [(level.id, level.name) for level in investment_levels()]
+    form.variants.choices = [(level.id, level.name) for level in InvestmentLevel().investment_levels()]
     if is_headmaster_start_testing:
-        form.variants.process_data(user_choice('investment_level').variant)
+        form.variants.process_data(UsersChoices().user_choice('investment_level').one().variant)
     return form
 
 
 def CSOFormDynamic():
     form = _CSOForm()
-    form.variants.choices = [(process.id, process.name) for process in organization_processes()]
+    form.variants.choices = [(process.id, process.name) for process in Process.chosen_processes()]
     return form
 
 
-def TestFormDynamic(process):
-    form = _QuestionFormList()
-    questions_by_process = questions(process)
-    for i in range(0, len(questions_by_process)):
-        question = questions_by_process[i]
-        question_form = _QuestionForm()
-        form.questions.append_entry(question_form)
-        form.questions.entries[i].label = question.name
-        form.questions.entries[i].variants.choices = question_variants(question)
-    print('\n')
-    print(len(form.questions.entries))
-    form.questions.max_entries = len(questions_by_process)
+def TestFormDynamic(process_id):
+    question_by_process = Question.chosen_questions(process_id).all()
+    form = _TestForm()
+    if not form.questions.entries:
+        for i in range(0, len(question_by_process)):
+            question = question_by_process[i]
+            question_form = _QuestionForm()
+            form.questions.append_entry(question_form)
+            form.questions.entries[i].label = question.name
+            form.questions.entries[i].variants.choices = question.question_variants()
     return form
