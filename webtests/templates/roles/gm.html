@@ -7,8 +7,18 @@
 <form action="{{url_for('gm')}}" method="POST">
 {% if is_cso_choose_processes %}
     {% if not is_gm_answered_on_questions %}
-            {{ forms.render_tests(form, process_name) }}
-            <input type="Submit" value="Отправить">
+        {{ forms.render_tests(form, process_name) }}
+            {% if processes.has_prev %}
+                <a href="{{ url_for('gm', page=processes.prev_num) }}"><< Назад</a>
+            {% else %}
+                << Назад
+            {% endif %} |
+            {% if processes.has_next %}
+                <a href="{{ url_for('gm', page=processes.next_num) }}">Далее >></a>
+            {% else %}
+                Далее >>
+                <p><input type="Submit" value="Отправить"></p>
+            {% endif %}
     {% endif %}
 {% endif %}
 </form>

@@ -95,11 +95,17 @@ class Question(CRUDMixin, db.Model):
         return [(1, self.answer1), (2, self.answer2),
                 (3, self.answer3), (4, self.answer4)]
 
+    def __repr__(self):
+        return '<Question #{:d}>'.format(self.id)
+
 
 class ApplicationData(CRUDMixin, db.Model):
     __tablename__ = 'application_data'
     description = db.Column(db.String(120), unique=True)
     status = db.Column(db.Boolean)
+
+    def __repr__(self):
+        return 'ApplicationData #{:d}>'.format(self.id)
 
 
 class UsersChoices(CRUDMixin, db.Model):
@@ -112,3 +118,5 @@ class UsersChoices(CRUDMixin, db.Model):
     def user_choice(description):
         return UsersChoices.query.filter(UsersChoices.description == description)
 
+    def __repr__(self):
+        return '<UsersChoices #{:d}>'.format(self.id)
