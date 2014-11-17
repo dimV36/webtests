@@ -27,6 +27,8 @@ class _QuestionForm(Form):
 
 class _TestForm(Form):
     questions = fields.FieldList(fields.FormField(_QuestionForm))
+    prev_page = fields.SubmitField()
+    next_page = fields.SubmitField()
 
 
 class LoginForm(Form):

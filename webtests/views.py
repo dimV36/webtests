@@ -1,5 +1,5 @@
 # coding=utf-8
-from flask import redirect, render_template, url_for, g
+from flask import redirect, render_template, url_for, g, request
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -95,6 +95,9 @@ def gm(page=1):
             app_data.update()
             return redirect(url_for('gm'))
         else:
+            print('page: ' + str(page) + str(form.data))
+            print('prev_page: ' + str(form.prev_page.data))
+            print('next_page: ' + str(form.next_page.data))
             print(form.errors)
         return render_template('roles/gm.html', form=form,
                                process_name=Process.process(current_process.variant).name,
