@@ -100,9 +100,51 @@ class Question(CRUDMixin, db.Model):
 
 
 class ApplicationData(CRUDMixin, db.Model):
+    __HEADMASTER_START_TESTING = 'is_headmaster_start_testing'
+    __CSO_CHOOSE_PROCESSES = 'is_cso_choose_processes'
+    __GM_ANSWERED_ON_QUESTIONS = 'is_gm_answered_on_questions'
+    __APPLICATION_FIELD_DATA = [__HEADMASTER_START_TESTING, __CSO_CHOOSE_PROCESSES, __GM_ANSWERED_ON_QUESTIONS]
     __tablename__ = 'application_data'
     description = db.Column(db.String(120), unique=True)
     status = db.Column(db.Boolean)
+
+    @staticmethod
+    def __application_data(description):
+        return ApplicationData.query.filter(ApplicationData.description == description)
+
+    @staticmethod
+    def reset_application_data():
+        for field in ApplicationData.__APPLICATION_FIELD_DATA:
+            try:
+                data = ApplicationData.query.filter(ApplicationData.description == field).one()
+            except NoResultFound:
+                raise LookupError(u'Не найдены значения данных приложения')
+            if data is not None:
+                data.status = False
+                data.update()
+
+    @staticmethod
+    def headmaster_is_start_testing():
+        return ApplicationData.__application_data(ApplicationData.__HEADMASTER_START_TESTING)
+
+    @staticmethod
+    def cso_choose_processes():
+        return ApplicationData.__application_data(ApplicationData.__CSO_CHOOSE_PROCESSES)
+
+    @staticmethod
+    def gm_answered_on_questions():
+        return ApplicationData.__application_data(ApplicationData.__GM_ANSWERED_ON_QUESTIONS)
+
+    @staticmethod
+    def init_application_data():
+        data = None
+        for field in ApplicationData.__APPLICATION_FIELD_DATA:
+            try:
+                data = ApplicationData.query.filter(ApplicationData.description == field)
+            except NoResultFound:
+                pass
+            if data is None:
+                ApplicationData.create(description=field, status=False)
 
     def __repr__(self):
         return 'ApplicationData #{:d}>'.format(self.id)

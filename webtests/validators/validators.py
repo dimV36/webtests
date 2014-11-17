@@ -1,7 +1,6 @@
 # coding=utf-8
 __author__ = 'dimv36'
 from wtforms.validators import StopValidation
-from webtests.admin import get_application_data, HEADMASTER_START_TESTING
 
 
 class MyInputRequired(object):

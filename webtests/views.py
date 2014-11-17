@@ -1,22 +1,21 @@
 # coding=utf-8
-from flask import redirect, render_template, url_for, g, flash
+from flask import redirect, render_template, url_for, g
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.orm.exc import NoResultFound
 
-from admin import __ADMIN_USER, HEADMASTER_START_TESTING, CSO_CHOOSE_PROCESSES, GM_ANSWERED_ON_QUESTIONS
-from admin import get_application_data, reset_application_data
+from admin import __ADMIN_USER
 from webtests.roles import ROLE_HEAD_OF_ORGANIZATION, ROLE_HEAD_OF_INFORMATION_SECURITY, ROLE_HEAD_OF_STRATEGIC_LEVEL
 from forms import LoginForm, RegistrationForm, HeadmasterFormDynamic, CSOFormDynamic, TestFormDynamic
-from models import User, UsersChoices, Process, Question
+from models import ApplicationData, User, UsersChoices, Process
 from webtests import app
 
 
 @app.before_request
 def before_request():
     g.user = current_user
-    app_data = get_application_data(HEADMASTER_START_TESTING)
+    app_data = ApplicationData.headmaster_is_start_testing().one()
     if not app_data.status:
-        reset_application_data()
+        ApplicationData.reset_application_data()
 
 
 @app.route('/admin/', methods=('GET', 'POST'))
@@ -35,7 +34,7 @@ def register():
 @login_required
 def headmaster():
     if g.user.role == ROLE_HEAD_OF_ORGANIZATION:
-        app_data = get_application_data(HEADMASTER_START_TESTING)
+        app_data = ApplicationData.headmaster_is_start_testing().one()
         form = HeadmasterFormDynamic(app_data.status)
         if form.validate_on_submit():
             if not app_data.status:
@@ -60,7 +59,7 @@ def headmaster():
 def cso():
     if g.user.role == ROLE_HEAD_OF_INFORMATION_SECURITY:
         form = CSOFormDynamic()
-        app_data = get_application_data(CSO_CHOOSE_PROCESSES)
+        app_data = ApplicationData.cso_choose_processes().one()
         if form.validate_on_submit():
             if not app_data.status:
                 for variant in form.variants.data:
@@ -70,7 +69,7 @@ def cso():
         else:
             print(form.errors)
         return render_template('roles/cso.html', form=form, is_cso_choose_processes=app_data.status,
-                               is_headmaster_start_testing=get_application_data(HEADMASTER_START_TESTING))
+                               is_headmaster_start_testing=ApplicationData.headmaster_is_start_testing().one().status)
     else:
         return u'Вы не можете получить доступ к этой странице'
 
@@ -83,7 +82,7 @@ def gm(page=1):
         chosen_processes = UsersChoices.user_choice('processes').paginate(page, 1, False)
         current_process = chosen_processes.items[0]
         form = TestFormDynamic(current_process.variant)
-        app_data = get_application_data(GM_ANSWERED_ON_QUESTIONS)
+        app_data = ApplicationData.gm_answered_on_questions().one()
         if form.validate_on_submit():
             if not app_data.status:
                 # get form data and save to db
@@ -99,7 +98,7 @@ def gm(page=1):
             print(form.errors)
         return render_template('roles/gm.html', form=form,
                                process_name=Process.process(current_process.variant).name,
-                               is_cso_choose_processes=get_application_data(CSO_CHOOSE_PROCESSES),
+                               is_cso_choose_processes=ApplicationData.cso_choose_processes().one().status,
                                is_gm_answered_on_questions=app_data.status,
                                processes=chosen_processes)
     else:

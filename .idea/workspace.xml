@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3631e424-3193-4c6d-9bf1-8773799192bc" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/webtests/templates/helpers/tables.html" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/webtests/templates/roles/gm.html" afterPath="$PROJECT_DIR$/webtests/templates/roles/gm.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/webtests/admin.py" afterPath="$PROJECT_DIR$/webtests/admin.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/webtests/models.py" afterPath="$PROJECT_DIR$/webtests/models.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/webtests/validators/validators.py" afterPath="$PROJECT_DIR$/webtests/validators/validators.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/webtests/views.py" afterPath="$PROJECT_DIR$/webtests/views.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
@@ -32,7 +32,7 @@
       <file leaf-file-name="forms.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/webtests/forms.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="875" max-vertical-offset="1500">
+            <state vertical-scroll-proportion="0.0" vertical-offset="240" max-vertical-offset="1590">
               <caret line="16" column="55" selection-start-line="16" selection-start-column="55" selection-end-line="16" selection-end-column="55" />
               <folding />
             </state>
@@ -42,8 +42,8 @@
       <file leaf-file-name="models.py" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/webtests/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="575" max-vertical-offset="1830">
-              <caret line="120" column="23" selection-start-line="120" selection-start-column="23" selection-end-line="120" selection-end-column="23" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="1653" max-vertical-offset="2460">
+              <caret line="130" column="8" selection-start-line="130" selection-start-column="8" selection-end-line="130" selection-end-column="8" />
               <folding />
             </state>
           </provider>
@@ -52,10 +52,10 @@
       <file leaf-file-name="views.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/webtests/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.69827586" vertical-offset="915" max-vertical-offset="2205">
-              <caret line="88" column="32" selection-start-line="88" selection-start-column="32" selection-end-line="88" selection-end-column="32" />
+            <state vertical-scroll-proportion="-0.6891892" vertical-offset="1524" max-vertical-offset="2190">
+              <caret line="71" column="117" selection-start-line="71" selection-start-column="117" selection-end-line="71" selection-end-column="117" />
               <folding>
-                <element signature="e#15#77#0" expanded="true" />
+                <element signature="e#15#70#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -74,9 +74,21 @@
       <file leaf-file-name="gm.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/webtests/templates/roles/gm.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-11.875" vertical-offset="0" max-vertical-offset="450">
+            <state vertical-scroll-proportion="0.0" vertical-offset="285" max-vertical-offset="450">
               <caret line="19" column="19" selection-start-line="19" selection-start-column="19" selection-end-line="19" selection-end-column="19" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="admin.py" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/webtests/admin.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1275">
+              <caret line="20" column="43" selection-start-line="20" selection-start-column="43" selection-end-line="20" selection-end-column="43" />
+              <folding>
+                <element signature="e#37#81#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -84,7 +96,7 @@
       <file leaf-file-name="forms.html" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/webtests/templates/helpers/forms.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-20.666666" vertical-offset="629" max-vertical-offset="1215">
+            <state vertical-scroll-proportion="0.0" vertical-offset="629" max-vertical-offset="1215">
               <caret line="75" column="14" selection-start-line="75" selection-start-column="14" selection-end-line="75" selection-end-column="14" />
               <folding />
             </state>
@@ -104,7 +116,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/webtests/validators/validators.py" />
         <option value="$PROJECT_DIR$/config.py" />
         <option value="$PROJECT_DIR$/webtests/using/fields.py" />
         <option value="$PROJECT_DIR$/webtests/__init__.py" />
@@ -113,7 +124,6 @@
         <option value="$PROJECT_DIR$/webtests/templates/roles/cso.html" />
         <option value="$PROJECT_DIR$/webtests/auth.py" />
         <option value="$PROJECT_DIR$/webtests/roles.py" />
-        <option value="$PROJECT_DIR$/webtests/admin.py" />
         <option value="$PROJECT_DIR$/test.py" />
         <option value="$PROJECT_DIR$/form.html" />
         <option value="$PROJECT_DIR$/webtests/dbquery.py" />
@@ -122,8 +132,10 @@
         <option value="$PROJECT_DIR$/run.py" />
         <option value="$PROJECT_DIR$/webtests/forms.py" />
         <option value="$PROJECT_DIR$/webtests/templates/helpers/forms.html" />
-        <option value="$PROJECT_DIR$/webtests/models.py" />
         <option value="$PROJECT_DIR$/webtests/templates/roles/gm.html" />
+        <option value="$PROJECT_DIR$/webtests/validators/validators.py" />
+        <option value="$PROJECT_DIR$/webtests/models.py" />
+        <option value="$PROJECT_DIR$/webtests/admin.py" />
         <option value="$PROJECT_DIR$/webtests/views.py" />
       </list>
     </option>
@@ -132,7 +144,7 @@
     <option name="x" value="-2" />
     <option name="y" value="-3" />
     <option name="width" value="1924" />
-    <option name="height" value="966" />
+    <option name="height" value="1088" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
     <entry key="Project Default">
@@ -508,14 +520,14 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-2" y="-3" width="1924" height="966" extended-state="6" />
+    <frame x="-2" y="-3" width="1924" height="1088" extended-state="6" />
     <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24895833" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298969" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298611" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.30309987" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3021148" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3298969" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -571,6 +583,14 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/webtests/templates/helpers/forms.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="629" max-vertical-offset="1215">
+          <caret line="75" column="14" selection-start-line="75" selection-start-column="14" selection-end-line="75" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/run.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="75" max-vertical-offset="255">
@@ -608,7 +628,7 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="885" max-vertical-offset="2130">
           <caret line="85" column="0" selection-start-line="85" selection-start-column="0" selection-end-line="85" selection-end-column="0" />
           <folding>
-            <element signature="e#15#77#0" expanded="true" />
+            <element signature="e#15#70#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -632,7 +652,7 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="1136" max-vertical-offset="2070">
           <caret line="94" column="31" selection-start-line="94" selection-start-column="31" selection-end-line="94" selection-end-column="31" />
           <folding>
-            <element signature="e#15#77#0" expanded="true" />
+            <element signature="e#15#70#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -693,7 +713,7 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="357" max-vertical-offset="1290">
           <caret line="45" column="29" selection-start-line="45" selection-start-column="29" selection-end-line="45" selection-end-column="29" />
           <folding>
-            <element signature="e#15#77#0" expanded="true" />
+            <element signature="e#15#70#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -754,7 +774,7 @@
         <state vertical-scroll-proportion="0.0" vertical-offset="258" max-vertical-offset="1185">
           <caret line="36" column="18" selection-start-line="36" selection-start-column="18" selection-end-line="36" selection-end-column="18" />
           <folding>
-            <element signature="e#15#77#0" expanded="true" />
+            <element signature="e#15#70#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -771,13 +791,6 @@
         <state vertical-scroll-proportion="0.1212938" vertical-offset="0" max-vertical-offset="810">
           <caret line="8" column="6" selection-start-line="8" selection-start-column="6" selection-end-line="8" selection-end-column="6" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/webtests/validators/validators.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7614213" vertical-offset="0" max-vertical-offset="394">
-          <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -853,14 +866,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/webtests/admin.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1063" max-vertical-offset="2145">
-          <caret line="84" column="36" selection-start-line="84" selection-start-column="36" selection-end-line="84" selection-end-column="36" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/webtests/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="345">
@@ -914,7 +919,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/webtests/templates/helpers/forms.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-20.666666" vertical-offset="629" max-vertical-offset="1215">
+        <state vertical-scroll-proportion="0.0" vertical-offset="629" max-vertical-offset="1215">
           <caret line="75" column="14" selection-start-line="75" selection-start-column="14" selection-end-line="75" selection-end-column="14" />
           <folding />
         </state>
@@ -922,7 +927,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/webtests/templates/roles/gm.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-11.875" vertical-offset="0" max-vertical-offset="450">
+        <state vertical-scroll-proportion="0.0" vertical-offset="285" max-vertical-offset="450">
           <caret line="19" column="19" selection-start-line="19" selection-start-column="19" selection-end-line="19" selection-end-column="19" />
           <folding />
         </state>
@@ -936,20 +941,38 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/webtests/validators/validators.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.067567565" vertical-offset="0" max-vertical-offset="666">
+          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/webtests/admin.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1275">
+          <caret line="20" column="43" selection-start-line="20" selection-start-column="43" selection-end-line="20" selection-end-column="43" />
+          <folding>
+            <element signature="e#37#81#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/webtests/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="575" max-vertical-offset="1830">
-          <caret line="120" column="23" selection-start-line="120" selection-start-column="23" selection-end-line="120" selection-end-column="23" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="1653" max-vertical-offset="2460">
+          <caret line="130" column="8" selection-start-line="130" selection-start-column="8" selection-end-line="130" selection-end-column="8" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/webtests/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.69827586" vertical-offset="915" max-vertical-offset="2205">
-          <caret line="88" column="32" selection-start-line="88" selection-start-column="32" selection-end-line="88" selection-end-column="32" />
+        <state vertical-scroll-proportion="-0.6891892" vertical-offset="1524" max-vertical-offset="2190">
+          <caret line="71" column="117" selection-start-line="71" selection-start-column="117" selection-end-line="71" selection-end-column="117" />
           <folding>
-            <element signature="e#15#77#0" expanded="true" />
+            <element signature="e#15#70#0" expanded="true" />
           </folding>
         </state>
       </provider>
