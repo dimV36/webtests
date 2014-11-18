@@ -2,6 +2,7 @@
 from flask_wtf import Form
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from wtforms import fields, widgets
+from wtforms.validators import Optional
 from webtests.validators.validators import MyInputRequired
 from wtforms.validators import ValidationError
 from models import User, UsersChoices, InvestmentLevel, Process, Question
@@ -22,13 +23,19 @@ class _CSOForm(Form):
 
 
 class _QuestionForm(Form):
-    variants = fields.RadioField(coerce=int, default=0, choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4')])
+    variants = fields.RadioField(coerce=int, default=0, choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4')],
+                                 validators=[Optional()])
 
 
 class _TestForm(Form):
     questions = fields.FieldList(fields.FormField(_QuestionForm))
     prev_page = fields.SubmitField()
     next_page = fields.SubmitField()
+
+    def validate_questions(self, field):
+        for entry in self.questions.entries:
+            if entry.variants.data is None:
+                raise ValidationError(u'Необходимо ответить на все вопросы')
 
 
 class LoginForm(Form):

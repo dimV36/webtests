@@ -8,6 +8,17 @@
 {% if is_cso_choose_processes %}
     {% if not is_gm_answered_on_questions %}
         {{ forms.render_tests(form, process_name) }}
+        {% for field in form if field.type not in ["HiddenField", "CSRFTokenField"] %}
+            {% if field.errors %}
+                <ul class="errors">
+                {% for error in field.errors %}
+                    <li>{{error}}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endfor %}
+        {{ form.hidden_tag() }}
+
             {% if processes.has_prev %}
                 <a href="{{ url_for('gm', page=processes.prev_num) }}"><< Назад</a>
             {% else %}
@@ -17,7 +28,7 @@
                 <a href="{{ url_for('gm', page=processes.next_num) }}">Далее >></a>
             {% else %}
                 Далее >>
-                <p><input type="Submit" value="Отправить"></p>
+                <!--<p><input type="Submit" value="Отправить"></p>-->
             {% endif %}
         {{ form.prev_page }}
         {{ form.next_page }}

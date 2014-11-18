@@ -83,22 +83,34 @@ def gm(page=1):
         current_process = chosen_processes.items[0]
         form = TestFormDynamic(current_process.variant)
         app_data = ApplicationData.gm_answered_on_questions().one()
+        # if form.validate_on_submit() and form.prev_page.data:
+        #     print('prev_page: valid')
+        #     redirect(url_for('gm'))
+        # elif form.validate_on_submit() and form.next_page.data:
+        #     print('next_page: valid')
+        #     redirect(url_for('gm'))
         if form.validate_on_submit():
-            if not app_data.status:
-                # get form data and save to db
-                print(form.data)
-                # for entry in form.questions.entries:
-                #     for variant in entry.variants:
-                #         print(entry.data)
-                #         UsersChoices.create(username=g.user.username, description='cso_answers', variant=variant.data)
-            app_data.status = bool(not app_data.status)
-            app_data.update()
+            print('submit')
+            if form.prev_page.data:
+                print('prev_page')
+                return redirect(url_for('gm', page=chosen_processes.prev_num))
+            if form.next_page.data:
+                print('next_page')
+                return redirect(url_for('gm', page=chosen_processes.next_num))
+            # if not app_data.status:
+            #     # get form data and save to db
+            #     print(form.data)
+            #     # for entry in form.questions.entries:
+            #     #     for variant in entry.variants:
+            #     #         print(entry.data)
+            #     #         UsersChoices.create(username=g.user.username, description='cso_answers', variant=variant.data)
+            # app_data.status = bool(not app_data.status)
+            # app_data.update()
             return redirect(url_for('gm'))
         else:
-            print('page: ' + str(page) + str(form.data))
+            print('page: ' + str(page) + ' ' + str(form.data))
             print('prev_page: ' + str(form.prev_page.data))
             print('next_page: ' + str(form.next_page.data))
-            print(form.errors)
         return render_template('roles/gm.html', form=form,
                                process_name=Process.process(current_process.variant).name,
                                is_cso_choose_processes=ApplicationData.cso_choose_processes().one().status,
