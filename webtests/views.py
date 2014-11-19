@@ -6,7 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from admin import __ADMIN_USER
 from webtests.roles import ROLE_HEAD_OF_ORGANIZATION, ROLE_HEAD_OF_INFORMATION_SECURITY, ROLE_HEAD_OF_STRATEGIC_LEVEL
 from forms import LoginForm, RegistrationForm, HeadmasterFormDynamic, CSOFormDynamic, TestFormDynamic
-from models import ApplicationData, User, UsersChoices, Process
+from models import ApplicationData, User, UsersChoices, Process, InvestmentLevel, Question
 from webtests import app
 
 
@@ -38,8 +38,13 @@ def headmaster():
         form = HeadmasterFormDynamic(app_data.status)
         if form.validate_on_submit():
             if not app_data.status:
-                UsersChoices.create(username=g.user.username, description='investment_level',
-                                    variant=form.variants.data)
+                choice = form.variants.data
+                answer = InvestmentLevel().investment_level(choice)
+                UsersChoices.create(username=g.user.username,
+                                    field='investment_level',
+                                    question=u'Инвестиционный уровень',
+                                    choice=choice,
+                                    answer=answer.one().name)
             else:
                 choices = UsersChoices.query.all()
                 for choice in choices:
@@ -62,8 +67,13 @@ def cso():
         app_data = ApplicationData.cso_choose_processes().one()
         if form.validate_on_submit():
             if not app_data.status:
-                for variant in form.variants.data:
-                    UsersChoices.create(username=g.user.username, description='processes', variant=variant)
+                for choice in form.variants.data:
+                    answer = Process().process(choice)
+                    UsersChoices.create(username=g.user.username,
+                                        field='processes',
+                                        question=u'Процессы',
+                                        choice=choice,
+                                        answer=answer.one().name)
             app_data.status = bool(not app_data.status)
             app_data.update()
         else:
@@ -74,6 +84,67 @@ def cso():
         return u'Вы не можете получить доступ к этой странице'
 
 
+def save_answers_to_db(entries, questions):
+    for i in range(0, len(entries)):
+        entry = entries[i]
+        question_name = questions[i].name
+        print(u'question_name: ' + unicode(question_name))
+        question = Question.question(question_name).one()
+        choice = entry.variants.data
+        try:
+            user_choice = UsersChoices.user_choice_question(question_name).one()
+        except NoResultFound:
+            UsersChoices.create(username=g.user.username,
+                                field='questions',
+                                question=question_name,
+                                choice=choice,
+                                answer=question.question_answer(choice))
+        else:
+            user_choice.choice = choice
+            user_choice.answer = question.question_answer(choice)
+            user_choice.update()
+
+
+# @app.route('/gm/', methods=('GET', 'POST'))
+# @app.route('/gm/process<int:page>', methods=['GET', 'POST'])
+# @login_required
+# def gm(page=1):
+#     if g.user.role == ROLE_HEAD_OF_STRATEGIC_LEVEL:
+#         chosen_processes = UsersChoices.user_choice('processes').paginate(page, 1, False)
+#         print('\nafter_chosen_processes: ' + str(page) + '\n')
+#         current_process = chosen_processes.items[0]
+#         questions_by_process = Question.chosen_questions(current_process.choice).all()
+#         form = TestFormDynamic(questions_by_process)
+#         print('\nafter_create_form: ' + str(page) + '\n')
+#         print(form.data)
+#         app_data = ApplicationData.gm_answered_on_questions().one()
+#         if form.validate_on_submit():
+#             if form.prev_page.data:
+#                 save_answers_to_db(form.questions.entries, questions_by_process)
+#
+#             # save_answers_to_db(form.questions.entries, questions_by_process)
+#             # if form.finish.data:
+#             #     save_answers_to_db(form.questions.entries, questions_by_process)
+#             #     if not app_data.status:
+#             #         app_data.status = bool(not app_data.status)
+#             #         app_data.update()
+#             # save_answers_to_db(form.questions.entries, questions_by_process)
+#             # if chosen_processes.has_next and form.next_page.data:
+#             #     page = chosen_processes.next_num
+#             #     # return redirect(url_for('gm', page=page))
+#             # elif chosen_processes.has_prev and form.prev_page.data:
+#             #     page = chosen_processes.prev_num
+#                 # return redirect(url_for('gm', page=page))
+#             # return redirect(url_for('gm', page=page))
+#         return render_template('roles/gm.html', form=form,
+#                                process_name=Process.process(current_process.choice).one().name,
+#                                is_cso_choose_processes=ApplicationData.cso_choose_processes().one().status,
+#                                is_gm_answered_on_questions=app_data.status,
+#                                processes=chosen_processes)
+#     else:
+#         return u'Вы не можете получить доступ к этой странице'
+
+
 @app.route('/gm/', methods=('GET', 'POST'))
 @app.route('/gm/process<int:page>', methods=['GET', 'POST'])
 @login_required
@@ -81,22 +152,26 @@ def gm(page=1):
     if g.user.role == ROLE_HEAD_OF_STRATEGIC_LEVEL:
         chosen_processes = UsersChoices.user_choice('processes').paginate(page, 1, False)
         current_process = chosen_processes.items[0]
-        form = TestFormDynamic(current_process.variant)
+        questions_by_process = Question.chosen_questions(current_process.choice).all()
+        form = TestFormDynamic(questions_by_process)
         app_data = ApplicationData.gm_answered_on_questions().one()
-        # if form.validate_on_submit() and form.prev_page.data:
-        #     print('prev_page: valid')
-        #     redirect(url_for('gm'))
-        # elif form.validate_on_submit() and form.next_page.data:
-        #     print('next_page: valid')
-        #     redirect(url_for('gm'))
         if form.validate_on_submit():
-            print('submit')
             if form.prev_page.data:
-                print('prev_page')
-                return redirect(url_for('gm', page=chosen_processes.prev_num))
+                print('prev page: ' + str(page))
+                save_answers_to_db(form.questions.entries, questions_by_process)
+                if not chosen_processes.page == 1:
+                    return redirect(url_for('gm', page=chosen_processes.prev_num))
+                else:
+                    return redirect(url_for('gm'))
             if form.next_page.data:
-                print('next_page')
+                print('next page: ' + str(page))
+                save_answers_to_db(form.questions.entries, questions_by_process)
                 return redirect(url_for('gm', page=chosen_processes.next_num))
+            if form.finish.data:
+                print('finish page: ' + str(page))
+                save_answers_to_db(form.questions.entries, questions_by_process)
+                app_data.status = not app_data.status
+                app_data.update()
             # if not app_data.status:
             #     # get form data and save to db
             #     print(form.data)
@@ -107,12 +182,8 @@ def gm(page=1):
             # app_data.status = bool(not app_data.status)
             # app_data.update()
             return redirect(url_for('gm'))
-        else:
-            print('page: ' + str(page) + ' ' + str(form.data))
-            print('prev_page: ' + str(form.prev_page.data))
-            print('next_page: ' + str(form.next_page.data))
         return render_template('roles/gm.html', form=form,
-                               process_name=Process.process(current_process.variant).name,
+                               process_name=Process.process(current_process.choice).one().name,
                                is_cso_choose_processes=ApplicationData.cso_choose_processes().one().status,
                                is_gm_answered_on_questions=app_data.status,
                                processes=chosen_processes)
@@ -152,4 +223,4 @@ def user_page(username):
         elif user.role == ROLE_HEAD_OF_INFORMATION_SECURITY:
             redirect(url_for('cso'))
         elif user.role == ROLE_HEAD_OF_STRATEGIC_LEVEL:
-            redirect(url_for('gm'))
+            redirect(url_for('gm', page=1))

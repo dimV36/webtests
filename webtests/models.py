@@ -46,8 +46,13 @@ class InvestmentLevel(CRUDMixin, db.Model):
     name = db.Column(db.String(120), unique=True)
     process = db.relationship('Process', backref='investment_level', lazy='dynamic')
 
-    def investment_levels(self):
-        return self.query
+    @staticmethod
+    def investment_levels():
+        return InvestmentLevel.query
+
+    @staticmethod
+    def investment_level(investment_level_id):
+        return InvestmentLevel.query.filter(InvestmentLevel.id == investment_level_id)
 
     def __repr__(self):
         return '<InvestmentLevel #{:d}>'.format(self.id)
@@ -62,17 +67,18 @@ class Process(CRUDMixin, db.Model):
 
     @staticmethod
     def process(process_id):
-        return Process.query.filter(Process.id == process_id).one()
+        return Process.query.filter(Process.id == process_id)
 
     @staticmethod
-    def chosen_processes():
+    def processes_by_chosen_investment_level():
         try:
             chosen_investment_level = UsersChoices.user_choice('investment_level').one()
+            print(chosen_investment_level)
         except NoResultFound:
             raise LookupError(u'Не найдено значение investment_level')
         except MultipleResultsFound:
             raise LookupError(u'Найдено несколько значений investment_level')
-        return Process.query.filter(Process.investment_level_id == chosen_investment_level.variant)
+        return Process.query.filter(Process.investment_level_id == chosen_investment_level.choice)
 
     def __repr__(self):
         return '<Process #{:d}>'.format(self.id)
@@ -88,12 +94,26 @@ class Question(CRUDMixin, db.Model):
     process_id = db.Column(db.Integer, db.ForeignKey('process.id'))
 
     @staticmethod
+    def question(name):
+        return Question.query.filter(Question.name == name)
+
+    @staticmethod
     def chosen_questions(process_id):
         return Question.query.filter(Question.process_id == process_id)
 
     def question_variants(self):
         return [(1, self.answer1), (2, self.answer2),
                 (3, self.answer3), (4, self.answer4)]
+
+    def question_answer(self, choice):
+        if choice == 1:
+            return self.answer1
+        elif choice == 2:
+            return self.answer2
+        elif choice == 3:
+            return self.answer3
+        else:
+            return self.answer4
 
     def __repr__(self):
         return '<Question #{:d}>'.format(self.id)
@@ -137,13 +157,10 @@ class ApplicationData(CRUDMixin, db.Model):
 
     @staticmethod
     def init_application_data():
-        data = None
         for field in ApplicationData.__APPLICATION_FIELD_DATA:
             try:
-                data = ApplicationData.query.filter(ApplicationData.description == field)
+                ApplicationData.query.filter(ApplicationData.description == field).one()
             except NoResultFound:
-                pass
-            if data is None:
                 ApplicationData.create(description=field, status=False)
 
     def __repr__(self):
@@ -153,12 +170,18 @@ class ApplicationData(CRUDMixin, db.Model):
 class UsersChoices(CRUDMixin, db.Model):
     __tablename__ = 'users_choices'
     username = db.Column(db.String(120))
-    description = db.Column(db.String(120))
-    variant = db.Column(db.Integer)
+    field = db.Column(db.String(120))
+    question = db.Column(db.Text)
+    choice = db.Column(db.Integer)
+    answer = db.Column(db.Text)
 
     @staticmethod
-    def user_choice(description):
-        return UsersChoices.query.filter(UsersChoices.description == description)
+    def user_choice(field):
+        return UsersChoices.query.filter(UsersChoices.field == field)
+
+    @staticmethod
+    def user_choice_question(question_name):
+        return UsersChoices.query.filter(UsersChoices.question == question_name)
 
     def __repr__(self):
         return '<UsersChoices #{:d}>'.format(self.id)

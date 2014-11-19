@@ -17,21 +17,9 @@
                 </ul>
             {% endif %}
         {% endfor %}
+        {% if processes.has_prev %} {{ form.prev_page }} {% endif %}
+        {% if processes.has_next %} {{ form.next_page }} {% else %} {{ form.finish }} {% endif %}
         {{ form.hidden_tag() }}
-
-            {% if processes.has_prev %}
-                <a href="{{ url_for('gm', page=processes.prev_num) }}"><< Назад</a>
-            {% else %}
-                << Назад
-            {% endif %} |
-            {% if processes.has_next %}
-                <a href="{{ url_for('gm', page=processes.next_num) }}">Далее >></a>
-            {% else %}
-                Далее >>
-                <!--<p><input type="Submit" value="Отправить"></p>-->
-            {% endif %}
-        {{ form.prev_page }}
-        {{ form.next_page }}
     {% endif %}
 {% endif %}
 </form>

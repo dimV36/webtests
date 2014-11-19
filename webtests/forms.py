@@ -29,8 +29,9 @@ class _QuestionForm(Form):
 
 class _TestForm(Form):
     questions = fields.FieldList(fields.FormField(_QuestionForm))
-    prev_page = fields.SubmitField()
-    next_page = fields.SubmitField()
+    prev_page = fields.SubmitField(label=u'Назад')
+    next_page = fields.SubmitField(label=u'Далее')
+    finish = fields.SubmitField(label=u'Отправить')
 
     def validate_questions(self, field):
         for entry in self.questions.entries:
@@ -87,24 +88,29 @@ def HeadmasterFormDynamic(is_headmaster_start_testing):
     form = _HeadmasterForm()
     form.variants.choices = [(level.id, level.name) for level in InvestmentLevel().investment_levels()]
     if is_headmaster_start_testing:
-        form.variants.process_data(UsersChoices().user_choice('investment_level').one().variant)
+        form.variants.process_data(UsersChoices().user_choice('investment_level').one().choice)
     return form
 
 
 def CSOFormDynamic():
     form = _CSOForm()
-    form.variants.choices = [(process.id, process.name) for process in Process.chosen_processes()]
+    form.variants.choices = [(process.id, process.name) for process in Process.processes_by_chosen_investment_level()]
     return form
 
 
-def TestFormDynamic(process_id):
-    question_by_process = Question.chosen_questions(process_id).all()
+def TestFormDynamic(questions_by_process):
     form = _TestForm()
     if not form.questions.entries:
-        for i in range(0, len(question_by_process)):
-            question = question_by_process[i]
+        for i in range(0, len(questions_by_process)):
+            question = questions_by_process[i]
             question_form = _QuestionForm()
             form.questions.append_entry(question_form)
             form.questions.entries[i].label = question.name
             form.questions.entries[i].variants.choices = question.question_variants()
+            try:
+                user_choice = UsersChoices.user_choice_question(question.name).one()
+            except NoResultFound:
+                print('NOT FOUND')
+            else:
+                form.questions.entries[i].variants.data = user_choice.choice
     return form

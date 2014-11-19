@@ -53,7 +53,7 @@ def __create_processes():
     except NoResultFound:
         pass
     if len(processes) == 0:
-        for i in range(1, len(__INVESTMENT_LEVELS)):
+        for i in range(1, len(__INVESTMENT_LEVELS) + 1):
             investment_level = investment_levels[i - 1]
             for j in range(1, 3):
                 process_name = u'Процесс ' + str(i) + '.' + str(j)
@@ -72,7 +72,7 @@ def __create_questionnaire():
     except NoResultFound:
         pass
     if len(questionnaires) == 0:
-        for i in range(1, len(processes)):
+        for i in range(1, len(processes) + 1):
             process = processes[i - 1]
             for j in range(1, 5):
                 question = u'Вопрос ' + str(i) + '.' + str(j)
