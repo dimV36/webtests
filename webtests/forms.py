@@ -29,7 +29,6 @@ class _QuestionForm(Form):
 
 class _TestForm(Form):
     questions = fields.FieldList(fields.FormField(_QuestionForm))
-    prev_page = fields.SubmitField(label=u'Назад')
     next_page = fields.SubmitField(label=u'Далее')
     finish = fields.SubmitField(label=u'Отправить')
 
@@ -107,10 +106,4 @@ def TestFormDynamic(questions_by_process):
             form.questions.append_entry(question_form)
             form.questions.entries[i].label = question.name
             form.questions.entries[i].variants.choices = question.question_variants()
-            try:
-                user_choice = UsersChoices.user_choice_question(question.name).one()
-            except NoResultFound:
-                print('NOT FOUND')
-            else:
-                form.questions.entries[i].variants.data = user_choice.choice
     return form

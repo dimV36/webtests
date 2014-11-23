@@ -17,8 +17,11 @@
                 </ul>
             {% endif %}
         {% endfor %}
-        {% if processes.has_prev %} {{ form.prev_page }} {% endif %}
-        {% if processes.has_next %} {{ form.next_page }} {% else %} {{ form.finish }} {% endif %}
+        {% if processes.has_next %}
+            {{ form.next_page }}
+        {% else %}
+            {{ form.finish }}
+        {% endif %}
         {{ form.hidden_tag() }}
     {% endif %}
 {% endif %}
