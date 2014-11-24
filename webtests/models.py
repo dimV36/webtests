@@ -4,7 +4,7 @@ from random import SystemRandom
 from backports.pbkdf2 import pbkdf2_hmac, compare_digest
 from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.orm.exc import NoResultFound
 from webtests.data import CRUDMixin, db
 
 
@@ -14,7 +14,7 @@ class User(UserMixin, CRUDMixin, db.Model):
     role = db.Column(db.String(50))
     _password = db.Column(db.LargeBinary(120))
     _salt = db.Column(db.String(120))
-    # sites = db.relationship('Site', backref='owner', lazy='dynamic')
+    user_choice = db.relationship('UserChoice', backref='user', lazy='dynamic')
 
     @hybrid_property
     def password(self):
@@ -40,11 +40,18 @@ class User(UserMixin, CRUDMixin, db.Model):
     def __repr__(self):
         return '<User #{:d}>'.format(self.id)
 
+    @staticmethod
+    def user_by_name(username):
+        return User.query.filter(User.username == username)
+
+    @staticmethod
+    def user_by_role(role):
+        return User.query.filter(User.role == role)
+
 
 class InvestmentLevel(CRUDMixin, db.Model):
     __tablename__ = 'investment_level'
     name = db.Column(db.String(120), unique=True)
-    process = db.relationship('Process', backref='investment_level', lazy='dynamic')
 
     @staticmethod
     def investment_levels():
@@ -59,26 +66,22 @@ class InvestmentLevel(CRUDMixin, db.Model):
 
 
 class Process(CRUDMixin, db.Model):
-    __tablename__ = 'process'
+    __tablename__ = 'processes'
     name = db.Column(db.String(120), unique=True)
     role = db.Column(db.String(120))
-    investment_level_id = db.Column(db.Integer, db.ForeignKey('investment_level.id'))
     questionnaire_id = db.relationship('Question', backref='questionnaire', lazy='dynamic')
 
     @staticmethod
-    def process(process_id):
+    def process_by_id(process_id):
         return Process.query.filter(Process.id == process_id)
 
     @staticmethod
-    def processes_by_chosen_investment_level():
-        try:
-            chosen_investment_level = UsersChoices.user_choice('investment_level').one()
-            print(chosen_investment_level)
-        except NoResultFound:
-            raise LookupError(u'Не найдено значение investment_level')
-        except MultipleResultsFound:
-            raise LookupError(u'Найдено несколько значений investment_level')
-        return Process.query.filter(Process.investment_level_id == chosen_investment_level.choice)
+    def processes_by_role(role):
+        return Process.query.filter(Process.role == role)
+
+    @staticmethod
+    def processes():
+        return Process.query
 
     def __repr__(self):
         return '<Process #{:d}>'.format(self.id)
@@ -91,7 +94,7 @@ class Question(CRUDMixin, db.Model):
     answer2 = db.Column(db.Text)
     answer3 = db.Column(db.Text)
     answer4 = db.Column(db.Text)
-    process_id = db.Column(db.Integer, db.ForeignKey('process.id'))
+    process_id = db.Column(db.Integer, db.ForeignKey('processes.id'))
 
     @staticmethod
     def question(name):
@@ -167,21 +170,83 @@ class ApplicationData(CRUDMixin, db.Model):
         return 'ApplicationData #{:d}>'.format(self.id)
 
 
-class UsersChoices(CRUDMixin, db.Model):
-    __tablename__ = 'users_choices'
-    username = db.Column(db.String(120))
+class UserChoice(CRUDMixin, db.Model):
+    __tablename__ = 'user_choices'
+    __FIELD_INVESTMENT_LEVEL = 'investment_level'
+    __FIELD_PROCESS = 'process'
+    __FIELD_QUESTION = 'question'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     field = db.Column(db.String(120))
     question = db.Column(db.Text)
     choice = db.Column(db.Integer)
     answer = db.Column(db.Text)
 
     @staticmethod
-    def user_choice(field):
-        return UsersChoices.query.filter(UsersChoices.field == field)
+    def __user_choice(field):
+        return UserChoice.query.filter(UserChoice.field == field)
 
     @staticmethod
-    def user_choice_question(question_name):
-        return UsersChoices.query.filter(UsersChoices.question == question_name)
+    def create_investment_level_choice(username, choice, answer):
+        try:
+            user = User.user_by_name(username)
+        except NoResultFound:
+            raise ValueError(u'Не найдена запить в базе данных для пользователя "%s"' % username)
+        UserChoice.create(user_id=user.one().id,
+                            field=UserChoice.__FIELD_INVESTMENT_LEVEL,
+                            question=u'Инвестиционный уровень',
+                            choice=choice,
+                            answer=answer)
+
+    @staticmethod
+    def create_process_choice(username, choice, answer):
+        try:
+            user = User.user_by_name(username)
+        except NoResultFound:
+            raise ValueError(u'Не найдена запись в базе данных для пользователя "%s"' % username)
+        UserChoice.create(user_id=user.one().id,
+                            field=UserChoice.__FIELD_PROCESS,
+                            question=u'Процесс',
+                            choice=choice,
+                            answer=answer)
+
+    @staticmethod
+    def create_question_choice(username, question, choice, answer):
+        try:
+            user = User.user_by_name(username)
+        except NoResultFound:
+            raise ValueError(u'Не найдена запись в базе данных для пользователя "%s"' % username)
+        UserChoice.create(user_id=user.one().id,
+                            field=UserChoice.__FIELD_QUESTION,
+                            question=question,
+                            choice=choice,
+                            answer=answer)
+
+    @staticmethod
+    def user_choice_chosen_investment_level():
+        return UserChoice.query.filter(UserChoice.field == UserChoice.__FIELD_INVESTMENT_LEVEL)
+
+    @staticmethod
+    def user_choice_questions(question_name):
+        return UserChoice.query.filter(UserChoice.question == question_name)
+
+    @staticmethod
+    def user_choice_processes():
+        return UserChoice.query.filter(UserChoice.field == UserChoice.__FIELD_PROCESS)
+
+    @staticmethod
+    def user_choice_processes_by_role(user_role):
+        user = User.user_by_role(user_role).one()
+        # print(Process.processes_by_role(user_role))
+        print(Process.processes_by_role(user_role).all())
+        # chosen_processes = UserChoice.query.filter(UserChoice.field == UserChoice.__FIELD_PROCESS).all()
+        # user_choice_processes = []
+        # for chosen_process in chosen_processes:
+        #     print(chosen_process)
+        #     process = Process.process_by_id(chosen_process.choice).one()
+        #     if process.role == user.role:
+        #         user_choice_processes.append(chosen_process)
+        # return user_choice_processes
+        return UserChoice.query.filter(UserChoice.field == UserChoice.__FIELD_PROCESS)
 
     def __repr__(self):
         return '<UsersChoices #{:d}>'.format(self.id)

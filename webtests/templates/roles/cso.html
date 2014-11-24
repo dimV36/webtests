@@ -10,7 +10,18 @@
             Выбрать процессы организации:
             {{ forms.render_choices(form) }}
             <input type="Submit" value="Отправить">
+    {% else %}
+        {% if processes %}
+            Были выбраны следующие процессы:
+            <ul>
+            {% for process in processes.all() %}
+                <li>{{ process.answer }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
     {% endif %}
+{% else %}
+    Тестирование ещё не началось.
 {% endif %}
 </form>
 {% endblock %}

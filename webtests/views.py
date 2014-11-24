@@ -1,12 +1,12 @@
 # coding=utf-8
-from flask import redirect, render_template, url_for, g, request
+from flask import redirect, render_template, url_for, g, flash
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.orm.exc import NoResultFound
 
 from admin import __ADMIN_USER
-from webtests.roles import ROLE_HEAD_OF_ORGANIZATION, ROLE_HEAD_OF_INFORMATION_SECURITY, ROLE_HEAD_OF_STRATEGIC_LEVEL
+from webtests.roles import ROLE_HEAD_OF_ORGANIZATION, ROLE_HEAD_OF_INFORMATION_SECURITY, ROLE_HEAD_OF_BASE_LEVEL
 from forms import LoginForm, RegistrationForm, HeadmasterFormDynamic, CSOFormDynamic, TestFormDynamic
-from models import ApplicationData, User, UsersChoices, Process, InvestmentLevel, Question
+from models import ApplicationData, User, UserChoice, Process, InvestmentLevel, Question
 from webtests import app
 
 
@@ -25,6 +25,7 @@ def register():
         form = RegistrationForm()
         if form.validate_on_submit():
             User.create(username=form.username.data, password=form.password.data, role=form.role.data)
+            flash(u'Пользователь "%s" успешно зарегистрирован в системе.' % form.username.data)
         return render_template('users/register.html', form=form)
     else:
         return u'Вы не можете получить доступ к этой странице.'
@@ -36,25 +37,27 @@ def headmaster():
     if g.user.role == ROLE_HEAD_OF_ORGANIZATION:
         app_data = ApplicationData.headmaster_is_start_testing().one()
         form = HeadmasterFormDynamic(app_data.status)
+        try:
+            investment_level = UserChoice.user_choice_chosen_investment_level()
+        except NoResultFound:
+            investment_level = None
         if form.validate_on_submit():
             if not app_data.status:
                 choice = form.variants.data
                 answer = InvestmentLevel().investment_level(choice)
-                UsersChoices.create(username=g.user.username,
-                                    field='investment_level',
-                                    question=u'Инвестиционный уровень',
-                                    choice=choice,
-                                    answer=answer.one().name)
+                UserChoice.create_investment_level_choice(g.user.username, choice, answer.one().name)
             else:
-                choices = UsersChoices.query.all()
+                choices = UserChoice.query.all()
                 for choice in choices:
-                    UsersChoices.delete(choice)
+                    UserChoice.delete(choice)
             app_data.status = bool(not app_data.status)
             app_data.update()
             return redirect(url_for('headmaster'))
         else:
             print(form.errors)
-        return render_template('roles/headmaster.html', form=form, testing_is_started=app_data.status)
+        return render_template('roles/headmaster.html', form=form,
+                               testing_is_started=app_data.status,
+                               investment_level=investment_level)
     else:
         return u'Вы не можете получить доступ к этой странице'
 
@@ -65,27 +68,31 @@ def cso():
     if g.user.role == ROLE_HEAD_OF_INFORMATION_SECURITY:
         form = CSOFormDynamic()
         app_data = ApplicationData.cso_choose_processes().one()
+        investment_level = UserChoice.user_choice_chosen_investment_level()
+        try:
+            processes = UserChoice.user_choice_processes()
+        except NoResultFound:
+            processes = None
         if form.validate_on_submit():
             if not app_data.status:
                 for choice in form.variants.data:
-                    answer = Process().process(choice)
-                    UsersChoices.create(username=g.user.username,
-                                        field='processes',
-                                        question=u'Процессы',
-                                        choice=choice,
-                                        answer=answer.one().name)
+                    answer = Process.process_by_id(choice)
+                    UserChoice.create_process_choice(g.user.username, choice, answer.one().name)
             app_data.status = bool(not app_data.status)
             app_data.update()
         else:
             print(form.errors)
-        return render_template('roles/cso.html', form=form, is_cso_choose_processes=app_data.status,
-                               is_headmaster_start_testing=ApplicationData.headmaster_is_start_testing().one().status)
+        return render_template('roles/cso.html', form=form,
+                               is_cso_choose_processes=app_data.status,
+                               is_headmaster_start_testing=ApplicationData.headmaster_is_start_testing().one().status,
+                               investment_level=investment_level.one().answer,
+                               processes=processes)
     else:
         return u'Вы не можете получить доступ к этой странице'
 
 
 def save_answers_to_db(entries, page):
-    process = UsersChoices.user_choice('processes').paginate(page, 1, False).items[0]
+    process = UserChoice.user_choice('processes').paginate(page, 1, False).items[0]
     questions = Question.chosen_questions(process.choice).all()
     for i in range(0, len(entries)):
         entry = entries[i]
@@ -93,9 +100,9 @@ def save_answers_to_db(entries, page):
         question = Question.question(question_name).one()
         choice = entry.variants.data
         try:
-            UsersChoices.user_choice_question(question_name).one()
+            UserChoice.user_choice_question(question_name).one()
         except NoResultFound:
-            UsersChoices.create(username=g.user.username,
+            UserChoice.create(username=g.user.username,
                                 field='questions',
                                 question=question_name,
                                 choice=choice,
@@ -106,8 +113,8 @@ def save_answers_to_db(entries, page):
 @app.route('/gm/process<int:page>', methods=['GET', 'POST'])
 @login_required
 def gm(page=1):
-    if g.user.role == ROLE_HEAD_OF_STRATEGIC_LEVEL:
-        chosen_processes = UsersChoices.user_choice('processes').paginate(page, 1, False)
+    if g.user.role == ROLE_HEAD_OF_BASE_LEVEL:
+        chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_BASE_LEVEL).paginate(page, 1, False)
         current_process = chosen_processes.items[0]
         questions_by_process = Question.chosen_questions(current_process.choice).all()
         form = TestFormDynamic(questions_by_process)
@@ -125,7 +132,7 @@ def gm(page=1):
                 page = chosen_processes.next_num
             return redirect(url_for('gm', page=page))
         return render_template('roles/gm.html', form=form,
-                               process_name=Process.process(current_process.choice).one().name,
+                               process_name=Process.process_by_id(current_process.choice).one().name,
                                is_cso_choose_processes=ApplicationData.cso_choose_processes().one().status,
                                is_gm_answered_on_questions=app_data.status,
                                processes=chosen_processes)
@@ -161,8 +168,8 @@ def user_page(username):
         pass
     if user is not None:
         if user.role == ROLE_HEAD_OF_ORGANIZATION:
-            redirect(url_for('headmaster'))
+            return redirect(url_for('headmaster'))
         elif user.role == ROLE_HEAD_OF_INFORMATION_SECURITY:
-            redirect(url_for('cso'))
-        elif user.role == ROLE_HEAD_OF_STRATEGIC_LEVEL:
-            redirect(url_for('gm', page=1))
+            return redirect(url_for('cso'))
+        elif user.role == ROLE_HEAD_OF_BASE_LEVEL:
+            return redirect(url_for('gm', page=1))

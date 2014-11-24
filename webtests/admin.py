@@ -53,12 +53,11 @@ def __create_processes():
     except NoResultFound:
         pass
     if len(processes) == 0:
-        for i in range(1, len(__INVESTMENT_LEVELS) + 1):
-            investment_level = investment_levels[i - 1]
+        for i in range(1, len(__INVESTMENT_LEVELS) * 2 + 1):
             for j in range(1, 3):
                 process_name = u'Процесс ' + str(i) + '.' + str(j)
                 role = ROLES_FOR_TESTING[randint(0, len(ROLES_FOR_TESTING) - 1)]
-                Process.create(name=process_name, investment_level_id=investment_level.id, role=role)
+                Process.create(name=process_name, role=role)
 
 
 def __create_questionnaire():

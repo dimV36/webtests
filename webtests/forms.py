@@ -5,7 +5,7 @@ from wtforms import fields, widgets
 from wtforms.validators import Optional
 from webtests.validators.validators import MyInputRequired
 from wtforms.validators import ValidationError
-from models import User, UsersChoices, InvestmentLevel, Process, Question
+from models import User, UserChoice, InvestmentLevel, Process
 from roles import ROLES
 
 
@@ -85,15 +85,15 @@ class RegistrationForm(Form):
 
 def HeadmasterFormDynamic(is_headmaster_start_testing):
     form = _HeadmasterForm()
-    form.variants.choices = [(level.id, level.name) for level in InvestmentLevel().investment_levels()]
+    form.variants.choices = [(level.id, level.name) for level in InvestmentLevel.investment_levels()]
     if is_headmaster_start_testing:
-        form.variants.process_data(UsersChoices().user_choice('investment_level').one().choice)
+        form.variants.process_data(UserChoice.user_choice_chosen_investment_level().one().choice)
     return form
 
 
 def CSOFormDynamic():
     form = _CSOForm()
-    form.variants.choices = [(process.id, process.name) for process in Process.processes_by_chosen_investment_level()]
+    form.variants.choices = [(process.id, process.name) for process in Process.processes()]
     return form
 
 
