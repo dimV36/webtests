@@ -5,7 +5,7 @@ from wtforms import fields, widgets
 from wtforms.validators import Optional
 from webtests.validators.validators import MyInputRequired
 from wtforms.validators import ValidationError
-from models import User, UserChoice, InvestmentLevel, Process
+from models import Role, User, UserChoice, InvestmentLevel, Process
 from roles import ROLES
 
 
@@ -73,8 +73,12 @@ class RegistrationForm(Form):
             raise ValidationError(u'Пользователь %s уже зарегистрирован в системе' % self.username.data)
 
     def validate_role(self, field):
-        user = User.query.filter(User.role == field.data).first()
-        if user is not None:
+        role = Role.role_by_name(field.data).one()
+        try:
+            User.user_by_role_id(role.id).one()
+        except NoResultFound:
+            pass
+        else:
             raise ValidationError(u'%s уже зарегистрирован в системе' % self.role.data)
 
     def validate_password(self, field):

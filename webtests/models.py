@@ -8,10 +8,36 @@ from sqlalchemy.orm.exc import NoResultFound
 from webtests.data import CRUDMixin, db
 
 
+class Role(UserMixin, CRUDMixin, db.Model):
+    __tablename__ = 'roles'
+    name = db.Column(db.String(50), unique=True)
+    user = db.relationship('User', backref='role', uselist=False)
+    process = db.relationship('Process', backref='role', lazy='dynamic')
+
+    @staticmethod
+    def create_roles(roles_list):
+        for role in roles_list:
+            try:
+                Role.role_by_name(role).one()
+            except NoResultFound:
+                Role.create(name=role)
+
+    @staticmethod
+    def role_by_id(role_id):
+        return Role.query.filter(Role.id == role_id)
+
+    @staticmethod
+    def role_by_name(role_name):
+        return Role.query.filter(Role.name == role_name)
+
+    def __repr__(self):
+        return '<Role #{:d}>'.format(self.id)
+
+
 class User(UserMixin, CRUDMixin, db.Model):
     __tablename__ = 'users'
     username = db.Column(db.String(50), unique=True)
-    role = db.Column(db.String(50))
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     _password = db.Column(db.LargeBinary(120))
     _salt = db.Column(db.String(120))
     user_choice = db.relationship('UserChoice', backref='user', lazy='dynamic')
@@ -37,20 +63,20 @@ class User(UserMixin, CRUDMixin, db.Model):
         buff = pbkdf2_hmac('sha512', pwd, salt, iterations=100000)
         return bytes(buff)
 
-    def __repr__(self):
-        return '<User #{:d}>'.format(self.id)
-
     @staticmethod
     def user_by_name(username):
         return User.query.filter(User.username == username)
 
     @staticmethod
-    def user_by_role(role):
-        return User.query.filter(User.role == role)
+    def user_by_role_id(role_id):
+        return User.query.filter(User.role_id == role_id)
+
+    def __repr__(self):
+        return '<User #{:d}>'.format(self.id)
 
 
 class InvestmentLevel(CRUDMixin, db.Model):
-    __tablename__ = 'investment_level'
+    __tablename__ = 'investment_levels'
     name = db.Column(db.String(120), unique=True)
 
     @staticmethod
@@ -68,7 +94,7 @@ class InvestmentLevel(CRUDMixin, db.Model):
 class Process(CRUDMixin, db.Model):
     __tablename__ = 'processes'
     name = db.Column(db.String(120), unique=True)
-    role = db.Column(db.String(120))
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     questionnaire_id = db.relationship('Question', backref='questionnaire', lazy='dynamic')
 
     @staticmethod
@@ -235,17 +261,10 @@ class UserChoice(CRUDMixin, db.Model):
 
     @staticmethod
     def user_choice_processes_by_role(user_role):
-        user = User.user_by_role(user_role).one()
-        # print(Process.processes_by_role(user_role))
-        print(Process.processes_by_role(user_role).all())
-        # chosen_processes = UserChoice.query.filter(UserChoice.field == UserChoice.__FIELD_PROCESS).all()
-        # user_choice_processes = []
-        # for chosen_process in chosen_processes:
-        #     print(chosen_process)
-        #     process = Process.process_by_id(chosen_process.choice).one()
-        #     if process.role == user.role:
-        #         user_choice_processes.append(chosen_process)
-        # return user_choice_processes
+        role = Role.role_by_name(user_role).one()
+        print('\n' + str(role.process.all()) + '\n')
+        # query = UserChoice.query.filter(UserChoice.field == UserChoice.__FIELD_PROCESS).filter(UserChoice.choice == role.process.id)
+        # print(query.all())
         return UserChoice.query.filter(UserChoice.field == UserChoice.__FIELD_PROCESS)
 
     def __repr__(self):

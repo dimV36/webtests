@@ -2,8 +2,8 @@
 __author__ = 'dimv36'
 from sqlalchemy.orm.exc import NoResultFound
 
-from models import User, InvestmentLevel, ApplicationData, Process, Question
-from webtests.roles import ROLE_ADMIN, ROLES_FOR_TESTING
+from models import Role, User, InvestmentLevel, ApplicationData, Process, Question
+from webtests.roles import ROLE_ADMIN, ROLES_FOR_TESTING, USER_ROLES
 from random import randint
 
 
@@ -14,6 +14,7 @@ __ANSWERS = [u'Ответ 1', u'Ответ 2', u'Ответ 3', u'Ответ 4']
 
 
 def create_entities():
+    Role.create_roles(USER_ROLES)
     __create_admin()
     __create_investment_level()
     __create_processes()
@@ -28,7 +29,8 @@ def __create_admin():
     except NoResultFound:
         pass
     if admin is None:
-        User.create(username=__ADMIN_USER, password='123456', role=ROLE_ADMIN)
+        role = Role.role_by_name(ROLE_ADMIN).one()
+        User.create(username=__ADMIN_USER, password='123456', role_id=role.id)
 
 
 def __create_investment_level():
@@ -45,10 +47,6 @@ def __create_investment_level():
 def __create_processes():
     processes = None
     try:
-        investment_levels = InvestmentLevel.query.all()
-    except NoResultFound:
-        raise LookupError(u'Не найдены значения инвестиционных уровней')
-    try:
         processes = Process.query.all()
     except NoResultFound:
         pass
@@ -56,8 +54,9 @@ def __create_processes():
         for i in range(1, len(__INVESTMENT_LEVELS) * 2 + 1):
             for j in range(1, 3):
                 process_name = u'Процесс ' + str(i) + '.' + str(j)
-                role = ROLES_FOR_TESTING[randint(0, len(ROLES_FOR_TESTING) - 1)]
-                Process.create(name=process_name, role=role)
+                role_name = ROLES_FOR_TESTING[randint(0, len(ROLES_FOR_TESTING) - 1)]
+                role = Role.role_by_name(role_name).one()
+                Process.create(name=process_name, role_id=role.id)
 
 
 def __create_questionnaire():

@@ -6,7 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from admin import __ADMIN_USER
 from webtests.roles import ROLE_HEAD_OF_ORGANIZATION, ROLE_HEAD_OF_INFORMATION_SECURITY, ROLE_HEAD_OF_BASE_LEVEL
 from forms import LoginForm, RegistrationForm, HeadmasterFormDynamic, CSOFormDynamic, TestFormDynamic
-from models import ApplicationData, User, UserChoice, Process, InvestmentLevel, Question
+from models import ApplicationData, Role, User, UserChoice, Process, InvestmentLevel, Question
 from webtests import app
 
 
@@ -24,7 +24,9 @@ def register():
     if g.user.username == __ADMIN_USER:
         form = RegistrationForm()
         if form.validate_on_submit():
-            User.create(username=form.username.data, password=form.password.data, role=form.role.data)
+            print('\n' + form.role.data + '\n')
+            role = Role.role_by_name(form.role.data).one()
+            User.create(username=form.username.data, password=form.password.data, role_id=role.id)
             flash(u'Пользователь "%s" успешно зарегистрирован в системе.' % form.username.data)
         return render_template('users/register.html', form=form)
     else:
@@ -34,7 +36,7 @@ def register():
 @app.route('/headmaster/', methods=('GET', 'POST'))
 @login_required
 def headmaster():
-    if g.user.role == ROLE_HEAD_OF_ORGANIZATION:
+    if g.user.role.name == ROLE_HEAD_OF_ORGANIZATION:
         app_data = ApplicationData.headmaster_is_start_testing().one()
         form = HeadmasterFormDynamic(app_data.status)
         try:
@@ -65,7 +67,7 @@ def headmaster():
 @app.route('/cso/', methods=('GET', 'POST'))
 @login_required
 def cso():
-    if g.user.role == ROLE_HEAD_OF_INFORMATION_SECURITY:
+    if g.user.role.name == ROLE_HEAD_OF_INFORMATION_SECURITY:
         form = CSOFormDynamic()
         app_data = ApplicationData.cso_choose_processes().one()
         investment_level = UserChoice.user_choice_chosen_investment_level()
@@ -113,7 +115,7 @@ def save_answers_to_db(entries, page):
 @app.route('/gm/process<int:page>', methods=['GET', 'POST'])
 @login_required
 def gm(page=1):
-    if g.user.role == ROLE_HEAD_OF_BASE_LEVEL:
+    if g.user.role.name == ROLE_HEAD_OF_BASE_LEVEL:
         chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_BASE_LEVEL).paginate(page, 1, False)
         current_process = chosen_processes.items[0]
         questions_by_process = Question.chosen_questions(current_process.choice).all()
@@ -167,9 +169,9 @@ def user_page(username):
     except NoResultFound:
         pass
     if user is not None:
-        if user.role == ROLE_HEAD_OF_ORGANIZATION:
+        if user.role.name == ROLE_HEAD_OF_ORGANIZATION:
             return redirect(url_for('headmaster'))
-        elif user.role == ROLE_HEAD_OF_INFORMATION_SECURITY:
+        elif user.role.name == ROLE_HEAD_OF_INFORMATION_SECURITY:
             return redirect(url_for('cso'))
-        elif user.role == ROLE_HEAD_OF_BASE_LEVEL:
+        elif user.role.name == ROLE_HEAD_OF_BASE_LEVEL:
             return redirect(url_for('gm', page=1))
