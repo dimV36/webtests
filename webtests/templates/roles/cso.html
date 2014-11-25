@@ -6,13 +6,16 @@
 {{ forms.navigation() }}
 <form action="{{url_for('cso')}}" method="POST">
 {% if is_headmaster_start_testing %}
+    {% if investment_level %}
+        Инвестиционный уровень: "<b>{{ investment_level }}</b>"
+    {% endif %}
     {% if not is_cso_choose_processes %}
-            Выбрать процессы организации:
+            <p>Выбрать процессы организации:</p>
             {{ forms.render_choices(form) }}
             <input type="Submit" value="Отправить">
     {% else %}
         {% if processes %}
-            Были выбраны следующие процессы:
+            <p>Были выбраны следующие процессы:</p>
             <ul>
             {% for process in processes.all() %}
                 <li>{{ process.answer }}</li>

@@ -5,12 +5,11 @@
 {{ super() }}
 {{ forms.navigation() }}
 <form action="{{url_for('gm')}}" method="POST">
-GM choose processes: {{ is_cso_choose_processes }}
-{% if is_cso_choose_processes %}
+{% if is_om_answered_on_questions %}
     {% if investment_level %}
         Инвестиционный уровень: "<b>{{ investment_level.one().answer }}</b>"
     {% endif %}
-    {% if not is_gm_answered_on_questions %}
+    {% if not is_tm_answered_on_questions %}
         {{ forms.render_tests(form, process_name) }}
         {% for field in form if field.type not in ["HiddenField", "CSRFTokenField"] %}
             {% if field.errors %}
@@ -31,7 +30,7 @@ GM choose processes: {{ is_cso_choose_processes }}
         <p>Тестирование окончено.</p>
     {% endif %}
 {% else %}
-    <p>Тестирование недоступно.</p>
+    <p>Тестирование ещё не открыто. </p>
 {% endif %}
 </form>
 {% endblock %}
