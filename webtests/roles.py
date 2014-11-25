@@ -1,7 +1,6 @@
 # coding=utf-8
 __author__ = 'dimv36'
 
-
 ROLE_ADMIN = 'Administrator'
 
 ROLE_HEAD_OF_ORGANIZATION = 'headmaster'

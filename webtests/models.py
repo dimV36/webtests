@@ -152,7 +152,13 @@ class ApplicationData(CRUDMixin, db.Model):
     __HEADMASTER_START_TESTING = 'is_headmaster_start_testing'
     __CSO_CHOOSE_PROCESSES = 'is_cso_choose_processes'
     __GM_ANSWERED_ON_QUESTIONS = 'is_gm_answered_on_questions'
-    __APPLICATION_FIELD_DATA = [__HEADMASTER_START_TESTING, __CSO_CHOOSE_PROCESSES, __GM_ANSWERED_ON_QUESTIONS]
+    __OM_ANSWERED_ON_QUESTIONS = 'is_om_answered_on_questions'
+    __TM_ANSWERED_ON_QUESTIONS = 'is_tm_answered_on_questions'
+    __APPLICATION_FIELD_DATA = [__HEADMASTER_START_TESTING,
+                                __CSO_CHOOSE_PROCESSES,
+                                __GM_ANSWERED_ON_QUESTIONS,
+                                __OM_ANSWERED_ON_QUESTIONS,
+                                __TM_ANSWERED_ON_QUESTIONS]
     __tablename__ = 'application_data'
     description = db.Column(db.String(120), unique=True)
     status = db.Column(db.Boolean)
@@ -183,6 +189,14 @@ class ApplicationData(CRUDMixin, db.Model):
     @staticmethod
     def gm_answered_on_questions():
         return ApplicationData.__application_data(ApplicationData.__GM_ANSWERED_ON_QUESTIONS)
+
+    @staticmethod
+    def om_answered_on_questions():
+        return ApplicationData.__application_data(ApplicationData.__OM_ANSWERED_ON_QUESTIONS)
+
+    @staticmethod
+    def tm_answered_on_questions():
+        return ApplicationData.__application_data(ApplicationData.__TM_ANSWERED_ON_QUESTIONS)
 
     @staticmethod
     def init_application_data():
@@ -252,7 +266,7 @@ class UserChoice(CRUDMixin, db.Model):
         return UserChoice.query.filter(UserChoice.field == UserChoice.__FIELD_INVESTMENT_LEVEL)
 
     @staticmethod
-    def user_choice_questions(question_name):
+    def user_choice_question(question_name):
         return UserChoice.query.filter(UserChoice.question == question_name)
 
     @staticmethod
@@ -262,10 +276,8 @@ class UserChoice(CRUDMixin, db.Model):
     @staticmethod
     def user_choice_processes_by_role(user_role):
         role = Role.role_by_name(user_role).one()
-        print('\n' + str(role.process.all()) + '\n')
-        # query = UserChoice.query.filter(UserChoice.field == UserChoice.__FIELD_PROCESS).filter(UserChoice.choice == role.process.id)
-        # print(query.all())
-        return UserChoice.query.filter(UserChoice.field == UserChoice.__FIELD_PROCESS)
+        user_processes_names = [process.name for process in role.process.all()]
+        return UserChoice.query.filter(UserChoice.answer.in_(user_processes_names))
 
     def __repr__(self):
         return '<UsersChoices #{:d}>'.format(self.id)
