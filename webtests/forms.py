@@ -35,6 +35,7 @@ class _TestForm(Form):
     def validate_questions(self, field):
         for entry in self.questions.entries:
             if entry.variants.data is None:
+                print('\n\nERROR\n\n')
                 raise ValidationError(u'Необходимо ответить на все вопросы')
 
 

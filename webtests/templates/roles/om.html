@@ -4,12 +4,12 @@
 {% block content %}
 {{ super() }}
 {{ forms.navigation() }}
-<form action="{{url_for('gm')}}" method="POST">
-{% if is_gm_answered_on_questions %}
+<form action="{{url_for('om')}}" method="POST">
+{% if is_gm_answered_on_questions.status %}
     {% if investment_level %}
         Инвестиционный уровень: "<b>{{ investment_level.one().answer }}</b>"
     {% endif %}
-    {% if not is_om_answered_on_questions %}
+    {% if not is_om_answered_on_questions.status %}
         {{ forms.render_tests(form, process_name) }}
         {% for field in form if field.type not in ["HiddenField", "CSRFTokenField"] %}
             {% if field.errors %}
@@ -30,7 +30,7 @@
         <p>Тестирование окончено.</p>
     {% endif %}
 {% else %}
-    <p>Тестирование ещё не открыто.</p>
+    <p>Тестирование недоступно.</p>
 {% endif %}
 </form>
 {% endblock %}

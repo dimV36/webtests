@@ -5,7 +5,7 @@
 {{ super() }}
 {{ forms.navigation() }}
 <form action="{{url_for('headmaster')}}" method="POST">
-{% if testing_is_started %}
+{% if headmaster_is_started_testing.status %}
     {% if investment_level %}
         Инвестиционный уровень: "<b>{{ investment_level.one().answer }}</b>"
     {% endif %}

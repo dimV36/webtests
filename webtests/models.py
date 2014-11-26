@@ -149,7 +149,7 @@ class Question(CRUDMixin, db.Model):
 
 
 class ApplicationData(CRUDMixin, db.Model):
-    __HEADMASTER_START_TESTING = 'is_headmaster_start_testing'
+    __HEADMASTER_START_TESTING = 'is_headmaster_started_testing'
     __CSO_CHOOSE_PROCESSES = 'is_cso_choose_processes'
     __GM_ANSWERED_ON_QUESTIONS = 'is_gm_answered_on_questions'
     __OM_ANSWERED_ON_QUESTIONS = 'is_om_answered_on_questions'
@@ -179,24 +179,24 @@ class ApplicationData(CRUDMixin, db.Model):
                 data.update()
 
     @staticmethod
-    def headmaster_is_start_testing():
-        return ApplicationData.__application_data(ApplicationData.__HEADMASTER_START_TESTING)
+    def headmaster_is_started_testing():
+        return ApplicationData.__application_data(ApplicationData.__HEADMASTER_START_TESTING).one()
 
     @staticmethod
     def cso_choose_processes():
-        return ApplicationData.__application_data(ApplicationData.__CSO_CHOOSE_PROCESSES)
+        return ApplicationData.__application_data(ApplicationData.__CSO_CHOOSE_PROCESSES).one()
 
     @staticmethod
     def gm_answered_on_questions():
-        return ApplicationData.__application_data(ApplicationData.__GM_ANSWERED_ON_QUESTIONS)
+        return ApplicationData.__application_data(ApplicationData.__GM_ANSWERED_ON_QUESTIONS).one()
 
     @staticmethod
     def om_answered_on_questions():
-        return ApplicationData.__application_data(ApplicationData.__OM_ANSWERED_ON_QUESTIONS)
+        return ApplicationData.__application_data(ApplicationData.__OM_ANSWERED_ON_QUESTIONS).one()
 
     @staticmethod
     def tm_answered_on_questions():
-        return ApplicationData.__application_data(ApplicationData.__TM_ANSWERED_ON_QUESTIONS)
+        return ApplicationData.__application_data(ApplicationData.__TM_ANSWERED_ON_QUESTIONS).one()
 
     @staticmethod
     def init_application_data():
