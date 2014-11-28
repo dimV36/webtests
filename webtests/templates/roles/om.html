@@ -4,7 +4,7 @@
 {% block content %}
 {{ super() }}
 {{ forms.navigation() }}
-<form action="{{url_for('om')}}" method="POST">
+<form action="" method="POST">
 {% if is_gm_answered_on_questions.status %}
     {% if investment_level %}
         Инвестиционный уровень: "<b>{{ investment_level.one().answer }}</b>"
