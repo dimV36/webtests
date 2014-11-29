@@ -23,19 +23,19 @@ class _CSOForm(Form):
 
 
 class _QuestionForm(Form):
-    variants = fields.RadioField(coerce=int, default=0, choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4')],
-                                 validators=[Optional()])
+    variants = fields.SelectField(coerce=int, choices=[(0, '0'), (1, '1'), (2, '2'), (3, '3'), (4, '4')],
+                                  validators=[Optional()])
 
 
 class _TestForm(Form):
     questions = fields.FieldList(fields.FormField(_QuestionForm))
     next_page = fields.SubmitField(label=u'Далее')
-    finish = fields.SubmitField(label=u'Отправить')
+    finish = fields.SubmitField(label=u'Завершить')
 
     def validate_questions(self, field):
         for entry in self.questions.entries:
-            if entry.variants.data is None:
-                print('\n\nERROR\n\n')
+            print(self.questions.data)
+            if entry.variants.data == 0:
                 raise ValidationError(u'Необходимо ответить на все вопросы')
 
 
@@ -110,5 +110,10 @@ def TestFormDynamic(questions_by_process):
             question_form = _QuestionForm()
             form.questions.append_entry(question_form)
             form.questions.entries[i].label = question.name
-            form.questions.entries[i].variants.choices = question.question_variants()
+            form.questions.entries[i].variants.choices = [(0, '')] + question.question_variants()
+    else:
+        for i in range(0, len(questions_by_process)):
+            question = questions_by_process[i]
+            form.questions.entries[i].label = question.name
+            form.questions.entries[i].variants.choices = [(0, '')] + question.question_variants()
     return form

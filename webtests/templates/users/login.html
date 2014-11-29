@@ -5,6 +5,7 @@
 {{super()}}
 <form action="{{ url_for('login', next=request.args.get('next', '')) }}" method="POST">
 {{ forms.render(form) }}
-<p><input type="Submit" value="Войти"></p>
+<br>
+<input class="btn btn-primary" type="submit" value="Войти">
 </form>
 {% endblock content %}

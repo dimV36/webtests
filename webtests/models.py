@@ -154,11 +154,13 @@ class ApplicationData(CRUDMixin, db.Model):
     __GM_ANSWERED_ON_QUESTIONS = 'is_gm_answered_on_questions'
     __OM_ANSWERED_ON_QUESTIONS = 'is_om_answered_on_questions'
     __TM_ANSWERED_ON_QUESTIONS = 'is_tm_answered_on_questions'
+    __CSO_ANSWERED_ON_QUESTIONS = 'is_cso_answered_on_questions'
     __APPLICATION_FIELD_DATA = [__HEADMASTER_START_TESTING,
                                 __CSO_CHOOSE_PROCESSES,
                                 __GM_ANSWERED_ON_QUESTIONS,
                                 __OM_ANSWERED_ON_QUESTIONS,
-                                __TM_ANSWERED_ON_QUESTIONS]
+                                __TM_ANSWERED_ON_QUESTIONS,
+                                __CSO_ANSWERED_ON_QUESTIONS]
     __tablename__ = 'application_data'
     description = db.Column(db.String(120), unique=True)
     status = db.Column(db.Boolean)
@@ -197,6 +199,10 @@ class ApplicationData(CRUDMixin, db.Model):
     @staticmethod
     def tm_answered_on_questions():
         return ApplicationData.__application_data(ApplicationData.__TM_ANSWERED_ON_QUESTIONS).one()
+
+    @staticmethod
+    def cso_answered_on_questions():
+        return ApplicationData.__application_data(ApplicationData.__CSO_ANSWERED_ON_QUESTIONS).one()
 
     @staticmethod
     def init_application_data():

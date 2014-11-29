@@ -54,8 +54,6 @@ def headmaster():
             headmaster_is_started_testing.status = bool(not headmaster_is_started_testing.status)
             headmaster_is_started_testing.update()
             return redirect(url_for('headmaster'))
-        else:
-            print(form.errors)
         return render_template('roles/headmaster.html', form=form,
                                headmaster_is_started_testing=headmaster_is_started_testing,
                                investment_level=investment_level)
@@ -81,8 +79,6 @@ def cso():
                     UserChoice.create_process_choice(g.user.username, choice, answer.one().name)
             is_cso_choose_processes.status = bool(not is_cso_choose_processes.status)
             is_cso_choose_processes.update()
-        else:
-            print(form.errors)
         return render_template('roles/cso.html', form=form,
                                is_headmaster_started_testing=ApplicationData.headmaster_is_started_testing(),
                                is_cso_choose_processes=is_cso_choose_processes,
@@ -188,7 +184,7 @@ def om(page=1):
 @login_required
 def tm(page=1):
     if g.user.role.name == ROLE_HEAD_OF_TACTICAL_LEVEL:
-        is_om_answered_on_questions = ApplicationData.tm_answered_on_questions()
+        is_om_answered_on_questions = ApplicationData.om_answered_on_questions()
         chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_TACTICAL_LEVEL).paginate(page, 1, False)
         if is_om_answered_on_questions.status:
             current_process = chosen_processes.items[0]
