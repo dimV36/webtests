@@ -65,8 +65,14 @@ def headmaster():
 @login_required
 def cso():
     if g.user.role.name == ROLE_HEAD_OF_INFORMATION_SECURITY:
-        form = CSOFormDynamic()
+        is_headmaster_started_testing = ApplicationData.headmaster_is_started_testing()
         is_cso_choose_processes = ApplicationData.cso_choose_processes()
+        is_cso_answered_on_questions = ApplicationData.cso_answered_on_questions()
+        if is_headmaster_started_testing.status and \
+                is_cso_choose_processes.status and \
+                not is_cso_answered_on_questions.status:
+            return redirect(url_for('cso_testing', page=1))
+        form = CSOFormDynamic()
         investment_level = UserChoice.user_choice_chosen_investment_level()
         try:
             processes = UserChoice.user_choice_processes()
@@ -80,7 +86,7 @@ def cso():
             is_cso_choose_processes.status = bool(not is_cso_choose_processes.status)
             is_cso_choose_processes.update()
         return render_template('roles/cso.html', form=form,
-                               is_headmaster_started_testing=ApplicationData.headmaster_is_started_testing(),
+                               is_headmaster_started_testing=is_headmaster_started_testing,
                                is_cso_choose_processes=is_cso_choose_processes,
                                investment_level=investment_level,
                                processes=processes)
@@ -134,7 +140,7 @@ def gm(page=1):
             return redirect(url_for('gm', page=page))
         return render_template('roles/gm.html', form=form,
                                process_name=process_name,
-                               is_cso_choose_processes=ApplicationData.cso_choose_processes(),
+                               is_cso_choose_processes=is_cso_choose_processes,
                                is_gm_answered_on_questions=is_gm_answered_on_questions,
                                processes=chosen_processes,
                                investment_level=UserChoice.user_choice_chosen_investment_level())
@@ -208,8 +214,44 @@ def tm(page=1):
             return redirect(url_for('tm', page=page))
         return render_template('roles/tm.html', form=form,
                                process_name=process_name,
-                               is_om_answered_on_questions=ApplicationData.om_answered_on_questions(),
+                               is_om_answered_on_questions=is_om_answered_on_questions,
                                is_tm_answered_on_questions=is_tm_answered_on_questions,
+                               processes=chosen_processes,
+                               investment_level=UserChoice.user_choice_chosen_investment_level())
+    else:
+        return u'Вы не можете получить доступ к этой странице'
+
+
+@app.route('/cso/process<int:page>', methods=['GET', 'POST'])
+def cso_testing(page=1):
+    if g.user.role.name == ROLE_HEAD_OF_INFORMATION_SECURITY:
+        is_tm_answered_on_questions = ApplicationData.tm_answered_on_questions()
+        chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_INFORMATION_SECURITY).paginate(page, 1, False)
+        if is_tm_answered_on_questions.status:
+            current_process = chosen_processes.items[0]
+            questions_by_process = Question.chosen_questions(current_process.choice).all()
+            process_name = Process.process_by_id(current_process.choice).one().name
+        else:
+            questions_by_process = []
+            process_name = None
+        form = TestFormDynamic(questions_by_process)
+        is_cso_answered_on_questions = ApplicationData.cso_answered_on_questions()
+        if form.validate_on_submit():
+            if form.finish.data:
+                page = chosen_processes.pages
+                save_answers_to_db(form.questions, ROLE_HEAD_OF_INFORMATION_SECURITY, page)
+                if not is_cso_answered_on_questions.status:
+                    is_cso_answered_on_questions.status = bool(not is_cso_answered_on_questions.status)
+                    is_cso_answered_on_questions.update()
+                return redirect(url_for('cso'))
+            if form.next_page.data:
+                save_answers_to_db(form.questions, ROLE_HEAD_OF_INFORMATION_SECURITY, page)
+                page = chosen_processes.next_num
+            return redirect(url_for('cso_testing', page=page))
+        return render_template('roles/cso_testing.html', form=form,
+                               process_name=process_name,
+                               is_tm_answered_on_questions=is_tm_answered_on_questions,
+                               is_cso_answered_on_questions=is_cso_answered_on_questions,
                                processes=chosen_processes,
                                investment_level=UserChoice.user_choice_chosen_investment_level())
     else:

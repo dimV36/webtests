@@ -1,0 +1,36 @@
+{% extends "helpers/layout.html" %}
+{% import "helpers/forms.html" as forms %}
+{{ forms.whoami() }}
+{% block content %}
+{{ super() }}
+{{ forms.navigation() }}
+<form action="" method="POST">
+{% if is_tm_answered_on_questions.status %}
+    {% if investment_level %}
+        Инвестиционный уровень: "<b>{{ investment_level.one().answer }}</b>"
+    {% endif %}
+    {% if not is_cso_answered_on_questions.status %}
+        {{ forms.render_tests(form, process_name) }}
+        {% for field in form if field.type not in ["HiddenField", "CSRFTokenField"] %}
+            {% if field.errors %}
+                <ul class="errors">
+                {% for error in field.errors %}
+                    <li>{{error}}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endfor %}
+        {% if processes.has_next %}
+            {{ form.next_page }}
+        {% else %}
+            {{ form.finish }}
+        {% endif %}
+        {{ form.hidden_tag() }}
+    {% else %}
+        <p>Тестирование окончено.</p>
+    {% endif %}
+{% else %}
+    <p>Тестирование недоступно. </p>
+{% endif %}
+</form>
+{% endblock %}
