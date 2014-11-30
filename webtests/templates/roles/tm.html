@@ -1,6 +1,5 @@
 {% extends "helpers/layout.html" %}
 {% import "helpers/forms.html" as forms %}
-{{ forms.whoami() }}
 {% block content %}
 {{ super() }}
 {{ forms.render_test_form(is_om_answered_on_questions, investment_level, is_tm_answered_on_questions, form, process_name, processes) }}
