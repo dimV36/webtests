@@ -42,21 +42,6 @@
 {{ form.hidden_tag() }}
 {% endmacro %}
 
-
-{% macro render_tests(form, process_name) %}
-    <h1>Тест пользователя {{g.user.username }} по процессу "{{ process_name }}"</h1>
-    <table cellspacing="10">
-    {% for entry in form.questions.entries %}
-        <tr>
-            <td> {{ entry.label }} </td>
-            <td> {{ entry.variants }}</td>
-        </tr>
-    {% endfor %}
-    </table>
-    <br/>
-{% endmacro %}
-
-
 {% macro navigation() %}
 <section>
     <div>
@@ -74,7 +59,16 @@
             Инвестиционный уровень: "<b>{{ level.one().answer }}</b>"
         {% endif %}
         {% if not current.status %}
-            {{ render_tests(form, process_name) }}
+            <h1>Тестирование пользователя {{g.user.username }} по процессу "{{ process_name }}"</h1>
+                <table cellspacing="10">
+                {% for entry in form.questions.entries %}
+                <tr>
+                    <td> {{ entry.label }} </td>
+                    <td> {{ entry.variants }}</td>
+                </tr>
+                {% endfor %}
+                </table>
+               <br/>
             {% for field in form if field.type not in ["HiddenField", "CSRFTokenField"] %}
                 {% if field.errors %}
                     <ul class="errors">

@@ -181,27 +181,27 @@ class ApplicationData(CRUDMixin, db.Model):
                 data.update()
 
     @staticmethod
-    def headmaster_is_started_testing():
+    def is_headmaster_started_testing():
         return ApplicationData.__application_data(ApplicationData.__HEADMASTER_START_TESTING).one()
 
     @staticmethod
-    def cso_choose_processes():
+    def is_cso_choose_processes():
         return ApplicationData.__application_data(ApplicationData.__CSO_CHOOSE_PROCESSES).one()
 
     @staticmethod
-    def gm_answered_on_questions():
+    def is_gm_answered_on_questions():
         return ApplicationData.__application_data(ApplicationData.__GM_ANSWERED_ON_QUESTIONS).one()
 
     @staticmethod
-    def om_answered_on_questions():
+    def is_om_answered_on_questions():
         return ApplicationData.__application_data(ApplicationData.__OM_ANSWERED_ON_QUESTIONS).one()
 
     @staticmethod
-    def tm_answered_on_questions():
+    def is_tm_answered_on_questions():
         return ApplicationData.__application_data(ApplicationData.__TM_ANSWERED_ON_QUESTIONS).one()
 
     @staticmethod
-    def cso_answered_on_questions():
+    def is_cso_answered_on_questions():
         return ApplicationData.__application_data(ApplicationData.__CSO_ANSWERED_ON_QUESTIONS).one()
 
     @staticmethod

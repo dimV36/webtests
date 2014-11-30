@@ -13,8 +13,8 @@ from webtests import app
 @app.before_request
 def before_request():
     g.user = current_user
-    app_data = ApplicationData.headmaster_is_started_testing()
-    if not app_data.status:
+    is_headmaster_started_testing = ApplicationData.is_headmaster_started_testing()
+    if not is_headmaster_started_testing.status:
         ApplicationData.reset_application_data()
 
 
@@ -36,14 +36,14 @@ def register():
 @login_required
 def headmaster():
     if g.user.role.name == ROLE_HEAD_OF_ORGANIZATION:
-        headmaster_is_started_testing = ApplicationData.headmaster_is_started_testing()
-        form = HeadmasterFormDynamic(headmaster_is_started_testing.status)
+        is_headmaster_started_testing = ApplicationData.is_headmaster_started_testing()
+        form = HeadmasterFormDynamic(is_headmaster_started_testing.status)
         try:
             investment_level = UserChoice.user_choice_chosen_investment_level()
         except NoResultFound:
             investment_level = None
         if form.validate_on_submit():
-            if not headmaster_is_started_testing.status:
+            if not is_headmaster_started_testing.status:
                 choice = form.variants.data
                 answer = InvestmentLevel().investment_level(choice)
                 UserChoice.create_investment_level_choice(g.user.username, choice, answer.one().name)
@@ -51,11 +51,11 @@ def headmaster():
                 choices = UserChoice.query.all()
                 for choice in choices:
                     UserChoice.delete(choice)
-            headmaster_is_started_testing.status = bool(not headmaster_is_started_testing.status)
-            headmaster_is_started_testing.update()
+            is_headmaster_started_testing.status = bool(not is_headmaster_started_testing.status)
+            is_headmaster_started_testing.update()
             return redirect(url_for('headmaster'))
         return render_template('roles/headmaster.html', form=form,
-                               headmaster_is_started_testing=headmaster_is_started_testing,
+                               headmaster_is_started_testing=is_headmaster_started_testing,
                                investment_level=investment_level)
     else:
         return u'Вы не можете получить доступ к этой странице'
@@ -65,9 +65,9 @@ def headmaster():
 @login_required
 def cso():
     if g.user.role.name == ROLE_HEAD_OF_INFORMATION_SECURITY:
-        is_headmaster_started_testing = ApplicationData.headmaster_is_started_testing()
-        is_cso_choose_processes = ApplicationData.cso_choose_processes()
-        is_cso_answered_on_questions = ApplicationData.cso_answered_on_questions()
+        is_headmaster_started_testing = ApplicationData.is_headmaster_started_testing()
+        is_cso_choose_processes = ApplicationData.is_cso_choose_processes()
+        is_cso_answered_on_questions = ApplicationData.is_cso_answered_on_questions()
         if is_headmaster_started_testing.status and \
                 is_cso_choose_processes.status and \
                 not is_cso_answered_on_questions.status:
@@ -116,7 +116,7 @@ def save_answers_to_db(entries, user_role, page):
 @login_required
 def gm(page=1):
     if g.user.role.name == ROLE_HEAD_OF_BASE_LEVEL:
-        is_cso_choose_processes = ApplicationData.cso_choose_processes()
+        is_cso_choose_processes = ApplicationData.is_cso_choose_processes()
         chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_BASE_LEVEL).paginate(page, 1, False)
         if is_cso_choose_processes.status:
             current_process = chosen_processes.items[0]
@@ -126,7 +126,7 @@ def gm(page=1):
             questions_by_process = []
             process_name = None
         form = TestFormDynamic(questions_by_process)
-        is_gm_answered_on_questions = ApplicationData.gm_answered_on_questions()
+        is_gm_answered_on_questions = ApplicationData.is_gm_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
                 page = chosen_processes.pages
@@ -153,7 +153,7 @@ def gm(page=1):
 @login_required
 def om(page=1):
     if g.user.role.name == ROLE_HEAD_OF_OPERATIONAL_LEVEL:
-        is_gm_answered_on_questions = ApplicationData.gm_answered_on_questions()
+        is_gm_answered_on_questions = ApplicationData.is_gm_answered_on_questions()
         chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_OPERATIONAL_LEVEL).paginate(page, 1, False)
         if is_gm_answered_on_questions.status:
             current_process = chosen_processes.items[0]
@@ -163,7 +163,7 @@ def om(page=1):
             questions_by_process = []
             process_name = None
         form = TestFormDynamic(questions_by_process)
-        is_om_answered_on_questions = ApplicationData.om_answered_on_questions()
+        is_om_answered_on_questions = ApplicationData.is_om_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
                 page = chosen_processes.pages
@@ -190,7 +190,7 @@ def om(page=1):
 @login_required
 def tm(page=1):
     if g.user.role.name == ROLE_HEAD_OF_TACTICAL_LEVEL:
-        is_om_answered_on_questions = ApplicationData.om_answered_on_questions()
+        is_om_answered_on_questions = ApplicationData.is_om_answered_on_questions()
         chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_TACTICAL_LEVEL).paginate(page, 1, False)
         if is_om_answered_on_questions.status:
             current_process = chosen_processes.items[0]
@@ -200,7 +200,7 @@ def tm(page=1):
             questions_by_process = []
             process_name = None
         form = TestFormDynamic(questions_by_process)
-        is_tm_answered_on_questions = ApplicationData.tm_answered_on_questions()
+        is_tm_answered_on_questions = ApplicationData.is_tm_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
                 page = chosen_processes.pages
@@ -225,7 +225,7 @@ def tm(page=1):
 @app.route('/cso/process<int:page>', methods=['GET', 'POST'])
 def cso_testing(page=1):
     if g.user.role.name == ROLE_HEAD_OF_INFORMATION_SECURITY:
-        is_tm_answered_on_questions = ApplicationData.tm_answered_on_questions()
+        is_tm_answered_on_questions = ApplicationData.is_tm_answered_on_questions()
         chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_INFORMATION_SECURITY).paginate(page, 1, False)
         if is_tm_answered_on_questions.status:
             current_process = chosen_processes.items[0]
@@ -235,7 +235,7 @@ def cso_testing(page=1):
             questions_by_process = []
             process_name = None
         form = TestFormDynamic(questions_by_process)
-        is_cso_answered_on_questions = ApplicationData.cso_answered_on_questions()
+        is_cso_answered_on_questions = ApplicationData.is_cso_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
                 page = chosen_processes.pages
