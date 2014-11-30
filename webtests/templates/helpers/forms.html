@@ -64,3 +64,37 @@
     </div>
 </section>
 {% endmacro %}
+
+
+{% macro render_test_form(previous, level, current, form, process_name, processes) %}
+    {{ navigation() }}
+    <form action="" method="POST">
+    {% if previous.status %}
+        {% if level %}
+            Инвестиционный уровень: "<b>{{ level.one().answer }}</b>"
+        {% endif %}
+        {% if not current.status %}
+            {{ render_tests(form, process_name) }}
+            {% for field in form if field.type not in ["HiddenField", "CSRFTokenField"] %}
+                {% if field.errors %}
+                    <ul class="errors">
+                    {% for error in field.errors %}
+                        <li>{{error}}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endfor %}
+            {% if processes.has_next %}
+                {{ form.next_page }}
+            {% else %}
+                {{ form.finish }}
+            {% endif %}
+            {{ form.hidden_tag() }}
+        {% else %}
+            <p>Тестирование окончено.</p>
+        {% endif %}
+    {% else %}
+        <p>Тестирование недоступно.</p>
+    {% endif %}
+    </form>
+{% endmacro %}
