@@ -5,6 +5,7 @@ from backports.pbkdf2 import pbkdf2_hmac, compare_digest
 from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.dialects.postgresql import ARRAY
 from webtests.data import CRUDMixin, db
 
 
@@ -116,10 +117,12 @@ class Process(CRUDMixin, db.Model):
 class Question(CRUDMixin, db.Model):
     __tablename__ = 'questions'
     name = db.Column(db.Text, unique=True)
-    answer1 = db.Column(db.Text)
-    answer2 = db.Column(db.Text)
-    answer3 = db.Column(db.Text)
-    answer4 = db.Column(db.Text)
+    answers = db.Column(ARRAY(db.Text))
+    correct_answer = db.Column(db.Integer)
+    # answer1 = db.Column(db.Text)
+    # answer2 = db.Column(db.Text)
+    # answer3 = db.Column(db.Text)
+    # answer4 = db.Column(db.Text)
     process_id = db.Column(db.Integer, db.ForeignKey('processes.id'))
 
     @staticmethod

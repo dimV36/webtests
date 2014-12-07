@@ -4,6 +4,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from models import Role, User, InvestmentLevel, ApplicationData, Process, Question
 from webtests.roles import ROLE_ADMIN, ROLES_FOR_TESTING, USER_ROLES
+from sqlalchemy.dialects.postgresql import array
 from random import randint
 
 
@@ -74,5 +75,6 @@ def __create_questionnaire():
             process = processes[i - 1]
             for j in range(1, 5):
                 question = u'Вопрос ' + str(i) + '.' + str(j)
-                Question.create(name=question, answer1=u'Ответ 1', answer2=u'Ответ 2',
-                                     answer3=u'Ответ 3', answer4=u'Ответ 4', process_id=process.id)
+                Question.create(name=question,
+                                answers=array([u'Ответ 1', u'Ответ 2', u'Ответ 3', u'Ответ 4']),
+                                process_id=process.id)
