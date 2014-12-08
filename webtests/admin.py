@@ -76,5 +76,5 @@ def __create_questionnaire():
             for j in range(1, 5):
                 question = u'Вопрос ' + str(i) + '.' + str(j)
                 Question.create(name=question,
-                                answers=array([u'Ответ 1', u'Ответ 2', u'Ответ 3', u'Ответ 4']),
+                                variants=array([u'Ответ 1', u'Ответ 2', u'Ответ 3', u'Ответ 4']),
                                 process_id=process.id)

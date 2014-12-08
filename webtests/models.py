@@ -117,12 +117,8 @@ class Process(CRUDMixin, db.Model):
 class Question(CRUDMixin, db.Model):
     __tablename__ = 'questions'
     name = db.Column(db.Text, unique=True)
-    answers = db.Column(ARRAY(db.Text))
+    variants = db.Column(ARRAY(db.Text))
     correct_answer = db.Column(db.Integer)
-    # answer1 = db.Column(db.Text)
-    # answer2 = db.Column(db.Text)
-    # answer3 = db.Column(db.Text)
-    # answer4 = db.Column(db.Text)
     process_id = db.Column(db.Integer, db.ForeignKey('processes.id'))
 
     @staticmethod
@@ -134,18 +130,13 @@ class Question(CRUDMixin, db.Model):
         return Question.query.filter(Question.process_id == process_id)
 
     def question_variants(self):
-        return [(1, self.answer1), (2, self.answer2),
-                (3, self.answer3), (4, self.answer4)]
+        result = []
+        for i in range(0, len(self.variants)):
+            result.append((i + 1, self.variants[i].decode('utf-8')))
+        return result
 
     def question_answer(self, choice):
-        if choice == 1:
-            return self.answer1
-        elif choice == 2:
-            return self.answer2
-        elif choice == 3:
-            return self.answer3
-        else:
-            return self.answer4
+        return self.variants[choice - 1]
 
     def __repr__(self):
         return '<Question #{:d}>'.format(self.id)
