@@ -18,8 +18,8 @@ def create_entities():
     Role.create_roles(USER_ROLES)
     __create_admin()
     __create_investment_level()
-    __create_processes()
-    __create_questionnaire()
+    #__create_processes()
+    #__create_questionnaire()
     ApplicationData.init_application_data()
 
 
