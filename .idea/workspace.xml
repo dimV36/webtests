@@ -2,14 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3631e424-3193-4c6d-9bf1-8773799192bc" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/pgsql/processes.sql" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/sites" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/support/RPMS/python-flask-paginate-0.2.8-1.fc20.noarch.rpm" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/support/SRPMS/python-flask-paginate-0.2.8-1.fc20.src.rpm" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/support/bootstrap_3.0.2.zip" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/processes.py" afterPath="$PROJECT_DIR$/processes.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pgsql/processes.sql" afterPath="$PROJECT_DIR$/pgsql/processes.sql" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/files/processes" afterPath="$PROJECT_DIR$/files/processes" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="webtests.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -77,11 +71,31 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="processes.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="processes.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/processes.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.045045044" vertical-offset="0" max-vertical-offset="666">
-              <caret line="2" column="20" selection-start-line="2" selection-start-column="20" selection-end-line="2" selection-end-column="20" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="495">
+              <caret line="10" column="19" selection-start-line="10" selection-start-column="19" selection-end-line="10" selection-end-column="19" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="processes.sql" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/pgsql/processes.sql">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="615">
+              <caret line="34" column="107" selection-start-line="34" selection-start-column="107" selection-end-line="34" selection-end-column="107" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="processes" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/files/processes">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.7657658" vertical-offset="0" max-vertical-offset="666">
+              <caret line="34" column="49" selection-start-line="34" selection-start-column="49" selection-end-line="34" selection-end-column="49" />
               <folding />
             </state>
           </provider>
@@ -102,16 +116,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0" vertical-offset="105" max-vertical-offset="405">
               <caret line="7" column="31" selection-start-line="7" selection-start-column="31" selection-end-line="7" selection-end-column="31" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="cso.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/webtests/templates/roles/cso.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="15" max-vertical-offset="510">
-              <caret line="1" column="13" selection-start-line="1" selection-start-column="13" selection-end-line="1" selection-end-column="13" />
               <folding />
             </state>
           </provider>
@@ -142,6 +146,8 @@
       <list>
         <option value="$PROJECT_DIR$/files/processes.sql" />
         <option value="$PROJECT_DIR$/processes.py" />
+        <option value="$PROJECT_DIR$/pgsql/processes.sql" />
+        <option value="$PROJECT_DIR$/files/processes" />
       </list>
     </option>
   </component>
@@ -578,13 +584,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/webtests/templates/roles/cso.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="225" max-vertical-offset="315">
-          <caret line="15" column="14" selection-start-line="15" selection-start-column="14" selection-end-line="15" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/webtests/templates/roles/gm.html">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="120" max-vertical-offset="315">
@@ -938,8 +937,24 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/processes.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.045045044" vertical-offset="0" max-vertical-offset="666">
-          <caret line="2" column="20" selection-start-line="2" selection-start-column="20" selection-end-line="2" selection-end-column="20" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="495">
+          <caret line="10" column="19" selection-start-line="10" selection-start-column="19" selection-end-line="10" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/pgsql/processes.sql">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="615">
+          <caret line="34" column="107" selection-start-line="34" selection-start-column="107" selection-end-line="34" selection-end-column="107" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/files/processes">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.7657658" vertical-offset="0" max-vertical-offset="666">
+          <caret line="34" column="49" selection-start-line="34" selection-start-column="49" selection-end-line="34" selection-end-column="49" />
           <folding />
         </state>
       </provider>

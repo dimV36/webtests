@@ -32,4 +32,4 @@ INSERT INTO processes(id, name, role_id) VALUES(DEFAULT, 'OSP-12:', 5) RETURNING
 INSERT INTO processes(id, name, role_id) VALUES(DEFAULT, 'OSP-16: Сегментация и управление фильтрацией', 5) RETURNING id;
 INSERT INTO processes(id, name, role_id) VALUES(DEFAULT, 'OSP-17: Управление защитой от вредоносных программ', 5) RETURNING id;
 INSERT INTO processes(id, name, role_id) VALUES(DEFAULT, 'OSP-10: Управление резервными копиями', 5) RETURNING id;
-INSERT INTO processes(id, name, role_id) VALUES(DEFAULT, 'OSP-21: Анализ качества и соответствия информации ', 5) RETURNING id;
+INSERT INTO processes(id, name, role_id) VALUES(DEFAULT, 'OSP-21: Анализ качества и соответствия информации', 5) RETURNING id;
