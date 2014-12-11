@@ -116,9 +116,13 @@ class Process(CRUDMixin, db.Model):
 
 class Question(CRUDMixin, db.Model):
     __tablename__ = 'questions'
+    __METRICS = [u'Деятельность', u'Область действия', u'Недоступность', u'Эффективность'
+                 u'Нагрузка', u'Результативность', u'Качество', u'Экономическая эффективность',
+                 u'Недоступность', u'Инцидентность']
     name = db.Column(db.Text, unique=True)
     variants = db.Column(ARRAY(db.Text))
     correct_answer = db.Column(db.Integer)
+    metric = db.Column(db.String(120))
     process_id = db.Column(db.Integer, db.ForeignKey('processes.id'))
 
     @staticmethod
