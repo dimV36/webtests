@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="3631e424-3193-4c6d-9bf1-8773799192bc" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/webtests/models.py" afterPath="$PROJECT_DIR$/webtests/models.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/files/questions" afterPath="$PROJECT_DIR$/files/questions" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="webtests.iws" />
@@ -41,21 +41,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/webtests/models.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.46646795" vertical-offset="1382" max-vertical-offset="4290">
-              <caret line="119" column="95" selection-start-line="119" selection-start-column="95" selection-end-line="119" selection-end-column="95" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="validators.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/webtests/validators/validators.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="435">
-              <caret line="22" column="41" selection-start-line="22" selection-start-column="41" selection-end-line="22" selection-end-column="41" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="887" max-vertical-offset="4290">
+              <caret line="106" column="57" selection-start-line="106" selection-start-column="57" selection-end-line="106" selection-end-column="57" />
               <folding />
             </state>
           </provider>
@@ -96,8 +86,18 @@
       <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/webtests/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="315" max-vertical-offset="4515">
-              <caret line="36" column="17" selection-start-line="36" selection-start-column="17" selection-end-line="36" selection-end-column="17" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="3664" max-vertical-offset="4515">
+              <caret line="260" column="58" selection-start-line="260" selection-start-column="58" selection-end-line="260" selection-end-column="58" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="questions" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/files/questions">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.7317437" vertical-offset="26809" max-vertical-offset="27480">
+              <caret line="1820" column="4" selection-start-line="1820" selection-start-column="4" selection-end-line="1820" selection-end-column="4" />
               <folding />
             </state>
           </provider>
@@ -108,16 +108,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="-3.125" vertical-offset="0" max-vertical-offset="1440">
               <caret line="5" column="23" selection-start-line="5" selection-start-column="23" selection-end-line="5" selection-end-column="23" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="questions" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/files/questions">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="22549" max-vertical-offset="23220">
-              <caret line="1001" column="0" selection-start-line="1001" selection-start-column="0" selection-end-line="1001" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -157,8 +147,8 @@
         <option value="$PROJECT_DIR$/webtests/forms.py" />
         <option value="$PROJECT_DIR$/webtests/admin.py" />
         <option value="$PROJECT_DIR$/webtests/templates/roles/cso.html" />
-        <option value="$PROJECT_DIR$/files/questions" />
         <option value="$PROJECT_DIR$/webtests/models.py" />
+        <option value="$PROJECT_DIR$/files/questions" />
       </list>
     </option>
   </component>
@@ -659,13 +649,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="45" max-vertical-offset="135">
-          <caret line="3" column="24" selection-start-line="3" selection-start-column="24" selection-end-line="3" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/webtests/validators/validators.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="315" max-vertical-offset="405">
@@ -971,14 +954,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/webtests/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="315" max-vertical-offset="4515">
-          <caret line="36" column="17" selection-start-line="36" selection-start-column="17" selection-end-line="36" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/webtests/admin.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="559" max-vertical-offset="1230">
@@ -1021,18 +996,34 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/files/questions">
+    <entry file="file://$PROJECT_DIR$/webtests/models.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="22549" max-vertical-offset="23220">
-          <caret line="1001" column="0" selection-start-line="1001" selection-start-column="0" selection-end-line="1001" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="887" max-vertical-offset="4290">
+          <caret line="106" column="57" selection-start-line="106" selection-start-column="57" selection-end-line="106" selection-end-column="57" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/webtests/models.py">
+    <entry file="file:///usr/lib/python2.7/site-packages/flask_login.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.46646795" vertical-offset="1382" max-vertical-offset="4290">
-          <caret line="119" column="95" selection-start-line="119" selection-start-column="95" selection-end-line="119" selection-end-column="95" />
+        <state vertical-scroll-proportion="0.3323398" vertical-offset="9407" max-vertical-offset="13080">
+          <caret line="656" column="4" selection-start-line="656" selection-start-column="4" selection-end-line="656" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/webtests/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="3664" max-vertical-offset="4515">
+          <caret line="260" column="58" selection-start-line="260" selection-start-column="58" selection-end-line="260" selection-end-column="58" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/files/questions">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.7317437" vertical-offset="26809" max-vertical-offset="27480">
+          <caret line="1820" column="4" selection-start-line="1820" selection-start-column="4" selection-end-line="1820" selection-end-column="4" />
           <folding />
         </state>
       </provider>
