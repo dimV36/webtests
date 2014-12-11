@@ -21,16 +21,15 @@
 {{ form.hidden_tag() }}
 {% endmacro %}
 
-{% macro render_choices(form) %}
+{% macro render_choices(field) %}
 <table>
-{% for subfield in form.variants %}
+{% for subfield in field %}
     <tr>
         <td>{{ subfield }}</td>
         <td>{{ subfield.label }}</td>
     </tr>
 {% endfor %}
 </table>
-{% for field in form if field.type not in ["HiddenField", "CSRFTokenField"] %}
     {% if field.errors %}
         <ul class="errors">
             {% for error in field.errors %}
@@ -38,8 +37,6 @@
             {% endfor %}
         </ul>
     {% endif %}
-{% endfor %}
-{{ form.hidden_tag() }}
 {% endmacro %}
 
 {% macro navigation() %}

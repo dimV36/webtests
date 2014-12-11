@@ -9,9 +9,9 @@
         Инвестиционный уровень: "<b>{{ investment_level.one().answer }}</b>"
     {% endif %}
     {% if not is_cso_choose_processes.status %}
-            <p>Выбрать процессы организации:</p>
-            {{ forms.render_choices(form) }}
-            <input type="Submit" value="Отправить">
+            <p>Выберите процессы организации:</p>
+            {{ forms.render_choices(form.variants) }}
+            <p><input type="Submit" value="Отправить"></p>
     {% else %}
         {% if processes %}
             <p>Были выбраны следующие процессы:</p>

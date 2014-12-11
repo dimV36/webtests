@@ -47,6 +47,10 @@ def headmaster():
                 choice = form.variants.data
                 answer = InvestmentLevel().investment_level(choice)
                 UserChoice.create_investment_level_choice(g.user.username, choice, answer.one().name)
+                question_choice = form.scope_variants.data
+                answer = form.scope_variants.choices[question_choice][1]
+                UserChoice.create_question_choice(g.user.username, u'Сфера деятельности организации',
+                                                  question_choice, answer)
             else:
                 choices = UserChoice.query.all()
                 for choice in choices:
@@ -54,6 +58,8 @@ def headmaster():
             is_headmaster_started_testing.status = bool(not is_headmaster_started_testing.status)
             is_headmaster_started_testing.update()
             return redirect(url_for('headmaster'))
+        else:
+            print('\n' + unicode(form.errors.values()) + '\n')
         return render_template('roles/headmaster.html', form=form,
                                headmaster_is_started_testing=is_headmaster_started_testing,
                                investment_level=investment_level)

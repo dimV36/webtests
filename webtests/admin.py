@@ -9,17 +9,14 @@ from random import randint
 
 
 __ADMIN_USER = 'admin'
-__INVESTMENT_LEVELS = [u'Инвестиционный уровень ' + str(i) for i in range(1, 6)]
-__QUESTIONS = [u'Вопрос 1', u'Вопрос 2', u'Вопрос 3']
-__ANSWERS = [u'Ответ 1', u'Ответ 2', u'Ответ 3', u'Ответ 4']
 
 
 def create_entities():
     Role.create_roles(USER_ROLES)
     __create_admin()
-    __create_investment_level()
-    #__create_processes()
-    #__create_questionnaire()
+    # __create_investment_level()
+    # __create_processes()
+    # __create_questionnaire()
     ApplicationData.init_application_data()
 
 
@@ -34,30 +31,30 @@ def __create_admin():
         User.create(username=__ADMIN_USER, password='123456', role_id=role.id)
 
 
-def __create_investment_level():
-    investment_level = None
-    for level in __INVESTMENT_LEVELS:
-        try:
-            investment_level = InvestmentLevel.query.filter(InvestmentLevel.name == level).one()
-        except NoResultFound:
-            pass
-        if investment_level is None:
-            InvestmentLevel.create(name=level)
-
-
-def __create_processes():
-    processes = None
-    try:
-        processes = Process.query.all()
-    except NoResultFound:
-        pass
-    if len(processes) == 0:
-        for i in range(1, len(__INVESTMENT_LEVELS) * 2 + 1):
-            for j in range(1, 3):
-                process_name = u'Процесс ' + str(i) + '.' + str(j)
-                role_name = ROLES_FOR_TESTING[randint(0, len(ROLES_FOR_TESTING) - 1)]
-                role = Role.role_by_name(role_name).one()
-                Process.create(name=process_name, role_id=role.id)
+# def __create_investment_level():
+#     investment_level = None
+#     for level in __INVESTMENT_LEVELS:
+#         try:
+#             investment_level = InvestmentLevel.query.filter(InvestmentLevel.name == level).one()
+#         except NoResultFound:
+#             pass
+#         if investment_level is None:
+#             InvestmentLevel.create(name=level)
+#
+#
+# def __create_processes():
+#     processes = None
+#     try:
+#         processes = Process.query.all()
+#     except NoResultFound:
+#         pass
+#     if len(processes) == 0:
+#         for i in range(1, len(__INVESTMENT_LEVELS) * 2 + 1):
+#             for j in range(1, 3):
+#                 process_name = u'Процесс ' + str(i) + '.' + str(j)
+#                 role_name = ROLES_FOR_TESTING[randint(0, len(ROLES_FOR_TESTING) - 1)]
+#                 role = Role.role_by_name(role_name).one()
+#                 Process.create(name=process_name, role_id=role.id)
 
 
 def __create_questionnaire():

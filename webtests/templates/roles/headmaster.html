@@ -12,8 +12,11 @@
         <input type="Submit" value="Закончить тестирование">
     </p>
 {% else %}
-        Выбрать инвестиционный уровень организации:
-        {{ forms.render_choices(form) }}
+        <p>Выбрите инвестиционный уровень организации:</p>
+        {{ forms.render_choices(form.variants) }}
+
+        <p>Укажите сферу деятельности:</p>
+        {{ forms.render_choices(form.scope_variants) }}
         <input type="Submit" value="Начать тестирование">
 {% endif %}
 </form>
