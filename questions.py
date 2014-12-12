@@ -57,7 +57,7 @@ if __name__ == '__main__':
                 correct_answer = str()
                 metric = str()
             if not line:
-                # sql += '--END OF process %d--\n\n' % process_id
+                sql += '--END OF process %d--\n\n' % process_id
                 process_id = 0
             found = False
     out_file.write(sql.encode('utf-8'))
