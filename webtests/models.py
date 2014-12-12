@@ -119,7 +119,7 @@ class Question(CRUDMixin, db.Model):
     __METRICS = [u'Деятельность', u'Область действия', u'Недоступность', u'Эффективность'
                  u'Нагрузка', u'Результативность', u'Качество', u'Экономическая эффективность',
                  u'Недоступность', u'Инцидентность']
-    name = db.Column(db.Text, unique=True)
+    name = db.Column(db.Text)
     variants = db.Column(ARRAY(db.Text))
     correct_answer = db.Column(db.Integer)
     metric = db.Column(db.String(120))
