@@ -23,5 +23,5 @@ if __name__ == '__main__':
             sql = u"INSERT INTO processes(id, name, role_id) VALUES(DEFAULT, '%s', %d) RETURNING id;" \
                   % (process.decode('utf-8'), role_id)
             out_file.write(sql.encode('utf-8') + '\n')
-        out_file.close()
+    out_file.close()
 
