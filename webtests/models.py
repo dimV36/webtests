@@ -126,8 +126,8 @@ class Question(CRUDMixin, db.Model):
     process_id = db.Column(db.Integer, db.ForeignKey('processes.id'))
 
     @staticmethod
-    def question(name):
-        return Question.query.filter(Question.name == name)
+    def question(name, process_id):
+        return Question.query.filter(Question.name == name).filter(Question.process_id == process_id)
 
     @staticmethod
     def chosen_questions(process_id):

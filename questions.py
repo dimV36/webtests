@@ -5,10 +5,11 @@ from sys import argv
 from webtests.models import Process
 
 if __name__ == '__main__':
-    if len(argv) != 2:
-        print('Too few arguments for script')
-        exit(1)
-    file_name = argv[1]
+    # if len(argv) != 2:
+    #     print('Too few arguments for script')
+    #     exit(1)
+    # file_name = argv[1]
+    file_name = 'files/questions'
     out_file = open(file_name + '.sql', 'w')
     with open(file_name) as questions_file:
         sql = str()
@@ -57,7 +58,6 @@ if __name__ == '__main__':
                 correct_answer = str()
                 metric = str()
             if not line:
-                sql += '--END OF process %d--\n\n' % process_id
                 process_id = 0
             found = False
     out_file.write(sql.encode('utf-8'))

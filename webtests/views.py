@@ -58,8 +58,6 @@ def headmaster():
             is_headmaster_started_testing.status = bool(not is_headmaster_started_testing.status)
             is_headmaster_started_testing.update()
             return redirect(url_for('headmaster'))
-        else:
-            print('\n' + unicode(form.errors.values()) + '\n')
         return render_template('roles/headmaster.html', form=form,
                                headmaster_is_started_testing=is_headmaster_started_testing,
                                investment_level=investment_level)
@@ -100,13 +98,13 @@ def cso():
         return u'Вы не можете получить доступ к этой странице'
 
 
-def save_answers_to_db(entries, user_role, page):
+def save_answers_to_db(entries, user_role, page, process_id):
     process = UserChoice.user_choice_processes_by_role(user_role).paginate(page, 1, False).items[0]
     questions = Question.chosen_questions(process.choice).all()
     for i in range(0, len(entries)):
         entry = entries[i]
         question_name = questions[i].name
-        question = Question.question(question_name).one()
+        question = Question.question(question_name, process_id).one()
         choice = entry.variants.data
         try:
             UserChoice.user_choice_question(question_name).one()
@@ -117,35 +115,35 @@ def save_answers_to_db(entries, user_role, page):
                                               answer=question.question_answer(choice))
 
 
-@app.route('/gm/', methods=('GET', 'POST'))
-@app.route('/gm/process<int:page>', methods=['GET', 'POST'])
+@app.route('/cio/', methods=('GET', 'POST'))
+@app.route('/cio/process<int:page>', methods=['GET', 'POST'])
 @login_required
-def gm(page=1):
+def cio(page=1):
     if g.user.role.name == ROLE_HEAD_OF_BASE_LEVEL:
         is_cso_choose_processes = ApplicationData.is_cso_choose_processes()
         chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_BASE_LEVEL).paginate(page, 1, False)
         if is_cso_choose_processes.status:
             current_process = chosen_processes.items[0]
             questions_by_process = Question.chosen_questions(current_process.choice).all()
-            process_name = Process.process_by_id(current_process.choice).one().name
+            process = Process.process_by_id(current_process.choice).one()
         else:
             questions_by_process = []
-            process_name = None
+            process = None
         form = TestFormDynamic(questions_by_process)
         is_gm_answered_on_questions = ApplicationData.is_gm_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
                 page = chosen_processes.pages
-                save_answers_to_db(form.questions, ROLE_HEAD_OF_BASE_LEVEL, page)
+                save_answers_to_db(form.questions, ROLE_HEAD_OF_BASE_LEVEL, page, process.id)
                 if not is_gm_answered_on_questions.status:
                     is_gm_answered_on_questions.status = bool(not is_gm_answered_on_questions.status)
                     is_gm_answered_on_questions.update()
             if form.next_page.data:
-                save_answers_to_db(form.questions, ROLE_HEAD_OF_BASE_LEVEL, page)
+                save_answers_to_db(form.questions, ROLE_HEAD_OF_BASE_LEVEL, page, process.id)
                 page = chosen_processes.next_num
-            return redirect(url_for('gm', page=page))
-        return render_template('roles/gm.html', form=form,
-                               process_name=process_name,
+            return redirect(url_for('cio', page=page))
+        return render_template('roles/cio.html', form=form,
+                               process_name=process.name,
                                is_cso_choose_processes=is_cso_choose_processes,
                                is_gm_answered_on_questions=is_gm_answered_on_questions,
                                processes=chosen_processes,
@@ -296,7 +294,7 @@ def user_page(username):
         elif user.role.name == ROLE_HEAD_OF_INFORMATION_SECURITY:
             return redirect(url_for('cso'))
         elif user.role.name == ROLE_HEAD_OF_BASE_LEVEL:
-            return redirect(url_for('gm'))
+            return redirect(url_for('cio'))
         elif user.role.name == ROLE_HEAD_OF_OPERATIONAL_LEVEL:
             return redirect(url_for('om'))
         elif user.role.name == ROLE_HEAD_OF_TACTICAL_LEVEL:
