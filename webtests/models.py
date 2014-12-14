@@ -95,6 +95,7 @@ class InvestmentLevel(CRUDMixin, db.Model):
 class Process(CRUDMixin, db.Model):
     __tablename__ = 'processes'
     name = db.Column(db.String(120), unique=True)
+    is_important = db.Column(db.Boolean, default=False)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     questionnaire_id = db.relationship('Question', backref='questionnaire', lazy='dynamic')
 
@@ -103,8 +104,8 @@ class Process(CRUDMixin, db.Model):
         return Process.query.filter(Process.id == process_id)
 
     @staticmethod
-    def processes_by_role(role):
-        return Process.query.filter(Process.role == role)
+    def processes_by_role(role_id):
+        return Process.query.filter(Process.role_id == role_id)
 
     @staticmethod
     def processes():
@@ -272,6 +273,10 @@ class UserChoice(CRUDMixin, db.Model):
     @staticmethod
     def user_choice_question(question_name):
         return UserChoice.query.filter(UserChoice.question == question_name)
+
+    @staticmethod
+    def user_choice_question_by_user_id(user_id):
+        return UserChoice.question.filter(UserChoice.field == UserChoice.__FIELD_QUESTION).filter(UserChoice.user_id == user_id)
 
     @staticmethod
     def user_choice_processes():

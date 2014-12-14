@@ -57,21 +57,21 @@ def __create_admin():
 #                 Process.create(name=process_name, role_id=role.id)
 
 
-def __create_questionnaire():
-    questionnaires = None
-    try:
-        processes = Process.query.all()
-    except NoResultFound:
-        raise LookupError(u'Не найдены значения процессов')
-    try:
-        questionnaires = Question.query.all()
-    except NoResultFound:
-        pass
-    if len(questionnaires) == 0:
-        for i in range(1, len(processes) + 1):
-            process = processes[i - 1]
-            for j in range(1, 5):
-                question = u'Вопрос ' + str(i) + '.' + str(j)
-                Question.create(name=question,
-                                variants=array([u'Ответ 1', u'Ответ 2', u'Ответ 3', u'Ответ 4']),
-                                process_id=process.id)
+# def __create_questionnaire():
+#     questionnaires = None
+#     try:
+#         processes = Process.query.all()
+#     except NoResultFound:
+#         raise LookupError(u'Не найдены значения процессов')
+#     try:
+#         questionnaires = Question.query.all()
+#     except NoResultFound:
+#         pass
+#     if len(questionnaires) == 0:
+#         for i in range(1, len(processes) + 1):
+#             process = processes[i - 1]
+#             for j in range(1, 5):
+#                 question = u'Вопрос ' + str(i) + '.' + str(j)
+#                 Question.create(name=question,
+#                                 variants=array([u'Ответ 1', u'Ответ 2', u'Ответ 3', u'Ответ 4']),
+#                                 process_id=process.id)

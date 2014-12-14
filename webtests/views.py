@@ -143,7 +143,7 @@ def cio(page=1):
                 page = chosen_processes.next_num
             return redirect(url_for('cio', page=page))
         return render_template('roles/cio.html', form=form,
-                               process_name=process.name,
+                               process_name=process,
                                is_cso_choose_processes=is_cso_choose_processes,
                                is_gm_answered_on_questions=is_gm_answered_on_questions,
                                processes=chosen_processes,
@@ -162,25 +162,25 @@ def om(page=1):
         if is_gm_answered_on_questions.status:
             current_process = chosen_processes.items[0]
             questions_by_process = Question.chosen_questions(current_process.choice).all()
-            process_name = Process.process_by_id(current_process.choice).one().name
+            process = Process.process_by_id(current_process.choice).one()
         else:
             questions_by_process = []
-            process_name = None
+            process = None
         form = TestFormDynamic(questions_by_process)
         is_om_answered_on_questions = ApplicationData.is_om_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
                 page = chosen_processes.pages
-                save_answers_to_db(form.questions, ROLE_HEAD_OF_OPERATIONAL_LEVEL, page)
+                save_answers_to_db(form.questions, ROLE_HEAD_OF_OPERATIONAL_LEVEL, page, process.id)
                 if not is_om_answered_on_questions.status:
                     is_om_answered_on_questions.status = bool(not is_om_answered_on_questions.status)
                     is_om_answered_on_questions.update()
             if form.next_page.data:
-                save_answers_to_db(form.questions, ROLE_HEAD_OF_OPERATIONAL_LEVEL, page)
+                save_answers_to_db(form.questions, ROLE_HEAD_OF_OPERATIONAL_LEVEL, page, process.id)
                 page = chosen_processes.next_num
             return redirect(url_for('om', page=page))
         return render_template('roles/om.html', form=form,
-                               process_name=process_name,
+                               process_name=process.name,
                                is_gm_answered_on_questions=is_gm_answered_on_questions,
                                is_om_answered_on_questions=is_om_answered_on_questions,
                                processes=chosen_processes,
@@ -199,25 +199,25 @@ def tm(page=1):
         if is_om_answered_on_questions.status:
             current_process = chosen_processes.items[0]
             questions_by_process = Question.chosen_questions(current_process.choice).all()
-            process_name = Process.process_by_id(current_process.choice).one().name
+            process = Process.process_by_id(current_process.choice).one()
         else:
             questions_by_process = []
-            process_name = None
+            process = None
         form = TestFormDynamic(questions_by_process)
         is_tm_answered_on_questions = ApplicationData.is_tm_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
                 page = chosen_processes.pages
-                save_answers_to_db(form.questions, ROLE_HEAD_OF_TACTICAL_LEVEL, page)
+                save_answers_to_db(form.questions, ROLE_HEAD_OF_TACTICAL_LEVEL, page, process.id)
                 if not is_tm_answered_on_questions.status:
                     is_tm_answered_on_questions.status = bool(not is_tm_answered_on_questions.status)
                     is_tm_answered_on_questions.update()
             if form.next_page.data:
-                save_answers_to_db(form.questions, ROLE_HEAD_OF_TACTICAL_LEVEL, page)
+                save_answers_to_db(form.questions, ROLE_HEAD_OF_TACTICAL_LEVEL, page, process.id)
                 page = chosen_processes.next_num
             return redirect(url_for('tm', page=page))
         return render_template('roles/tm.html', form=form,
-                               process_name=process_name,
+                               process_name=process.name,
                                is_om_answered_on_questions=is_om_answered_on_questions,
                                is_tm_answered_on_questions=is_tm_answered_on_questions,
                                processes=chosen_processes,
@@ -234,26 +234,26 @@ def cso_testing(page=1):
         if is_tm_answered_on_questions.status:
             current_process = chosen_processes.items[0]
             questions_by_process = Question.chosen_questions(current_process.choice).all()
-            process_name = Process.process_by_id(current_process.choice).one().name
+            process = Process.process_by_id(current_process.choice).one()
         else:
             questions_by_process = []
-            process_name = None
+            process = None
         form = TestFormDynamic(questions_by_process)
         is_cso_answered_on_questions = ApplicationData.is_cso_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
                 page = chosen_processes.pages
-                save_answers_to_db(form.questions, ROLE_HEAD_OF_INFORMATION_SECURITY, page)
+                save_answers_to_db(form.questions, ROLE_HEAD_OF_INFORMATION_SECURITY, page, process.id)
                 if not is_cso_answered_on_questions.status:
                     is_cso_answered_on_questions.status = bool(not is_cso_answered_on_questions.status)
                     is_cso_answered_on_questions.update()
                 return redirect(url_for('cso'))
             if form.next_page.data:
-                save_answers_to_db(form.questions, ROLE_HEAD_OF_INFORMATION_SECURITY, page)
+                save_answers_to_db(form.questions, ROLE_HEAD_OF_INFORMATION_SECURITY, page, process.id)
                 page = chosen_processes.next_num
             return redirect(url_for('cso_testing', page=page))
         return render_template('roles/cso_testing.html', form=form,
-                               process_name=process_name,
+                               process_name=process.name,
                                is_tm_answered_on_questions=is_tm_answered_on_questions,
                                is_cso_answered_on_questions=is_cso_answered_on_questions,
                                processes=chosen_processes,
@@ -299,3 +299,4 @@ def user_page(username):
             return redirect(url_for('om'))
         elif user.role.name == ROLE_HEAD_OF_TACTICAL_LEVEL:
             return redirect(url_for('tm'))
+
