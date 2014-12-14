@@ -5,11 +5,10 @@ from sys import argv
 from webtests.models import Process
 
 if __name__ == '__main__':
-    # if len(argv) != 2:
-    #     print('Too few arguments for script')
-    #     exit(1)
-    # file_name = argv[1]
-    file_name = 'files/questions'
+    if len(argv) != 2:
+        print('Too few arguments for script')
+        exit(1)
+    file_name = argv[1]
     out_file = open(file_name + '.sql', 'w')
     with open(file_name) as questions_file:
         sql = str()
@@ -19,9 +18,11 @@ if __name__ == '__main__':
         correct_answer = str()
         metric = str()
         found = False
+        count = 0
         for line in questions_file.readlines():
             line = line.rstrip('\n')
             if line.startswith('GP') or line.startswith('SSP') or line.startswith('TSP') or line.startswith('OSP'):
+                count += 1
                 process_id = Process.query.filter(Process.name.like(line + '%')).one().id
                 found = True
             # Парсим имя вопроса
@@ -47,6 +48,7 @@ if __name__ == '__main__':
                 found = True
             if correct_answer and line and not found:
                 metric = line
+                count += 1
                 sql += u"INSERT INTO questions(id, name, variants, correct_answer, metric, process_id) VALUES" \
                        u"(DEFAULT, '%s', %s, %d, '%s', %d) RETURNING id;\n" % (question_name.decode('utf-8'),
                                                                                  variants.decode('utf-8'),
@@ -58,6 +60,8 @@ if __name__ == '__main__':
                 correct_answer = str()
                 metric = str()
             if not line:
+                out_file.write('--process_id: %d count: %d--\n' % (process_id, count))
+                count = 0
                 process_id = 0
             found = False
     out_file.write(sql.encode('utf-8'))
