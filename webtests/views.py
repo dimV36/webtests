@@ -71,9 +71,10 @@ def cso():
     if g.user.role.name == ROLE_HEAD_OF_INFORMATION_SECURITY:
         is_headmaster_started_testing = ApplicationData.is_headmaster_started_testing()
         is_cso_choose_processes = ApplicationData.is_cso_choose_processes()
+        is_om_answered_on_questions = ApplicationData.is_om_answered_on_questions()
         is_cso_answered_on_questions = ApplicationData.is_cso_answered_on_questions()
         if is_headmaster_started_testing.status and \
-                is_cso_choose_processes.status and \
+                is_om_answered_on_questions.status and \
                 not is_cso_answered_on_questions.status:
             return redirect(url_for('cso_testing', page=1))
         form = CSOFormDynamic()

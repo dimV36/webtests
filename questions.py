@@ -51,7 +51,7 @@ if __name__ == '__main__':
                 elif correct_answer == '?':
                     correct_answer = str(-2)
                 else:
-                    correct_answer = str(int(correct_answer) - 1)
+                    correct_answer = str(int(correct_answer))
                 found = True
             if correct_answer and line and not found:
                 metric = line
