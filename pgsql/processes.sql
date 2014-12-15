@@ -23,7 +23,7 @@ INSERT INTO processes(id, name, is_important, role_id) VALUES(DEFAULT, 'OSP-3: �
 INSERT INTO processes(id, name, is_important, role_id) VALUES(DEFAULT, 'OSP-4: Управление изменениями в IT', false, 5) RETURNING id;
 INSERT INTO processes(id, name, is_important, role_id) VALUES(DEFAULT, 'OSP-5: Управление обновлением в IT', true, 5) RETURNING id;
 INSERT INTO processes(id, name, is_important, role_id) VALUES(DEFAULT, 'OSP-6: Управление очисткой в IT', false, 5) RETURNING id;
-INSERT INTO processes(id, name, is_important, role_id) VALUES(DEFAULT, 'OSP-7: Усиление сферы',  управляемой на основе ИТ, 5) RETURNING id;
+INSERT INTO processes(id, name, is_important, role_id) VALUES(DEFAULT, 'OSP-7: Усиление сферы, управляемой на основе ИТ', false, 5) RETURNING id;
 INSERT INTO processes(id, name, is_important, role_id) VALUES(DEFAULT, 'OSP-8: Жизненный цикл ПО', false, 5) RETURNING id;
 INSERT INTO processes(id, name, is_important, role_id) VALUES(DEFAULT, 'OSP-9: Управление изменениями мер по безопасности', false, 5) RETURNING id;
 INSERT INTO processes(id, name, is_important, role_id) VALUES(DEFAULT, 'OSP-10: Управление резервными копиями', false, 5) RETURNING id;
