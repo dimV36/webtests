@@ -20,8 +20,8 @@ if __name__ == '__main__':
                 role_id = 5
             elif line.startswith('TSP'):
                 role_id = 6
-            process_name = line.split(',')[0]
-            is_important = line.split(',')[1].lower()
+            process_name = line.split(';')[0]
+            is_important = line.split(';')[1].lower()
             sql = u"INSERT INTO processes(id, name, is_important, role_id) VALUES(DEFAULT, '%s', %s, %d) RETURNING id;" \
                   % (process_name.decode('utf-8'), is_important.decode('utf-8'), role_id)
             out_file.write(sql.encode('utf-8') + '\n')

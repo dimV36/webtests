@@ -3,6 +3,7 @@
 __author__ = 'dimv36'
 from sys import argv
 from webtests.models import Process
+from sqlalchemy.orm.exc import NoResultFound
 
 if __name__ == '__main__':
     if len(argv) != 2:
@@ -23,7 +24,11 @@ if __name__ == '__main__':
             line = line.rstrip('\n')
             if line.startswith('GP') or line.startswith('SSP') or line.startswith('TSP') or line.startswith('OSP'):
                 count += 1
-                process_id = Process.query.filter(Process.name.like(line + '%')).one().id
+                try:
+                    process_id = Process.query.filter(Process.name.like(line + '%')).one().id
+                except NoResultFound:
+                    print(u'Could not find process with name like %s' % line)
+                    exit(1)
                 found = True
             # Парсим имя вопроса
             if not process_id == 0 and not question_name and not found:
@@ -43,6 +48,8 @@ if __name__ == '__main__':
                 correct_answer = line.lstrip('+')
                 if correct_answer == 'NULL':
                     correct_answer = str(-1)
+                elif correct_answer == '?':
+                    correct_answer = str(-2)
                 else:
                     correct_answer = str(int(correct_answer) - 1)
                 found = True
@@ -60,7 +67,6 @@ if __name__ == '__main__':
                 correct_answer = str()
                 metric = str()
             if not line:
-                out_file.write('--process_id: %d count: %d--\n' % (process_id, count))
                 count = 0
                 process_id = 0
             found = False
