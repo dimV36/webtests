@@ -49,7 +49,7 @@ def headmaster():
                 UserChoice.create_investment_level_choice(g.user.username, choice, answer.one().name)
                 question_choice = form.scope_variants.data
                 answer = form.scope_variants.choices[question_choice][1]
-                UserChoice.create_question_choice(g.user.username, u'Сфера деятельности организации',
+                UserChoice.create_question_choice(g.user.username, 0, u'Сфера деятельности организации',
                                                   question_choice, answer)
             else:
                 choices = UserChoice.query.all()
@@ -107,13 +107,11 @@ def save_answers_to_db(entries, user_role, page, process_id):
         question_name = questions[i].name
         question = Question.question(question_name, process_id).one()
         choice = entry.variants.data
-        try:
-            UserChoice.user_choice_question(question_name).one()
-        except NoResultFound:
-            UserChoice.create_question_choice(username=g.user.username,
-                                              question=question_name,
-                                              choice=choice,
-                                              answer=question.question_answer(choice))
+        UserChoice.create_question_choice(username=g.user.username,
+                                          process_id=process_id,
+                                          question=question_name,
+                                          choice=choice,
+                                          answer=question.question_answer(choice))
 
 
 @app.route('/cio/', methods=('GET', 'POST'))

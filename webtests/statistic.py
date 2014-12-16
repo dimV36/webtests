@@ -2,21 +2,56 @@
 __author__ = 'dimv36'
 import webtests.models as m
 
+__SECOND_LEVEL_METRICS = [u'Деятельность', u'Область действия', u'Недоступность', u'Эффективность']
+__THIRD_LEVEL_METRICS = __SECOND_LEVEL_METRICS + [u'Нагрузка']
+__FORTH_LEVEL_METRICS = __THIRD_LEVEL_METRICS + [u'Результативность', u'Качество', u'Непрерывность', u'Инцидентность']
+__FIFTH_LEVEL_METRICS = __FORTH_LEVEL_METRICS + [u'Экономическая эффективность']
+__METRIC_LEVELS = [__SECOND_LEVEL_METRICS, __THIRD_LEVEL_METRICS, __FORTH_LEVEL_METRICS, __FIFTH_LEVEL_METRICS]
 
-def level_by_flags(flags):
+
+def __level_by_flags(flags):
     if not flags[5]:
-        return 1
+        return 5
     for i in range(1, len(flags)):
         flag = flags[i - 1]
         if not flag:
-            return i
+            return i - 1
+    return 1
 
 
-def get_statistic_by_first_algorithm(user):
+def __level_by_control(answers):
+    if not answers[str(6)]:
+        return 1
+    for i in range(1, 6):
+        value = answers[str(i)]
+        if not value:
+            return i - 1
+    return 5
+
+
+def __level_by_metric(answers):
+    result = True
+    level = 1
+    for metric_level in __METRIC_LEVELS:
+        for metric in metric_level:
+            try:
+                result = result and answers[metric]
+            except KeyError:
+                pass
+        if not result:
+            if level == 1:
+                return level
+            else:
+                return level - 1
+        level += 1
+    return level
+
+
+def __get_statistic_by_first_algorithm(user):
     results = []
     # Нужна однозначная легенда для алгоритмов
     INVERSE = {1: 5, 2: 4, 3: 3, 4: 2, 5: 1}
-    processes = m.Process.processes_by_role(user.role_id).filter(m.Process.is_important).all()
+    processes = m.Process.processes_by_role(user.role_id).filter(m.Process.is_important == True).all()
     for process in processes:
         questions = m.Question.query.filter(m.Question.process_id == process.id)
         level = int()
@@ -24,8 +59,10 @@ def get_statistic_by_first_algorithm(user):
         if not questions.all() == []:
             question_number = 1
             for question in questions.all():
-                user_choice = m.UserChoice.query.filter(m.UserChoice.user_id == user.id).filter(m.UserChoice.question ==
-                                                                                                question.name).one()
+                user_choice = m.UserChoice.query.\
+                    filter(m.UserChoice.user_id == user.id).\
+                    filter(m.UserChoice.question == question.name).\
+                    filter(m.UserChoice.field == 'question ' + str(process.id)).one()
                 if question.correct_answer not in [-2, -1]:
                     flags[question_number - 1] = bool(question.correct_answer == user_choice.choice)
                 if question.correct_answer == -1:
@@ -41,27 +78,53 @@ def get_statistic_by_first_algorithm(user):
                         level = 5
                 question_number += 1
         short_process_name = process.name.split(' ')[0]
-        level = max(level, level_by_flags(flags))
+        level = max(level, __level_by_flags(flags))
         results.append((short_process_name, INVERSE[level]))
     return results
 
 
-def get_statistic_by_second_algorithm(user):
-    processes = m.Process.processes_by_role(user.role_id).filter(not m.Process.is_important).all()
-    flags = [False for _ in range(0, 12)]
-    print('\nflags: ' + str(flags) + '\n')
+def __get_statistic_by_second_algorithm(user):
+    results = []
+    processes = m.Process.processes_by_role(user.role_id).filter(m.Process.is_important == False).all()
+    answers = {}
     for process in processes:
-        questions = m.Question.query.fiter(m.Question.process_id == process.id)
-        level = int()
+        questions = m.Question.query.filter(m.Question.process_id == process.id)
+        level = 5
         if not questions.all() == []:
-            question_number = 1
             for question in questions.all():
-                user_choice = m.UserChoice.query.filter(m.UserChoice.user_id == user.id).filter(m.UserChoice.question ==
-                                                                                                question.name).one()
+                user_choice = m.UserChoice.query.\
+                    filter(m.UserChoice.user_id == user.id).\
+                    filter(m.UserChoice.question == question.name).\
+                    filter(m.UserChoice.field == 'question ' + str(process.id)).one()
+                if question.correct_answer == -2:
+                    headmaster_role = m.Role.role_by_id(2).one()
+                    headmaster_user = m.User.user_by_id(headmaster_role.role_id).one()
+                    headmaster_choice = m.UserChoice.query.filter(m.UserChoice.user_id == headmaster_user.id).one()
+                    if not headmaster_choice.choice == user_choice.choice:
+                        answers[question.metric] = False
+                        level = 1
+                    else:
+                        answers[question.metric] = True
+                else:
+                    answers[question.metric] = bool(user_choice.choice == question.correct_answer)
+        short_process_name = process.name.split(' ')[0]
+        level = min(__level_by_control(answers), __level_by_metric(answers), level)
+        results.append((short_process_name, level))
+    return results
 
 
+def __make_statistic_for_user(user):
+    results = __get_statistic_by_first_algorithm(user) + __get_statistic_by_second_algorithm(user)
+    # make diagram for user and save it
+
+
+def make_statistic():
+    roles = m.Role.testings_roles().all()
+    for role in roles:
+        user = m.User.user_by_role_id(role.id).one()
+        __make_statistic_for_user(user)
 
 if __name__ == '__main__':
     user = m.User.user_by_name('cio').one()
-    get_statistic_by_first_algorithm(user)
-    # get_statistic_by_second_algorithm(user)
+    # __get_statistic_by_first_algorithm(user)
+    __get_statistic_by_second_algorithm(user)
