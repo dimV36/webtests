@@ -65,6 +65,7 @@ def __get_statistic_by_first_algorithm(user):
         if not questions.all() == []:
             question_number = 1
             for question in questions.all():
+                print('\n\nprocess_id: %d, user_id: %d\n\n' % (process.id, user.id))
                 user_choice = m.UserChoice.query.\
                     filter(m.UserChoice.user_id == user.id).\
                     filter(m.UserChoice.question == question.name).\
@@ -135,7 +136,7 @@ def __make_statistic_for_user(user):
 
 
 def make_statistic():
-    roles = m.Role.testings_roles().all()
+    roles = m.Role.testing_roles().all()
     for role in roles:
         user = m.User.user_by_role_id(role.id).one()
         __make_statistic_for_user(user)
