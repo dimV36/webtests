@@ -57,7 +57,7 @@
         {% endif %}
         {% if not current.status %}
             {% if process %}
-                <h1>Тестирование пользователя {{g.user.username }} по процессу "{{ process.name }}"</h1>
+                <h1>Тестирование пользователя {{g.user.username }} по процессу "{{ process }}"</h1>
             {% endif %}
                 <table cellspacing="10">
                 {% for entry in form.questions.entries %}

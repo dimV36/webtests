@@ -2,12 +2,16 @@
 from flask import redirect, render_template, url_for, g, flash
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.orm.exc import NoResultFound
+from os.path import exists
+from os import mkdir, rmdir
 
 from admin import __ADMIN_USER
 from webtests.roles import *
 from forms import LoginForm, RegistrationForm, HeadmasterFormDynamic, CSOFormDynamic, TestFormDynamic
 from models import ApplicationData, Role, User, UserChoice, Process, InvestmentLevel, Question
+from config import STATISTIC_DIR
 from webtests import app
+from statistic import make_statistic
 
 
 @app.before_request
@@ -16,6 +20,10 @@ def before_request():
     is_headmaster_started_testing = ApplicationData.is_headmaster_started_testing()
     if not is_headmaster_started_testing.status:
         ApplicationData.reset_application_data()
+        rmdir(STATISTIC_DIR)
+    if not exists(STATISTIC_DIR):
+        mkdir(STATISTIC_DIR)
+
 
 
 @app.route('/admin/', methods=('GET', 'POST'))
@@ -160,6 +168,7 @@ def om(page=1):
         chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_OPERATIONAL_LEVEL).paginate(page, 1, False)
         if is_gm_answered_on_questions.status:
             current_process = chosen_processes.items[0]
+            print(u'\n\ncurr process: %s\n\n' % current_process)
             questions_by_process = Question.chosen_questions(current_process.choice).all()
             process = Process.process_by_id(current_process.choice).one()
         else:
@@ -246,6 +255,7 @@ def cso_testing(page=1):
                 if not is_cso_answered_on_questions.status:
                     is_cso_answered_on_questions.status = bool(not is_cso_answered_on_questions.status)
                     is_cso_answered_on_questions.update()
+                    make_statistic()
                 return redirect(url_for('cso'))
             if form.next_page.data:
                 save_answers_to_db(form.questions, ROLE_HEAD_OF_INFORMATION_SECURITY, page, process.id)

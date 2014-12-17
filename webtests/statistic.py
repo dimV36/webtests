@@ -1,6 +1,12 @@
 # coding=utf-8
 __author__ = 'dimv36'
 import webtests.models as m
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+from config import STATISTIC_DIR
+
+mpl.rcParams['font.sans-serif'] = 'DejaVu Sans'
 
 __SECOND_LEVEL_METRICS = [u'Деятельность', u'Область действия', u'Недоступность', u'Эффективность']
 __THIRD_LEVEL_METRICS = __SECOND_LEVEL_METRICS + [u'Нагрузка']
@@ -114,8 +120,18 @@ def __get_statistic_by_second_algorithm(user):
 
 
 def __make_statistic_for_user(user):
-    results = __get_statistic_by_first_algorithm(user) + __get_statistic_by_second_algorithm(user)
-    # make diagram for user and save it
+    results = sorted(__get_statistic_by_first_algorithm(user) + __get_statistic_by_second_algorithm(user))
+    role_name = user.role.name
+    x = [i for i in range(0, len(results))]
+    process_names = tuple(str(item[0].strip(':')) for item in results)
+    y = [item[1] for item in results]
+    index = np.arange(len(results))
+    width = 1
+    plt.bar(x, y, 1)
+    plt.ylabel(u'Уровень зрелости')
+    plt.xlabel(u'Процессы')
+    plt.xticks(index + width / 2., process_names)
+    plt.savefig(STATISTIC_DIR + '/%s.png' % role_name)
 
 
 def make_statistic():
@@ -123,8 +139,3 @@ def make_statistic():
     for role in roles:
         user = m.User.user_by_role_id(role.id).one()
         __make_statistic_for_user(user)
-
-if __name__ == '__main__':
-    user = m.User.user_by_name('cio').one()
-    # __get_statistic_by_first_algorithm(user)
-    __get_statistic_by_second_algorithm(user)
