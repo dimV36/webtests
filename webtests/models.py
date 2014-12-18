@@ -76,6 +76,10 @@ class User(UserMixin, CRUDMixin, db.Model):
     def user_by_role_id(role_id):
         return User.query.filter(User.role_id == role_id)
 
+    @staticmethod
+    def user_by_id(user_id):
+        return User.query.filter(User.id == user_id)
+
     def __repr__(self):
         return '<User #{:d}>'.format(self.id)
 
@@ -110,6 +114,14 @@ class Process(CRUDMixin, db.Model):
     @staticmethod
     def processes_by_role(role_id):
         return Process.query.filter(Process.role_id == role_id)
+
+    @staticmethod
+    def testing_processes(role_id, is_important):
+        chosen_processes_names = [process.answer for process in UserChoice.user_choice_processes().all()]
+        return Process.query.filter(Process.role_id == role_id).\
+            filter(Process.is_important == is_important).\
+            filter(Process.name.in_(chosen_processes_names))
+
 
     @staticmethod
     def processes():
@@ -154,13 +166,13 @@ class Question(CRUDMixin, db.Model):
 class ApplicationData(CRUDMixin, db.Model):
     __HEADMASTER_START_TESTING = 'is_headmaster_started_testing'
     __CSO_CHOOSE_PROCESSES = 'is_cso_choose_processes'
-    __GM_ANSWERED_ON_QUESTIONS = 'is_gm_answered_on_questions'
+    __CIO_ANSWERED_ON_QUESTIONS = 'is_cio_answered_on_questions'
     __OM_ANSWERED_ON_QUESTIONS = 'is_om_answered_on_questions'
     __TM_ANSWERED_ON_QUESTIONS = 'is_tm_answered_on_questions'
     __CSO_ANSWERED_ON_QUESTIONS = 'is_cso_answered_on_questions'
     __APPLICATION_FIELD_DATA = [__HEADMASTER_START_TESTING,
                                 __CSO_CHOOSE_PROCESSES,
-                                __GM_ANSWERED_ON_QUESTIONS,
+                                __CIO_ANSWERED_ON_QUESTIONS,
                                 __OM_ANSWERED_ON_QUESTIONS,
                                 __TM_ANSWERED_ON_QUESTIONS,
                                 __CSO_ANSWERED_ON_QUESTIONS]
@@ -192,8 +204,8 @@ class ApplicationData(CRUDMixin, db.Model):
         return ApplicationData.__application_data(ApplicationData.__CSO_CHOOSE_PROCESSES).one()
 
     @staticmethod
-    def is_gm_answered_on_questions():
-        return ApplicationData.__application_data(ApplicationData.__GM_ANSWERED_ON_QUESTIONS).one()
+    def is_cio_answered_on_questions():
+        return ApplicationData.__application_data(ApplicationData.__CIO_ANSWERED_ON_QUESTIONS).one()
 
     @staticmethod
     def is_om_answered_on_questions():

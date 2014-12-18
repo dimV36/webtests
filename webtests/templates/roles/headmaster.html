@@ -9,6 +9,7 @@
         Инвестиционный уровень: "<b>{{ investment_level.one().answer }}</b>"
     {% endif %}
     <p>
+        {{ forms.render_statistic(is_cso_answered_on_questions) }}
         <input type="Submit" value="Закончить тестирование">
     </p>
 {% else %}

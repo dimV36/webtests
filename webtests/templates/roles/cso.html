@@ -22,6 +22,7 @@
             </ul>
         {% endif %}
     {% endif %}
+    {{ forms.render_statistic(is_cso_answered_on_questions) }}
 {% else %}
     Тестирование ещё не началось.
 {% endif %}

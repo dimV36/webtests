@@ -3,7 +3,7 @@ from flask import redirect, render_template, url_for, g, flash
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.orm.exc import NoResultFound
 from os.path import exists
-from os import mkdir, rmdir
+from os import mkdir, rmdir, remove, listdir
 
 from admin import __ADMIN_USER
 from webtests.roles import *
@@ -20,7 +20,8 @@ def before_request():
     is_headmaster_started_testing = ApplicationData.is_headmaster_started_testing()
     if not is_headmaster_started_testing.status:
         ApplicationData.reset_application_data()
-        rmdir(STATISTIC_DIR)
+        for file_name in listdir(STATISTIC_DIR):
+            remove(STATISTIC_DIR + '/' + file_name)
     if not exists(STATISTIC_DIR):
         mkdir(STATISTIC_DIR)
 
@@ -45,6 +46,7 @@ def register():
 def headmaster():
     if g.user.role.name == ROLE_HEAD_OF_ORGANIZATION:
         is_headmaster_started_testing = ApplicationData.is_headmaster_started_testing()
+        is_cso_answered_on_questions = ApplicationData.is_cso_answered_on_questions()
         form = HeadmasterFormDynamic(is_headmaster_started_testing.status)
         try:
             investment_level = UserChoice.user_choice_chosen_investment_level()
@@ -68,6 +70,7 @@ def headmaster():
             return redirect(url_for('headmaster'))
         return render_template('roles/headmaster.html', form=form,
                                headmaster_is_started_testing=is_headmaster_started_testing,
+                               is_cso_answered_on_questions=is_cso_answered_on_questions,
                                investment_level=investment_level)
     else:
         return u'Вы не можете получить доступ к этой странице'
@@ -101,6 +104,7 @@ def cso():
         return render_template('roles/cso.html', form=form,
                                is_headmaster_started_testing=is_headmaster_started_testing,
                                is_cso_choose_processes=is_cso_choose_processes,
+                               is_cso_answered_on_questions=is_cso_answered_on_questions,
                                investment_level=investment_level,
                                processes=processes)
     else:
@@ -137,14 +141,14 @@ def cio(page=1):
             questions_by_process = []
             process = None
         form = TestFormDynamic(questions_by_process)
-        is_gm_answered_on_questions = ApplicationData.is_gm_answered_on_questions()
+        is_cio_answered_on_questions = ApplicationData.is_cio_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
                 page = chosen_processes.pages
                 save_answers_to_db(form.questions, ROLE_HEAD_OF_BASE_LEVEL, page, process.id)
-                if not is_gm_answered_on_questions.status:
-                    is_gm_answered_on_questions.status = bool(not is_gm_answered_on_questions.status)
-                    is_gm_answered_on_questions.update()
+                if not is_cio_answered_on_questions.status:
+                    is_cio_answered_on_questions.status = bool(not is_cio_answered_on_questions.status)
+                    is_cio_answered_on_questions.update()
             if form.next_page.data:
                 save_answers_to_db(form.questions, ROLE_HEAD_OF_BASE_LEVEL, page, process.id)
                 page = chosen_processes.next_num
@@ -152,7 +156,7 @@ def cio(page=1):
         return render_template('roles/cio.html', form=form,
                                process_name=process,
                                is_cso_choose_processes=is_cso_choose_processes,
-                               is_gm_answered_on_questions=is_gm_answered_on_questions,
+                               is_cio_answered_on_questions=is_cio_answered_on_questions,
                                processes=chosen_processes,
                                investment_level=UserChoice.user_choice_chosen_investment_level())
     else:
@@ -164,9 +168,9 @@ def cio(page=1):
 @login_required
 def om(page=1):
     if g.user.role.name == ROLE_HEAD_OF_OPERATIONAL_LEVEL:
-        is_gm_answered_on_questions = ApplicationData.is_gm_answered_on_questions()
+        is_cio_answered_on_questions = ApplicationData.is_cio_answered_on_questions()
         chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_OPERATIONAL_LEVEL).paginate(page, 1, False)
-        if is_gm_answered_on_questions.status:
+        if is_cio_answered_on_questions.status:
             current_process = chosen_processes.items[0]
             print(u'\n\ncurr process: %s\n\n' % current_process)
             questions_by_process = Question.chosen_questions(current_process.choice).all()
@@ -189,7 +193,7 @@ def om(page=1):
             return redirect(url_for('om', page=page))
         return render_template('roles/om.html', form=form,
                                process_name=process,
-                               is_gm_answered_on_questions=is_gm_answered_on_questions,
+                               is_cio_answered_on_questions=is_cio_answered_on_questions,
                                is_om_answered_on_questions=is_om_answered_on_questions,
                                processes=chosen_processes,
                                investment_level=UserChoice.user_choice_chosen_investment_level())

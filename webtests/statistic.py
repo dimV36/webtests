@@ -21,7 +21,10 @@ def __level_by_flags(flags):
     for i in range(1, len(flags)):
         flag = flags[i - 1]
         if not flag:
-            return i - 1
+            if not i == 1:
+                return i - 1
+            else:
+                return 1
     return 1
 
 
@@ -31,7 +34,10 @@ def __level_by_control(answers):
     for i in range(1, 6):
         value = answers[str(i)]
         if not value:
-            return i - 1
+            if not i == 1:
+                return i - 1
+            else:
+                return 1
     return 5
 
 
@@ -57,7 +63,7 @@ def __get_statistic_by_first_algorithm(user):
     results = []
     # Нужна однозначная легенда для алгоритмов
     INVERSE = {1: 5, 2: 4, 3: 3, 4: 2, 5: 1}
-    processes = m.Process.processes_by_role(user.role_id).filter(m.Process.is_important == True).all()
+    processes = m.Process.testing_processes(user.role_id, True).all()
     for process in processes:
         questions = m.Question.query.filter(m.Question.process_id == process.id)
         level = int()
@@ -65,7 +71,6 @@ def __get_statistic_by_first_algorithm(user):
         if not questions.all() == []:
             question_number = 1
             for question in questions.all():
-                print('\n\nprocess_id: %d, user_id: %d\n\n' % (process.id, user.id))
                 user_choice = m.UserChoice.query.\
                     filter(m.UserChoice.user_id == user.id).\
                     filter(m.UserChoice.question == question.name).\
@@ -79,8 +84,9 @@ def __get_statistic_by_first_algorithm(user):
                         level = user_choice.choice
                 if question.correct_answer == -2:
                     headmaster_role = m.Role.role_by_id(2).one()
-                    headmaster_user = m.User.user_by_id(headmaster_role.role_id).one()
-                    headmaster_choice = m.UserChoice.query.filter(m.UserChoice.user_id == headmaster_user.id).one()
+                    headmaster_user = m.User.user_by_id(headmaster_role.id).one()
+                    headmaster_choice = m.UserChoice.query.filter(m.UserChoice.user_id == headmaster_user.id).\
+                                                           filter(m.UserChoice.field == 'question 0').one()
                     if not headmaster_choice.choice == user_choice.choice:
                         level = 5
                 question_number += 1
@@ -92,7 +98,7 @@ def __get_statistic_by_first_algorithm(user):
 
 def __get_statistic_by_second_algorithm(user):
     results = []
-    processes = m.Process.processes_by_role(user.role_id).filter(m.Process.is_important == False).all()
+    processes = m.Process.testing_processes(user.role_id, False).all()
     answers = {}
     for process in processes:
         questions = m.Question.query.filter(m.Question.process_id == process.id)
@@ -105,8 +111,9 @@ def __get_statistic_by_second_algorithm(user):
                     filter(m.UserChoice.field == 'question ' + str(process.id)).one()
                 if question.correct_answer == -2:
                     headmaster_role = m.Role.role_by_id(2).one()
-                    headmaster_user = m.User.user_by_id(headmaster_role.role_id).one()
-                    headmaster_choice = m.UserChoice.query.filter(m.UserChoice.user_id == headmaster_user.id).one()
+                    headmaster_user = m.User.user_by_id(headmaster_role.id).one()
+                    headmaster_choice = m.UserChoice.query.filter(m.UserChoice.user_id == headmaster_user.id).\
+                                                           filter(m.UserChoice.field == 'question 0').one()
                     if not headmaster_choice.choice == user_choice.choice:
                         answers[question.metric] = False
                         level = 1
@@ -123,15 +130,17 @@ def __get_statistic_by_second_algorithm(user):
 def __make_statistic_for_user(user):
     results = sorted(__get_statistic_by_first_algorithm(user) + __get_statistic_by_second_algorithm(user))
     role_name = user.role.name
-    x = [i for i in range(0, len(results))]
+    x = tuple(i for i in range(0, len(results)))
+    y = tuple(item[1] for item in results)
     process_names = tuple(str(item[0].strip(':')) for item in results)
-    y = [item[1] for item in results]
     index = np.arange(len(results))
     width = 1
-    plt.bar(x, y, 1)
+    plt.clf()
+    plt.bar(x, y, width)
     plt.ylabel(u'Уровень зрелости')
     plt.xlabel(u'Процессы')
     plt.xticks(index + width / 2., process_names)
+    plt.yticks(np.arange(1, 6, 1))
     plt.savefig(STATISTIC_DIR + '/%s.png' % role_name)
 
 

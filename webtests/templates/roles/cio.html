@@ -2,5 +2,5 @@
 {% import "helpers/forms.html" as forms %}
 {% block content %}
 {{ super() }}
-{{ forms.render_test_form(is_cso_choose_processes, investment_level, is_gm_answered_on_questions, form, process_name, processes) }}
+{{ forms.render_test_form(is_cso_choose_processes, investment_level, is_cio_answered_on_questions, form, process_name, processes) }}
 {% endblock %}

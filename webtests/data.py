@@ -1,6 +1,8 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_images import Images
 
 db = SQLAlchemy()
+images = Images()
 
 
 class CRUDMixin(object):
