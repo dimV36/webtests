@@ -5,9 +5,9 @@ from sqlalchemy.orm.exc import NoResultFound
 from os.path import exists
 from os import mkdir, remove, listdir
 
-from admin import __ADMIN_USER
 from webtests.roles import *
-from forms import LoginForm, RegistrationForm, HeadmasterFormDynamic, CSOFormDynamic, TestFormDynamic
+from forms import LoginForm, RegisteredUserForm, HeadmasterFormDynamic, CSOFormDynamic, TestFormDynamic, \
+    DeleteUserFormDynamic
 from models import ApplicationData, Role, User, UserChoice, Process, InvestmentLevel, Question
 from config import STATISTIC_DIR
 from webtests import app
@@ -29,9 +29,20 @@ def before_request():
 
 @app.route('/admin/', methods=('GET', 'POST'))
 @login_required
-def register():
-    if g.user.username == __ADMIN_USER:
-        form = RegistrationForm()
+def admin():
+    if User.is_admin(g.user.username):
+        return render_template('roles/admin.html')
+    else:
+        return u'Вы не можете получить доступ к этой странице'
+
+
+@app.route('/admin/register', methods=('GET', 'POST'))
+@login_required
+def register_user():
+    if User.is_admin(g.user.username):
+        form = RegisteredUserForm()
+        if form.prev.data:
+            return redirect(url_for('admin'))
         if form.validate_on_submit():
             role = Role.role_by_name(form.role.data).one()
             User.create(username=form.username.data, password=form.password.data, role_id=role.id)
@@ -39,6 +50,24 @@ def register():
         return render_template('users/register.html', form=form)
     else:
         return u'Вы не можете получить доступ к этой странице.'
+
+
+@app.route('/admin/delete', methods=('GET', 'POST'))
+@login_required
+def delete_user():
+    if User.is_admin(g.user.username):
+        form = DeleteUserFormDynamic()
+        users = User.users()
+        if form.prev.data:
+            return redirect(url_for('admin'))
+        if form.validate_on_submit():
+            for user_id in form.users.data:
+                user = User.user_by_id(user_id).one()
+                flash(u'Пользователь %s был успешно удалён.' % user.username)
+                user.delete()
+        return render_template('users/delete.html', form=form, users=users)
+    else:
+        return u'Вы не можете получить доступ к этой странице'
 
 
 @app.route('/headmaster/', methods=('GET', 'POST'))

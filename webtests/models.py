@@ -7,6 +7,8 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.dialects.postgresql import ARRAY
 from webtests.data import CRUDMixin, db
+from roles import USER_ROLES, ROLE_ADMIN
+from config import ADMIN_PASSWORD
 
 
 class Role(UserMixin, CRUDMixin, db.Model):
@@ -41,6 +43,7 @@ class Role(UserMixin, CRUDMixin, db.Model):
 
 class User(UserMixin, CRUDMixin, db.Model):
     __tablename__ = 'users'
+    __ADMIN_USER = 'admin'
     username = db.Column(db.String(50), unique=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     _password = db.Column(db.LargeBinary(120))
@@ -69,6 +72,17 @@ class User(UserMixin, CRUDMixin, db.Model):
         return bytes(buff)
 
     @staticmethod
+    def create_admin():
+        admin = None
+        try:
+            admin = User.query.filter(User.username == User.__ADMIN_USER).one()
+        except NoResultFound:
+            pass
+        if admin is None:
+            role = Role.role_by_name(ROLE_ADMIN).one()
+            User.create(username=User.__ADMIN_USER, password=ADMIN_PASSWORD, role_id=role.id)
+
+    @staticmethod
     def user_by_name(username):
         return User.query.filter(User.username == username)
 
@@ -79,6 +93,14 @@ class User(UserMixin, CRUDMixin, db.Model):
     @staticmethod
     def user_by_id(user_id):
         return User.query.filter(User.id == user_id)
+
+    @staticmethod
+    def users():
+        return User.query.filter(User.username != User.__ADMIN_USER)
+
+    @staticmethod
+    def is_admin(username):
+        return User.__ADMIN_USER == username
 
     def __repr__(self):
         return '<User #{:d}>'.format(self.id)
@@ -133,9 +155,6 @@ class Process(CRUDMixin, db.Model):
 
 class Question(CRUDMixin, db.Model):
     __tablename__ = 'questions'
-    __METRICS = [u'Деятельность', u'Область действия', u'Недоступность', u'Эффективность'
-                 u'Нагрузка', u'Результативность', u'Качество', u'Экономическая эффективность',
-                 u'Недоступность', u'Инцидентность']
     name = db.Column(db.Text)
     variants = db.Column(ARRAY(db.Text))
     correct_answer = db.Column(db.Integer)
@@ -306,3 +325,10 @@ class UserChoice(CRUDMixin, db.Model):
 
     def __repr__(self):
         return '<UsersChoices #{:d}>'.format(self.id)
+
+
+def create_entities():
+    Role.create_roles(USER_ROLES)
+    User.create_admin()
+    ApplicationData.init_application_data()
+

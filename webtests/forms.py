@@ -65,12 +65,13 @@ class LoginForm(Form):
         self.user = user
 
 
-class RegistrationForm(Form):
+class RegisteredUserForm(Form):
     username = fields.StringField(u'Логин', validators=[MyInputRequired()])
     password = fields.PasswordField(u'Пароль', validators=[MyInputRequired()])
     retry_password = fields.PasswordField(u'Повтор пароля', validators=[MyInputRequired()])
     role = fields.SelectField(u'Роль', choices=ROLES)
-    registration = fields.SubmitField(u'Зарегистрировать')
+    prev = fields.SubmitField(u'Назад')
+    submit = fields.SubmitField(u'Зарегистрировать')
 
     def validate_username(self, field):
         user = User.query.filter(User.username == field.data).first()
@@ -97,6 +98,21 @@ class RegistrationForm(Form):
             import re
             if not re.search('[0-9]', password) or not re.search('[a-zA-Z]', password):
                 raise ValidationError(u'Пароль должен содержать символы [0-9a-zA-Z]')
+
+
+class _DeleteUserForm(Form):
+    users = _MultiCheckboxField(coerce=int, default=0)
+    prev = fields.SubmitField(u'Назад')
+    submit = fields.SubmitField(u'Удалить')
+
+    def validate_users(self, field):
+        if not field.data:
+            raise ValidationError(u'Вы должны выбрать хотя бы одного пользователя')
+
+def DeleteUserFormDynamic():
+    form = _DeleteUserForm()
+    form.users.choices = [(user.id, user.username) for user in User.users().all()]
+    return form
 
 
 def HeadmasterFormDynamic(is_headmaster_start_testing):

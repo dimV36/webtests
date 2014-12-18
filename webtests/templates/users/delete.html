@@ -1,0 +1,14 @@
+{% extends "helpers/layout.html" %}
+{% import "helpers/forms.html" as forms %}
+{% block title %} Удалить пользователя {% endblock %}
+{% block content %}
+{{super()}}
+<form action="{{ url_for('delete_user') }}" method="POST">
+{% if users.all() %}
+    {{ forms.render_choices(form.users) }}
+{% else %}
+    В системе не зарегистрировано ни одного пользователя.
+{% endif %}
+<p>{{ form.prev }} {{ form.submit }}</p>
+</form>
+{% endblock content %}

@@ -2,7 +2,7 @@ from flask import Flask
 
 from auth import login_manager
 from data import db, images
-from webtests.admin import create_entities
+from models import create_entities
 
 app = Flask(__name__)
 app.config.from_object('config')
