@@ -6,6 +6,6 @@
 {{ forms.navigation() }}
 <form action="{{url_for('register')}}" method="POST">
 {{ forms.render(form) }}
-<p><input type="Submit" value="Зарегистрировать"></p>
+<p>{{ form.registration }}</p>
 </form>
 {% endblock content %}

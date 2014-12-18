@@ -1,6 +1,6 @@
 {% macro render(form) %}
 <table>
-{% for field in form if field.type not in ["HiddenField", "CSRFTokenField"] %}
+{% for field in form if field.type not in ["HiddenField", "CSRFTokenField", "SubmitField"] %}
     <tr>
         <td> {{ field.label }} </td>
         <td> {{ field }} </td>

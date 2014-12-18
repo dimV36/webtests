@@ -70,6 +70,7 @@ class RegistrationForm(Form):
     password = fields.PasswordField(u'Пароль', validators=[MyInputRequired()])
     retry_password = fields.PasswordField(u'Повтор пароля', validators=[MyInputRequired()])
     role = fields.SelectField(u'Роль', choices=ROLES)
+    registration = fields.SubmitField(u'Зарегистрировать')
 
     def validate_username(self, field):
         user = User.query.filter(User.username == field.data).first()

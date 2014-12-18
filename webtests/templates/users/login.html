@@ -6,6 +6,6 @@
 <form action="{{ url_for('login', next=request.args.get('next', '')) }}" method="POST">
 {{ forms.render(form) }}
 <br>
-<input class="btn btn-primary" type="submit" value="Войти">
+<input type="submit" value="Войти">
 </form>
 {% endblock content %}

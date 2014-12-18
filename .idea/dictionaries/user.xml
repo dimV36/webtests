@@ -4,6 +4,7 @@
       <w>dimv</w>
       <w>endfor</w>
       <w>endif</w>
+      <w>resized</w>
     </words>
   </dictionary>
 </component>
