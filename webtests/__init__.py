@@ -18,6 +18,4 @@ login_manager.init_app(app)
 db.create_all(app=app)
 create_entities()
 
-print('\n\n' + str(app.config.get('IMAGES_PATH')) + '\n\n')
-
 from webtests import views, models

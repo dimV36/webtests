@@ -172,7 +172,6 @@ def om(page=1):
         chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_OPERATIONAL_LEVEL).paginate(page, 1, False)
         if is_cio_answered_on_questions.status:
             current_process = chosen_processes.items[0]
-            print(u'\n\ncurr process: %s\n\n' % current_process)
             questions_by_process = Question.chosen_questions(current_process.choice).all()
             process = Process.process_by_id(current_process.choice).one()
         else:

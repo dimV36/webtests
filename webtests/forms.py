@@ -7,6 +7,7 @@ from webtests.validators.validators import MyInputRequired
 from wtforms.validators import ValidationError
 from models import Role, User, UserChoice, InvestmentLevel, Process
 from roles import ROLES
+from config import USE_PASSWORD_POLICY
 
 
 class _MultiCheckboxField(fields.SelectMultipleField):
@@ -85,9 +86,16 @@ class RegistrationForm(Form):
             raise ValidationError(u'%s уже зарегистрирован в системе' % self.role.data)
 
     def validate_password(self, field):
+        password = str(field.data)
         retry_password = self.retry_password.data
-        if not field.data == retry_password:
+        if not password == retry_password:
             raise ValidationError(u'Пароли не совпадают')
+        if USE_PASSWORD_POLICY:
+            if len(password) < 8:
+                raise ValidationError(u'Пароль должен состоять как минимум из 8 символов')
+            import re
+            if not re.search('[0-9]', password) or not re.search('[a-zA-Z]', password):
+                raise ValidationError(u'Пароль должен содержать символы [0-9a-zA-Z]')
 
 
 def HeadmasterFormDynamic(is_headmaster_start_testing):
