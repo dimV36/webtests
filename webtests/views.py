@@ -3,7 +3,7 @@ from flask import redirect, render_template, url_for, g, flash
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.orm.exc import NoResultFound
 from os.path import exists
-from os import mkdir, rmdir, remove, listdir
+from os import mkdir, remove, listdir
 
 from admin import __ADMIN_USER
 from webtests.roles import *
