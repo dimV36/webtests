@@ -114,7 +114,14 @@ def __get_statistic_by_second_algorithm(user):
                     headmaster_user = m.User.user_by_id(headmaster_role.id).one()
                     headmaster_choice = m.UserChoice.query.filter(m.UserChoice.user_id == headmaster_user.id).\
                                                            filter(m.UserChoice.field == 'question 0').one()
-                    if not headmaster_choice.choice == user_choice.choice:
+                    choice = str()
+                    if headmaster_choice.answer == u'КВО':
+                        choice = 't1'
+                    elif headmaster_choice.answer in [u'КИИ', u'КСИИ']:
+                        choice = 't2'
+                    elif headmaster_choice.answer == u'АСУ':
+                        choice = 't3'
+                    if not headmaster_choice.choice == choice:
                         answers[question.metric] = False
                         level = 1
                     else:
