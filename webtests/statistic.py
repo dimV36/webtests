@@ -111,7 +111,7 @@ def __get_statistic_by_second_algorithm(user):
                     filter(m.UserChoice.field == 'question ' + str(process.id)).one()
                 if question.correct_answer == -2:
                     headmaster_role = m.Role.role_by_id(2).one()
-                    headmaster_user = m.User.user_by_id(headmaster_role.id).one()
+                    headmaster_user = m.User.user_by_role_id(headmaster_role.id).one()
                     headmaster_choice = m.UserChoice.query.filter(m.UserChoice.user_id == headmaster_user.id).\
                                                            filter(m.UserChoice.field == 'question 0').one()
                     choice = str()
