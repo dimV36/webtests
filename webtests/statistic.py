@@ -76,7 +76,10 @@ def __get_statistic_by_first_algorithm(user):
                     filter(m.UserChoice.question == question.name).\
                     filter(m.UserChoice.field == 'question ' + str(process.id)).one()
                 if question.correct_answer not in [-2, -1]:
-                    flags[question_number - 1] = bool(question.correct_answer == user_choice.choice)
+                    try:
+                        flags[question_number - 1] = bool(question.correct_answer == user_choice.choice)
+                    except IndexError:
+                        pass
                 if question.correct_answer == -1:
                     if len(question.variants) == 2 and user_choice.choice == 2:
                         level = 5

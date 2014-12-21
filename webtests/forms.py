@@ -109,6 +109,7 @@ class _DeleteUserForm(Form):
         if not field.data:
             raise ValidationError(u'Вы должны выбрать хотя бы одного пользователя')
 
+
 def DeleteUserFormDynamic():
     form = _DeleteUserForm()
     form.users.choices = [(user.id, user.username) for user in User.users().all()]
