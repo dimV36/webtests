@@ -16,7 +16,7 @@ if __name__ == '__main__':
         process_id = int()
         question_name = str()
         variants = str()
-        correct_answer = str()
+        correct_answers = str()
         metric = str()
         found = False
         count = 0
@@ -45,21 +45,16 @@ if __name__ == '__main__':
             if variants and line.startswith('+') and not found:
                 variants = variants[0:len(variants) - 2]
                 variants += '}\''
-                correct_answer = line.lstrip('+')
-                if correct_answer == 'NULL':
-                    correct_answer = str(-1)
-                elif correct_answer == '?':
-                    correct_answer = str(-2)
-                else:
-                    correct_answer = str(int(correct_answer))
+                correct_answers = line.lstrip('+')
+                correct_answer = '{\'' + correct_answers + '}\''
                 found = True
-            if correct_answer and line and not found:
+            if correct_answers and line and not found:
                 metric = line
                 count += 1
-                sql += u"INSERT INTO questions(id, name, variants, correct_answer, metric, process_id) VALUES" \
-                       u"(DEFAULT, '%s', %s, %d, '%s', %d) RETURNING id;\n" % (question_name.decode('utf-8'),
+                sql += u"INSERT INTO questions(id, name, variants, correct_answers, indicator, process_id) VALUES" \
+                       u"(DEFAULT, '%s', %s, %s, '%s', %d) RETURNING id;\n" % (question_name.decode('utf-8'),
                                                                                  variants.decode('utf-8'),
-                                                                                 int(correct_answer),
+                                                                                 correct_answers,
                                                                                  metric.decode('utf-8'),
                                                                                  process_id)
                 question_name = str()

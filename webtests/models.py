@@ -5,7 +5,7 @@ from backports.pbkdf2 import pbkdf2_hmac, compare_digest
 from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY, ENUM
 from webtests.data import CRUDMixin, db
 from roles import USER_ROLES, ROLE_ADMIN
 from config import ADMIN_PASSWORD
@@ -13,7 +13,7 @@ from config import ADMIN_PASSWORD
 
 class Role(UserMixin, CRUDMixin, db.Model):
     __tablename__ = 'roles'
-    name = db.Column(db.String(50), unique=True)
+    name = db.Column(db.Text, unique=True)
     user = db.relationship('User', backref='role', uselist=False)
     process = db.relationship('Process', backref='role', lazy='dynamic')
 
@@ -108,7 +108,7 @@ class User(UserMixin, CRUDMixin, db.Model):
 
 class InvestmentLevel(CRUDMixin, db.Model):
     __tablename__ = 'investment_levels'
-    name = db.Column(db.String(120), unique=True)
+    name = db.Column(db.Text, unique=True)
 
     @staticmethod
     def investment_levels():
@@ -124,8 +124,7 @@ class InvestmentLevel(CRUDMixin, db.Model):
 
 class Process(CRUDMixin, db.Model):
     __tablename__ = 'processes'
-    name = db.Column(db.String(120), unique=True)
-    is_important = db.Column(db.Boolean, default=False)
+    name = db.Column(db.Text, unique=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     questionnaire_id = db.relationship('Question', backref='questionnaire', lazy='dynamic')
 
@@ -138,10 +137,9 @@ class Process(CRUDMixin, db.Model):
         return Process.query.filter(Process.role_id == role_id)
 
     @staticmethod
-    def testing_processes(role_id, is_important):
+    def testing_processes(role_id):
         chosen_processes_names = [process.answer for process in UserChoice.user_choice_processes().all()]
         return Process.query.filter(Process.role_id == role_id).\
-            filter(Process.is_important == is_important).\
             filter(Process.name.in_(chosen_processes_names))
 
 
@@ -154,28 +152,68 @@ class Process(CRUDMixin, db.Model):
 
 
 class Question(CRUDMixin, db.Model):
+    """
+    Класс представляет таблицу 'questions' в БД следующего вида:
+    id                  oid     Идентификатор вопроса.
+    name                text    Имя вопроса.
+    variants            text[]  Предлагаемые варианты ответа.
+    correct_answers     int[]   Правильные варианты ответа.
+    indicator           enum    Тип показателя (может принимать следующие значеиня: Результативность,
+                                Рациональность, Соответствие, Непрерывность.
+    process_id          oid     Идентификатор процесса, которому принадлежит вопрос.
+    """
     __tablename__ = 'questions'
     name = db.Column(db.Text)
     variants = db.Column(ARRAY(db.Text))
-    correct_answer = db.Column(db.Integer)
-    metric = db.Column(db.String(120))
+    correct_answers = db.Column(ARRAY(db.Integer))
+    indicator = db.Column(ENUM(u'Результативность', u'Рациональность', u'Соответствие', u'Непрерывность',
+                               name='question_indicator'))
     process_id = db.Column(db.Integer, db.ForeignKey('processes.id'))
 
     @staticmethod
     def question(name, process_id):
+        """
+        Получить вопрос по имени и идентификатору процесса.
+        Эквивалентно запросу SELECT * FROM questions WHERE name = <question_name> AND process_id = <process_id>;
+        :param name: имя вопроса (str)
+        :param process_id: идентификатор процесса (int)
+        :return: Question
+        """
         return Question.query.filter(Question.name == name).filter(Question.process_id == process_id)
 
     @staticmethod
     def chosen_questions(process_id):
+        """
+        Получить список вопросов по значению идентификтаора процесса.
+        Эквивалентно запросу SELECT * FROM questions WHERE process_id = <process_id>;
+        :param process_id: идентификатор процесса (int)
+        :return: list
+        """
         return Question.query.filter(Question.process_id == process_id)
 
+    def question_correct_answers(self):
+        """
+        Получить список правильных ответов пользователя
+        :return: list
+        """
+        return self.correct_answers
+
     def question_variants(self):
+        """
+        Получить список вариантов ответов вопроса.
+        :return: list
+        """
         result = []
         for i in range(0, len(self.variants)):
             result.append((i + 1, self.variants[i].decode('utf-8')))
         return result
 
     def question_answer(self, choice):
+        """
+        Получить вариант ответа по его номеру
+        :param choice: номер ответа (int)
+        :return: str
+        """
         return self.variants[choice - 1]
 
     def __repr__(self):
@@ -183,6 +221,13 @@ class Question(CRUDMixin, db.Model):
 
 
 class ApplicationData(CRUDMixin, db.Model):
+    """
+    Вспомогательный класс, который представляет собой таблицу 'application_data',
+    с помощью которой определяется состояние информационной системы (степень прохождения пользователями тестов)
+    id              oid         Идентификатор состояния
+    description     text        Описание состояния
+    status          boolean     True, если состояние достигнуто и False, иначе
+    """
     __HEADMASTER_START_TESTING = 'is_headmaster_started_testing'
     __CSO_CHOOSE_PROCESSES = 'is_cso_choose_processes'
     __CIO_ANSWERED_ON_QUESTIONS = 'is_cio_answered_on_questions'
@@ -196,15 +241,26 @@ class ApplicationData(CRUDMixin, db.Model):
                                 __TM_ANSWERED_ON_QUESTIONS,
                                 __CSO_ANSWERED_ON_QUESTIONS]
     __tablename__ = 'application_data'
-    description = db.Column(db.String(120), unique=True)
+    description = db.Column(db.Text, unique=True)
     status = db.Column(db.Boolean)
 
     @staticmethod
     def __application_data(description):
+        """
+        Вспомогательный метод, получающий Состояние информационной системы по переданному описанию.
+        Эквивалентно запросу SELECT * FROM application_data WHERE description == <description>;
+        :param description: Имя состояния
+        :return: ApplicationData
+        """
         return ApplicationData.query.filter(ApplicationData.description == description)
 
     @staticmethod
     def reset_application_data():
+        """
+        Метод сбрасывания всех настроек системы (используется для перезапуска системы).
+        Эквивалентно запросу UPDATE application_data SET status = false WHERE status = true;
+        :return: None
+        """
         for field in ApplicationData.__APPLICATION_FIELD_DATA:
             try:
                 data = ApplicationData.query.filter(ApplicationData.description == field).one()
@@ -214,6 +270,8 @@ class ApplicationData(CRUDMixin, db.Model):
                 data.status = False
                 data.update()
 
+    # Методы получения статуса прохождения пользователями тестов
+    # @return: bool
     @staticmethod
     def is_headmaster_started_testing():
         return ApplicationData.__application_data(ApplicationData.__HEADMASTER_START_TESTING).one()
@@ -240,6 +298,11 @@ class ApplicationData(CRUDMixin, db.Model):
 
     @staticmethod
     def init_application_data():
+        """
+        Метод инициализации состояний системы. Используется при старте системы.
+        Эквивалентно созданию 6 состояний (см. выше) со значениями False.
+        :return:
+        """
         for field in ApplicationData.__APPLICATION_FIELD_DATA:
             try:
                 ApplicationData.query.filter(ApplicationData.description == field).one()
@@ -256,7 +319,7 @@ class UserChoice(CRUDMixin, db.Model):
     __FIELD_PROCESS = 'process'
     __FIELD_QUESTION = 'question'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    field = db.Column(db.String(120))
+    field = db.Column(db.Text)
     question = db.Column(db.Text)
     choice = db.Column(db.Integer)
     answer = db.Column(db.Text)
@@ -311,7 +374,8 @@ class UserChoice(CRUDMixin, db.Model):
 
     @staticmethod
     def user_choice_question_by_user_id(user_id):
-        return UserChoice.question.filter(UserChoice.field == UserChoice.__FIELD_QUESTION).filter(UserChoice.user_id == user_id)
+        return UserChoice.question.filter(UserChoice.field == UserChoice.__FIELD_QUESTION).\
+            filter(UserChoice.user_id == user_id)
 
     @staticmethod
     def user_choice_processes():
