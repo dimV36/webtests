@@ -1,0 +1,25 @@
+Virtualenv directory
+
+Needed for Webtest project:
+- Flask
+- Flask-Login
+- Flask-Sqlalchemy
+- Flask-Images
+- Flask-WTF
+- backports.pbkdf2
+- sqlalchemy
+- psycopg2
+- numpy
+- matplotlib
+Those packages can be installed by pip:
+pip install <package-name>
+
+Fedora packages:
+- postgresql
+- postgresql-server
+- postgresql-devel
+- freetype-devel
+- gcc
+- gcc-c++
+Those packages can be installed by yum:
+# yum install <package-name>
