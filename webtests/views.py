@@ -18,12 +18,12 @@ from statistic import make_statistic
 def before_request():
     g.user = current_user
     is_headmaster_started_testing = ApplicationData.is_headmaster_started_testing()
+    if not exists(STATISTIC_DIR):
+        mkdir(STATISTIC_DIR)
     if not is_headmaster_started_testing.status:
         ApplicationData.reset_application_data()
         for file_name in listdir(STATISTIC_DIR):
             remove(STATISTIC_DIR + '/' + file_name)
-    if not exists(STATISTIC_DIR):
-        mkdir(STATISTIC_DIR)
 
 
 

@@ -1,10 +1,17 @@
 <component name="ProjectDictionaryState">
   <dictionary name="user">
     <words>
+      <w>backports</w>
+      <w>csrf</w>
+      <w>devel</w>
       <w>dimv</w>
       <w>endfor</w>
       <w>endif</w>
+      <w>freetype</w>
+      <w>matplotlib</w>
       <w>resized</w>
+      <w>venv</w>
+      <w>webtest</w>
     </words>
   </dictionary>
 </component>
