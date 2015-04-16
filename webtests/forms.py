@@ -18,9 +18,36 @@ class _MultiCheckboxField(fields.SelectMultipleField):
 class _HeadmasterForm(Form):
     variants = fields.RadioField(coerce=int, default=None)
 
+# class BaseSurveyForm(Form):
+#     # define your base fields here
+#
+#
+# def show_survey(survey_id):
+#     survey_information = get_survey_info(survey_id)
+#
+#     class SurveyInstance(BaseSurveyForm):
+#         pass
+#
+#     for question in survey_information:
+#         field = generate_field_for_question(question)
+#         setattr(SurveyInstanceForm, question.backend_name, field)
+#
+#     form = SurveyInstanceForm(request.form)
+#
+#     # Do whatever you need to with form here
+#
+#
+# def generate_field_for_question(question):
+#     if question.type == "truefalse":
+#         return BooleanField(question.text)
+#     elif question.type == "date":
+#         return DateField(question.text)
+#     else:
+#         return TextField(question.text)
+
 
 class _CSOForm(Form):
-    variants = _MultiCheckboxField(coerce=int, default=0)
+    variants = _MultiCheckboxField(coerce=int, default=0, choices=[(i, i) for i in range(0, 10)])
 
 
 class _QuestionForm(Form):
@@ -124,7 +151,7 @@ def HeadmasterFormDynamic(is_headmaster_start_testing):
 
 def CSOFormDynamic():
     form = _CSOForm()
-    form.variants.choices = [(process.id, process.name) for process in Process.processes()]
+    # form.variants.choices = [(process.id, process.name) for process in Process.processes()]
     return form
 
 
