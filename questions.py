@@ -17,7 +17,7 @@ if __name__ == '__main__':
         question_name = str()
         variants = str()
         correct_answers = str()
-        metric = str()
+        weight = int()
         found = False
         count = 0
         for line in questions_file.readlines():
@@ -46,21 +46,24 @@ if __name__ == '__main__':
                 variants = variants[0:len(variants) - 2]
                 variants += '}\''
                 correct_answers = line.lstrip('+')
-                correct_answer = '{\'' + correct_answers + '}\''
+                correct_answers = '{\'' + correct_answers + '}\''
                 found = True
-            if correct_answers and line and not found:
-                metric = line
+            # Парсим вес вопроса
+            if correct_answers and not found:
+                weight = str(line)
+                found = True
+            if bool(weight) and line and not found:
                 count += 1
-                sql += u"INSERT INTO questions(id, name, variants, correct_answers, indicator, process_id) VALUES" \
-                       u"(DEFAULT, '%s', %s, %s, '%s', %d) RETURNING id;\n" % (question_name.decode('utf-8'),
+                sql += u"INSERT INTO questions(id, name, variants, correct_answers, weight, process_id) VALUES" \
+                       u"(DEFAULT, '%s', %s, %s, %d, %d) RETURNING id;\n" % (question_name.decode('utf-8'),
                                                                                  variants.decode('utf-8'),
                                                                                  correct_answers,
-                                                                                 metric.decode('utf-8'),
+                                                                                 weight,
                                                                                  process_id)
                 question_name = str()
                 variants = str()
-                correct_answer = str()
-                metric = str()
+                correct_answers = str()
+                weight = int()
             if not line:
                 count = 0
                 process_id = 0
