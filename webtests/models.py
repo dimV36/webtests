@@ -165,10 +165,13 @@ class Process(CRUDMixin, db.Model):
         return Process.query.filter(Process.role_id == role_id).\
             filter(Process.name.in_(chosen_processes_names))
 
-
     @staticmethod
     def processes():
-        return Process.query
+        """
+        Получить список кортежей (id, name) для процессов.
+        @:return: List
+        """
+        return [(process.id, process.name) for process in Process.query.all()]
 
     def __repr__(self):
         return '<Process #{:d}>'.format(self.id)

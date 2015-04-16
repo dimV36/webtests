@@ -46,8 +46,8 @@ class _HeadmasterForm(Form):
 #         return TextField(question.text)
 
 
-class _CSOForm(Form):
-    variants = _MultiCheckboxField(coerce=int, default=0, choices=[(i, i) for i in range(0, 10)])
+class CSOForm(Form):
+    variants = _MultiCheckboxField(coerce=int, default=0, choices=Process.processes())
 
 
 class _QuestionForm(Form):
@@ -146,12 +146,6 @@ def HeadmasterFormDynamic(is_headmaster_start_testing):
     form.variants.choices = [(level.id, level.name) for level in InvestmentLevel.investment_levels()]
     if is_headmaster_start_testing:
         form.variants.process_data(UserChoice.user_choice_chosen_investment_level().one().choice)
-    return form
-
-
-def CSOFormDynamic():
-    form = _CSOForm()
-    # form.variants.choices = [(process.id, process.name) for process in Process.processes()]
     return form
 
 

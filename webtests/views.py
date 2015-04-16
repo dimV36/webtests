@@ -6,8 +6,7 @@ from os.path import exists
 from os import mkdir, remove, listdir
 
 from webtests.roles import *
-from forms import LoginForm, RegisteredUserForm, HeadmasterFormDynamic, CSOFormDynamic, TestFormDynamic, \
-    DeleteUserFormDynamic
+from forms import LoginForm, RegisteredUserForm, HeadmasterFormDynamic, CSOForm, TestFormDynamic, DeleteUserFormDynamic
 from models import ApplicationData, Role, User, UserChoice, Process, InvestmentLevel, Question
 from config import STATISTIC_DIR
 from webtests import app
@@ -113,7 +112,7 @@ def cso():
                 is_om_answered_on_questions.status and \
                 not is_cso_answered_on_questions.status:
             return redirect(url_for('cso_testing', page=1))
-        form = CSOFormDynamic()
+        form = CSOForm()
         investment_level = UserChoice.user_choice_chosen_investment_level()
         try:
             processes = UserChoice.user_choice_processes()
