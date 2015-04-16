@@ -123,6 +123,13 @@ class InvestmentLevel(CRUDMixin, db.Model):
 
 
 class Process(CRUDMixin, db.Model):
+    """
+    Класс представляет таблицу 'processes' в БД следующего вида:
+    id          oid     Идентификатор процесса.
+    name        text    Имя процесса.
+    role_id     oid     Идентификатор роли, которой принадлежит процесс
+                        (связь 1 ко многим: 1 роль - несколько процессов)
+    """
     __tablename__ = 'processes'
     name = db.Column(db.Text, unique=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
@@ -130,14 +137,30 @@ class Process(CRUDMixin, db.Model):
 
     @staticmethod
     def process_by_id(process_id):
+        """
+        Получить процесс по идентификатору процесса.
+        Эквивалентно запросу SELECT * FROM processes WHERE id = <process_id>;
+        @:param process_id: идентификатор процесса(int)
+        @:return Process
+        """
         return Process.query.filter(Process.id == process_id)
 
     @staticmethod
     def processes_by_role(role_id):
+        """
+        Получить все процессы, приналежащие роли.
+        Экивалентно запросу SELECT * FROM processes WHERE role_id = <role_id>;
+        @:param role_id: идентификатор роли (int)
+        @:return: List
+        """
         return Process.query.filter(Process.role_id == role_id)
 
     @staticmethod
     def testing_processes(role_id):
+        """
+        Получить список все тестируемые (выбранные пользователем CSO) процессы, принадлежащие роли.
+        Эквивалентно запросу SELECT * FROM processes WHERE role_id = <role_id> AND processes.name IN (SELECT
+        """
         chosen_processes_names = [process.answer for process in UserChoice.user_choice_processes().all()]
         return Process.query.filter(Process.role_id == role_id).\
             filter(Process.name.in_(chosen_processes_names))
@@ -158,16 +181,14 @@ class Question(CRUDMixin, db.Model):
     name                text    Имя вопроса.
     variants            text[]  Предлагаемые варианты ответа.
     correct_answers     int[]   Правильные варианты ответа.
-    indicator           enum    Тип показателя (может принимать следующие значеиня: Результативность,
-                                Рациональность, Соответствие, Непрерывность.
+    weight              int     Вес ответа
     process_id          oid     Идентификатор процесса, которому принадлежит вопрос.
     """
     __tablename__ = 'questions'
     name = db.Column(db.Text)
     variants = db.Column(ARRAY(db.Text))
     correct_answers = db.Column(ARRAY(db.Integer))
-    indicator = db.Column(ENUM(u'Результативность', u'Рациональность', u'Соответствие', u'Непрерывность',
-                               name='question_indicator'))
+    weight = db.Column(db.Integer)
     process_id = db.Column(db.Integer, db.ForeignKey('processes.id'))
 
     @staticmethod
@@ -197,6 +218,13 @@ class Question(CRUDMixin, db.Model):
         :return: list
         """
         return self.correct_answers
+
+    def question_weight(self):
+        """
+        Получить вес вопроса
+        :return: int
+        """
+        return self.weight
 
     def question_variants(self):
         """

@@ -17,8 +17,6 @@ class _MultiCheckboxField(fields.SelectMultipleField):
 
 class _HeadmasterForm(Form):
     variants = fields.RadioField(coerce=int, default=None)
-    scope_variants = fields.RadioField(coerce=int, default=None, choices=[(0, u'КВО'), (1, u'КИИ'),
-                                                                          (2, u'КСИИ'), (3, u'АСУ')])
 
 
 class _CSOForm(Form):
@@ -121,7 +119,6 @@ def HeadmasterFormDynamic(is_headmaster_start_testing):
     form.variants.choices = [(level.id, level.name) for level in InvestmentLevel.investment_levels()]
     if is_headmaster_start_testing:
         form.variants.process_data(UserChoice.user_choice_chosen_investment_level().one().choice)
-        form.scope_variants.process_data(UserChoice.user_choice_question(u'Сфера деятельности организации').one().choice)
     return form
 
 

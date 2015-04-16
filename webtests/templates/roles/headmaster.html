@@ -16,9 +16,6 @@
 {% else %}
         <p>Выбрите инвестиционный уровень организации:</p>
         {{ forms.render_choices(form.variants) }}
-
-        <p>Укажите сферу деятельности:</p>
-        {{ forms.render_choices(form.scope_variants) }}
         <p><input type="Submit" value="Начать тестирование"></p>
 {% endif %}
 </form>

@@ -138,20 +138,21 @@ def __get_statistic_by_second_algorithm(user):
 
 
 def __make_statistic_for_user(user):
-    results = sorted(__get_statistic_by_first_algorithm(user) + __get_statistic_by_second_algorithm(user))
-    role_name = user.role.name
-    x = tuple(i for i in range(0, len(results)))
-    y = tuple(item[1] for item in results)
-    process_names = tuple(str(item[0].strip(':')) for item in results)
-    index = np.arange(len(results))
-    width = 1
-    plt.clf()
-    plt.bar(x, y, width)
-    plt.ylabel(u'Уровень зрелости')
-    plt.xlabel(u'Процессы')
-    plt.xticks(index + width / 2., process_names)
-    plt.yticks(np.arange(1, 6, 1))
-    plt.savefig(STATISTIC_DIR + '/%s.png' % role_name)
+    pass
+    # results = sorted(__get_statistic_by_first_algorithm(user) + __get_statistic_by_second_algorithm(user))
+    # role_name = user.role.name
+    # x = tuple(i for i in range(0, len(results)))
+    # y = tuple(item[1] for item in results)
+    # process_names = tuple(str(item[0].strip(':')) for item in results)
+    # index = np.arange(len(results))
+    # width = 1
+    # plt.clf()
+    # plt.bar(x, y, width)
+    # plt.ylabel(u'Уровень зрелости')
+    # plt.xlabel(u'Процессы')
+    # plt.xticks(index + width / 2., process_names)
+    # plt.yticks(np.arange(1, 6, 1))
+    # plt.savefig(STATISTIC_DIR + '/%s.png' % role_name)
 
 
 def make_statistic():
