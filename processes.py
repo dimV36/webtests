@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env venv/bin/python
 __author__ = 'dimv36'
 from sys import argv
 

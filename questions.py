@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env venv/bin/python
 # coding=utf-8
 __author__ = 'dimv36'
 from sys import argv
@@ -26,6 +26,10 @@ if __name__ == '__main__':
                 count += 1
                 try:
                     process_id = Process.query.filter(Process.name.like(line + '%')).one().id
+                    if process_id == 1:
+                        sql += str('-- Process: %s\n' % line.rstrip(':'))
+                    else:
+                        sql += str('\n\n-- Process: %s\n' % line)
                 except NoResultFound:
                     print(u'Could not find process with name like %s' % line)
                     exit(1)
@@ -46,20 +50,20 @@ if __name__ == '__main__':
                 variants = variants[0:len(variants) - 2]
                 variants += '}\''
                 correct_answers = line.lstrip('+')
-                correct_answers = '{\'' + correct_answers + '}\''
+                correct_answers = '\'{' + correct_answers + '}\''
                 found = True
             # Парсим вес вопроса
             if correct_answers and not found:
-                weight = str(line)
+                weight = int(line)
                 found = True
-            if bool(weight) and line and not found:
+            if weight:
                 count += 1
                 sql += u"INSERT INTO questions(id, name, variants, correct_answers, weight, process_id) VALUES" \
                        u"(DEFAULT, '%s', %s, %s, %d, %d) RETURNING id;\n" % (question_name.decode('utf-8'),
-                                                                                 variants.decode('utf-8'),
-                                                                                 correct_answers,
-                                                                                 weight,
-                                                                                 process_id)
+                                                                             variants.decode('utf-8'),
+                                                                             correct_answers,
+                                                                             weight,
+                                                                             process_id)
                 question_name = str()
                 variants = str()
                 correct_answers = str()
