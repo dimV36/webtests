@@ -236,7 +236,7 @@ class Question(CRUDMixin, db.Model):
         """
         result = []
         for i in range(0, len(self.variants)):
-            result.append((i + 1, self.variants[i].decode('utf-8')))
+            result.append((i + 1, self.variants[i]))
         return result
 
     def question_answer(self, choice):
