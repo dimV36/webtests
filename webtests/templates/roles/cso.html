@@ -11,7 +11,7 @@
     {% endif %}
     {% if not is_cso_choose_processes.status %}
             <p>Выберите процессы организации:</p>
-            {{ forms.render_choices(form.variants) }}
+            {{ forms.render_choices(form.processes) }}
             <p><input type="Submit" value="Отправить"></p>
     {% else %}
         {% if processes %}

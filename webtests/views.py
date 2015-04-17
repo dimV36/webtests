@@ -120,7 +120,7 @@ def cso():
             processes = None
         if form.validate_on_submit():
             if not is_cso_choose_processes.status:
-                for choice in form.variants.data:
+                for choice in form.processes.data:
                     answer = Process.process_by_id(choice)
                     UserChoice.create_process_choice(g.user.username, choice, answer.one().name)
             is_cso_choose_processes.status = bool(not is_cso_choose_processes.status)

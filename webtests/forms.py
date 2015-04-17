@@ -47,7 +47,11 @@ class _HeadmasterForm(Form):
 
 
 class CSOForm(Form):
-    variants = _MultiCheckboxField(coerce=int, default=0, choices=Process.processes())
+    processes = _MultiCheckboxField(coerce=int, default=0, choices=Process.processes())
+
+    def validate_variants(self, field):
+        if not self.processes.data:
+            raise ValidationError(u'Необходимо выбрать хотя бы один процесс')
 
 
 class _QuestionForm(Form):
