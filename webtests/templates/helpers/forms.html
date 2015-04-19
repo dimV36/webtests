@@ -7,7 +7,6 @@
     </tr>
 {% endfor %}
 </table>
-
 {% for field in form if field.type not in ["HiddenField", "CSRFTokenField"] %}
     {% if field.errors %}
         <ul class="errors">
@@ -60,11 +59,17 @@
                 <h1>Тестирование пользователя {{g.user.username }} по процессу "{{ process.name }}"</h1>
             {% endif %}
                 <table cellspacing="10">
-                {% for entry in form.questions.entries %}
-                <tr>
-                    <td> {{ entry.label }} </td>
-                    <td> {{ entry.variants }}</td>
-                </tr>
+                {% for entry in form.questions_with_many_answers.entries %}
+                    <tr>
+                        <td> {{ entry.label }} </td>
+                        <td> {{ entry }} </td>
+                    </tr>
+                {% endfor %}
+                {% for entry in form.questions_with_one_answer.entries %}
+                    <tr>
+                        <td> {{ entry.label }} </td>
+                        <td> {{ entry }}</td>
+                    </tr>
                 {% endfor %}
                 </table>
                <br/>

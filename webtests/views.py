@@ -25,7 +25,6 @@ def before_request():
             remove(STATISTIC_DIR + '/' + file_name)
 
 
-
 @app.route('/admin/', methods=('GET', 'POST'))
 @login_required
 def admin():
@@ -177,6 +176,8 @@ def cio(page=1):
                 save_answers_to_db(form.questions, ROLE_HEAD_OF_BASE_LEVEL, page, process.id)
                 page = chosen_processes.next_num
             return redirect(url_for('cio', page=page))
+        else:
+            print(form.data)
         return render_template('roles/cio.html', form=form,
                                process_name=process,
                                is_cso_choose_processes=is_cso_choose_processes,
@@ -193,7 +194,8 @@ def cio(page=1):
 def om(page=1):
     if g.user.role.name == ROLE_HEAD_OF_OPERATIONAL_LEVEL:
         is_cio_answered_on_questions = ApplicationData.is_cio_answered_on_questions()
-        chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_OPERATIONAL_LEVEL).paginate(page, 1, False)
+        chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_OPERATIONAL_LEVEL).\
+            paginate(page, 1, False)
         if is_cio_answered_on_questions.status:
             current_process = chosen_processes.items[0]
             questions_by_process = Question.chosen_questions(current_process.choice).all()
@@ -230,7 +232,8 @@ def om(page=1):
 def tm(page=1):
     if g.user.role.name == ROLE_HEAD_OF_TACTICAL_LEVEL:
         is_om_answered_on_questions = ApplicationData.is_om_answered_on_questions()
-        chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_TACTICAL_LEVEL).paginate(page, 1, False)
+        chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_TACTICAL_LEVEL).\
+            paginate(page, 1, False)
         if is_om_answered_on_questions.status:
             current_process = chosen_processes.items[0]
             questions_by_process = Question.chosen_questions(current_process.choice).all()
@@ -265,7 +268,8 @@ def tm(page=1):
 def cso_testing(page=1):
     if g.user.role.name == ROLE_HEAD_OF_INFORMATION_SECURITY:
         is_tm_answered_on_questions = ApplicationData.is_tm_answered_on_questions()
-        chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_INFORMATION_SECURITY).paginate(page, 1, False)
+        chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_INFORMATION_SECURITY).\
+            paginate(page, 1, False)
         if is_tm_answered_on_questions.status:
             current_process = chosen_processes.items[0]
             questions_by_process = Question.chosen_questions(current_process.choice).all()
@@ -335,4 +339,3 @@ def user_page(username):
             return redirect(url_for('om'))
         elif user.role.name == ROLE_HEAD_OF_TACTICAL_LEVEL:
             return redirect(url_for('tm'))
-

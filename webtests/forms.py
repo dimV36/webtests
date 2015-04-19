@@ -11,7 +11,7 @@ from config import USE_PASSWORD_POLICY
 
 
 class _MultiCheckboxField(fields.SelectMultipleField):
-    widget = widgets.ListWidget(prefix_label=False)
+    widget = widgets.TableWidget()
     option_widget = widgets.CheckboxInput()
 
 
@@ -49,9 +49,53 @@ class _HeadmasterForm(Form):
 class CSOForm(Form):
     processes = _MultiCheckboxField(coerce=int, default=0, choices=Process.processes())
 
-    def validate_variants(self, field):
+    def validate_processes(self, field):
         if not self.processes.data:
             raise ValidationError(u'Необходимо выбрать хотя бы один процесс')
+
+
+class TestForm(Form):
+    questions_with_one_answer = fields.FieldList(fields.SelectField(coerce=int, default=0, validators=[Optional()]))
+    questions_with_many_answers = fields.FieldList(_MultiCheckboxField(coerce=int, default=0, validators=[Optional()]))
+    next_page = fields.SubmitField(label=u'Далее')
+    finish = fields.SubmitField(label=u'Завершить')
+
+    def __init__(self, formdata=None, obj=None, prefix='', data=None, meta=None, **kwargs):
+        super(self.__class__, self).__init__(formdata=None, obj=None, prefix='', **kwargs)
+        if 'questions' in kwargs:
+            # Установка вопросов в форму
+            questions = kwargs['questions']
+            # self.__set_questions_to_form(kwargs['questions'])
+            for i in range(0, len(questions)):
+                question = questions[i]
+                if len(question.correct_answers) == 1:
+                    self.questions_with_one_answer.append_entry(fields.SelectField(coerce=int, default=None))
+                    self.questions_with_one_answer.entries[i - 2].label = question.name
+                    self.questions_with_one_answer.entries[i - 2].choices = question.question_variants(True)
+                else:
+                    question_form = _MultiCheckboxField(coerce=int, default=None)
+                    question_form.label = question.name
+                    self.questions_with_many_answers.append_entry(question_form)
+                    self.questions_with_many_answers.entries[i].label = question.name
+                    self.questions_with_many_answers.entries[i].choices = question.question_variants(False)
+        else:
+            raise ValueError('TestForm needed in questions for set in form')
+
+    def __set_questions_to_form(self, questions):
+        pass
+
+    def validate_questions_with_one_answer(self, field):
+        for entry in self.questions_with_one_answer.entries:
+            if entry.data == 0:
+                raise ValidationError(u'Необходимо ответить на все вопросы')
+
+    def validate_questions_with_many_answers(self, field):
+        print('\nvalidate_questions_with_many_answers\n')
+        for entry in self.questions_with_many_answers.entries:
+            print('entry: %s' % entry.data)
+            # if not entry.data:
+            #     raise ValidationError(u'На вопросы, предполагающие несколько ответов, необходимо дать по крайней '
+            #                           u'мере один ответ')
 
 
 class _QuestionForm(Form):
@@ -66,7 +110,6 @@ class _TestForm(Form):
 
     def validate_questions(self, field):
         for entry in self.questions.entries:
-            print(self.questions.data)
             if entry.variants.data == 0:
                 raise ValidationError(u'Необходимо ответить на все вопросы')
 
@@ -154,17 +197,19 @@ def HeadmasterFormDynamic(is_headmaster_start_testing):
 
 
 def TestFormDynamic(questions_by_process):
-    form = _TestForm()
-    if not form.questions.entries:
-        for i in range(0, len(questions_by_process)):
-            question = questions_by_process[i]
-            question_form = _QuestionForm()
-            form.questions.append_entry(question_form)
-            form.questions.entries[i].label = question.name
-            form.questions.entries[i].variants.choices = [(0, '')] + question.question_variants()
-    else:
-        for i in range(0, len(questions_by_process)):
-            question = questions_by_process[i]
-            form.questions.entries[i].label = question.name
-            form.questions.entries[i].variants.choices = [(0, '')] + question.question_variants()
-    return form
+    # form = _TestForm()
+    new_form = TestForm(questions=questions_by_process)
+    # if not form.questions.entries:
+    #     for i in range(0, len(questions_by_process)):
+    #         question = questions_by_process[i]
+    #         question_form = _QuestionForm()
+    #         form.questions.append_entry(question_form)
+    #         form.questions.entries[i].label = question.name
+    #         form.questions.entries[i].variants.choices = [(0, '')] + question.question_variants()
+    # else:
+    #     for i in range(0, len(questions_by_process)):
+    #         question = questions_by_process[i]
+    #         form.questions.entries[i].label = question.name
+    #         form.questions.entries[i].variants.choices = [(0, '')] + question.question_variants()
+    # return form
+    return new_form

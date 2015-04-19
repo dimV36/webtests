@@ -215,26 +215,14 @@ class Question(CRUDMixin, db.Model):
         """
         return Question.query.filter(Question.process_id == process_id)
 
-    def question_correct_answers(self):
-        """
-        Получить список правильных ответов пользователя
-        :return: list
-        """
-        return self.correct_answers
-
-    def question_weight(self):
-        """
-        Получить вес вопроса
-        :return: int
-        """
-        return self.weight
-
-    def question_variants(self):
+    def question_variants(self, create_empty_variant=True):
         """
         Получить список вариантов ответов вопроса.
         :return: list
         """
         result = []
+        if create_empty_variant:
+            result = [(0, '')]
         for i in range(0, len(self.variants)):
             result.append((i + 1, self.variants[i]))
         return result
