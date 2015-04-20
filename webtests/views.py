@@ -6,7 +6,7 @@ from os.path import exists
 from os import mkdir, remove, listdir
 
 from webtests.roles import *
-from forms import LoginForm, RegisteredUserForm, HeadmasterFormDynamic, CSOForm, TestFormDynamic, DeleteUserFormDynamic
+from forms import LoginForm, RegisteredUserForm, HeadmasterForm, CSOForm, DeleteUserForm, TestForm
 from models import ApplicationData, Role, User, UserChoice, Process, InvestmentLevel, Question
 from config import STATISTIC_DIR
 from webtests import app
@@ -54,7 +54,7 @@ def register_user():
 @login_required
 def delete_user():
     if User.is_admin(g.user.username):
-        form = DeleteUserFormDynamic()
+        form = DeleteUserForm()
         users = User.users()
         if form.prev.data:
             return redirect(url_for('admin'))
@@ -74,14 +74,14 @@ def headmaster():
     if g.user.role.name == ROLE_HEAD_OF_ORGANIZATION:
         is_headmaster_started_testing = ApplicationData.is_headmaster_started_testing()
         is_cso_answered_on_questions = ApplicationData.is_cso_answered_on_questions()
-        form = HeadmasterFormDynamic(is_headmaster_started_testing.status)
+        form = HeadmasterForm()
         try:
             investment_level = UserChoice.user_choice_chosen_investment_level()
         except NoResultFound:
             investment_level = None
         if form.validate_on_submit():
             if not is_headmaster_started_testing.status:
-                choice = form.variants.data
+                choice = form.investment_levels.data
                 answer = InvestmentLevel().investment_level(choice)
                 UserChoice.create_investment_level_choice(g.user.username, choice, answer.one().name)
             else:
@@ -163,11 +163,12 @@ def cio(page=1):
         else:
             questions_by_process = []
             process = None
-        form = TestFormDynamic(questions_by_process)
+        form = TestForm(questions_by_process)
         is_cio_answered_on_questions = ApplicationData.is_cio_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
                 page = chosen_processes.pages
+                # TODO: Реализовать корректное сохранение ответов пользователей
                 save_answers_to_db(form.questions, ROLE_HEAD_OF_BASE_LEVEL, page, process.id)
                 if not is_cio_answered_on_questions.status:
                     is_cio_answered_on_questions.status = bool(not is_cio_answered_on_questions.status)
@@ -203,7 +204,7 @@ def om(page=1):
         else:
             questions_by_process = []
             process = None
-        form = TestFormDynamic(questions_by_process)
+        form = TestForm(questions_by_process)
         is_om_answered_on_questions = ApplicationData.is_om_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
@@ -241,7 +242,7 @@ def tm(page=1):
         else:
             questions_by_process = []
             process = None
-        form = TestFormDynamic(questions_by_process)
+        form = TestForm(questions_by_process)
         is_tm_answered_on_questions = ApplicationData.is_tm_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
@@ -277,7 +278,7 @@ def cso_testing(page=1):
         else:
             questions_by_process = []
             process = None
-        form = TestFormDynamic(questions_by_process)
+        form = TestForm(questions_by_process)
         is_cso_answered_on_questions = ApplicationData.is_cso_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:

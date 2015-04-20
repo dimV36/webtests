@@ -15,7 +15,7 @@
     </p>
 {% else %}
         <p>Выбрите инвестиционный уровень организации:</p>
-        {{ forms.render_choices(form.variants) }}
+        {{ forms.render_choices(form.investment_levels) }}
         <p><input type="Submit" value="Начать тестирование"></p>
 {% endif %}
 </form>
