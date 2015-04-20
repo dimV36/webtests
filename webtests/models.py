@@ -5,13 +5,18 @@ from backports.pbkdf2 import pbkdf2_hmac, compare_digest
 from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.dialects.postgresql import ARRAY, ENUM
+from sqlalchemy.dialects.postgresql import ARRAY
 from webtests.data import CRUDMixin, db
 from roles import USER_ROLES, ROLE_ADMIN
 from config import ADMIN_PASSWORD
 
 
 class Role(UserMixin, CRUDMixin, db.Model):
+    """
+    Класс предсталяет собой таблицу 'roles' следующего вида:
+    id          oid         идентификатор роли
+    name        text        имя роли
+    """
     __tablename__ = 'roles'
     name = db.Column(db.Text, unique=True)
     user = db.relationship('User', backref='role', uselist=False)
@@ -19,6 +24,10 @@ class Role(UserMixin, CRUDMixin, db.Model):
 
     @staticmethod
     def create_roles(roles_list):
+        """
+        Метод создания ролей
+        @:param roles_list: список ролей (list)
+        """
         for role in roles_list:
             try:
                 Role.role_by_name(role).one()
@@ -27,14 +36,32 @@ class Role(UserMixin, CRUDMixin, db.Model):
 
     @staticmethod
     def role_by_id(role_id):
+        """
+        Метод получения роли по переданному идентификтору.
+        Эквивалентно запросу SELECT * FROM roles WHERE id = <role_id>;
+        @:param role_id: Идентификатор роли (int)
+        @:return Role
+        """
         return Role.query.filter(Role.id == role_id)
 
     @staticmethod
     def role_by_name(role_name):
+        """
+        Метод получения роли по переданному имени.
+        Эквивалентно запросу SELECT * FROM roles WHERE name = <role_name>;
+        @:param role_name: Имя роли (str)
+        @:return Role
+        """
         return Role.query.filter(Role.name == role_name)
 
     @staticmethod
     def testing_roles():
+        """
+        Метод получения списка тестируемых ролей.
+        Предполагается, что роли ADMIN и HEADMASTER имеют идентификаторы 1 и 2 соответственно
+        и они не участвуют в тестировании.
+        Эквивалентно запросу SELECT * FROM roles WHERE id >= 3;
+        """
         return Role.query.filter(Role.id >= 3)
 
     def __repr__(self):
@@ -42,9 +69,18 @@ class Role(UserMixin, CRUDMixin, db.Model):
 
 
 class User(UserMixin, CRUDMixin, db.Model):
+    """
+    Класс представляет собой таблицу 'users' следующего вида
+    id          oid             Идентификатор пользователя
+    username    text            Имя пользователя
+    role_id     oid             Идентификатор роли, которой соответствует пользователь.
+                                (Один к одному: одна роль к одному пользователю)
+    _password   bytea           Хэш пароля пользователя
+    _salt       varchar         Соль, используемая для шифрования и дешифрования пароля
+    """
     __tablename__ = 'users'
     __ADMIN_USER = 'admin'
-    username = db.Column(db.String(50), unique=True)
+    username = db.Column(db.Text, unique=True)
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     _password = db.Column(db.LargeBinary(120))
     _salt = db.Column(db.String(120))
@@ -52,20 +88,35 @@ class User(UserMixin, CRUDMixin, db.Model):
 
     @hybrid_property
     def password(self):
+        """
+        Метод получения пароля пользователя
+        """
         return self._password
 
     @password.setter
     def password(self, value):
-        # When a user is first created, give them a salt
+        """
+        Метод установки пароля
+        @:param value: пароль пользователя в текстовом виде
+        """
+        # Когда пользователь впервые создан, генерируем ему соль
         if self._salt is None:
             self._salt = bytes(SystemRandom().getrandbits(128))
+        # Хэшируем пароль с использованием соли
         self._password = self._hash_password(value)
 
     def is_valid_password(self, password):
+        """
+        Метод проверки корректности введенного пароля
+        """
         new_hash = self._hash_password(password)
+        # Сравниваем хэши введённого пароля и того, которых хранится в таблице
         return compare_digest(new_hash, self._password)
 
     def _hash_password(self, password):
+        """
+        Метод шифрования пароля
+        """
         pwd = password.encode('utf-8')
         salt = bytes(self._salt)
         buff = pbkdf2_hmac('sha512', pwd, salt, iterations=100000)
@@ -73,6 +124,9 @@ class User(UserMixin, CRUDMixin, db.Model):
 
     @staticmethod
     def create_admin():
+        """
+        Метод создания администратора
+        """
         admin = None
         try:
             admin = User.query.filter(User.username == User.__ADMIN_USER).one()
@@ -84,22 +138,50 @@ class User(UserMixin, CRUDMixin, db.Model):
 
     @staticmethod
     def user_by_name(username):
+        """
+        Метод получения пользователя по его имени.
+        Эквивалентно запросу SELECT * FROM users WHERE username = <username>;
+        :param username: Имя пользователя (str)
+        :return User
+        """
         return User.query.filter(User.username == username)
 
     @staticmethod
     def user_by_role_id(role_id):
+        """
+        Метод получения пользователя по идентификатору роли
+        Эквивалентно запросу SELECT * FROM users WHERE role_id = <role_id>;
+        :param role_id: Идентификатор роли (int)
+        :return User
+        """
         return User.query.filter(User.role_id == role_id)
 
     @staticmethod
     def user_by_id(user_id):
+        """
+        Метод получения пользователя по идентификатору пользователя
+        Эквивалентно запросу SELECT * FROM users WHERE id = <user_id>;
+        :param user_id: Идентификатор пользователя (int)
+        :return User
+        """
         return User.query.filter(User.id == user_id)
 
     @staticmethod
     def users():
+        """
+        Метод получения всех пользователей системы.
+        Эквивалентно запросу SELECT * FROM users WHERE username != admin;
+        :return list
+        """
         return User.query.filter(User.username != User.__ADMIN_USER)
 
     @staticmethod
     def is_admin(username):
+        """
+        Пользователь является администратором?
+        :param username: имя пользователя (str)
+        :return bool
+        """
         return User.__ADMIN_USER == username
 
     def __repr__(self):
@@ -107,15 +189,31 @@ class User(UserMixin, CRUDMixin, db.Model):
 
 
 class InvestmentLevel(CRUDMixin, db.Model):
+    """
+    Класс представляет собой таблицу 'investment_levels' следующего вида:
+    id          oid         Идентификатор инвестиционного уровня
+    name        text        Имя инвестиционного уровня
+    """
     __tablename__ = 'investment_levels'
     name = db.Column(db.Text, unique=True)
 
     @staticmethod
     def investment_levels():
+        """
+        Метод получения инвестиционного уровней.
+        Эквивалент запросу SELECT * FROM investment_levels;
+        :return list
+        """
         return InvestmentLevel.query
 
     @staticmethod
     def investment_level(investment_level_id):
+        """
+        Метод получения инвестиционного уровня по идентификатору.
+        Эквивалентно запросу: SELECT * FROM investment_levels WHERE id = <investment_level_id>;
+        :param investment_level_id идентификатор инвестиционного уровня (int)
+        :return InvestmentLevel
+        """
         return InvestmentLevel.query.filter(InvestmentLevel.id == investment_level_id)
 
     def __repr__(self):
@@ -320,7 +418,7 @@ class ApplicationData(CRUDMixin, db.Model):
         """
         Метод инициализации состояний системы. Используется при старте системы.
         Эквивалентно созданию 6 состояний (см. выше) со значениями False.
-        :return:
+        :return: None
         """
         for field in ApplicationData.__APPLICATION_FIELD_DATA:
             try:
@@ -354,10 +452,10 @@ class UserChoice(CRUDMixin, db.Model):
         except NoResultFound:
             raise ValueError(u'Не найдена запить в базе данных для пользователя "%s"' % username)
         UserChoice.create(user_id=user.one().id,
-                            field=UserChoice.__FIELD_INVESTMENT_LEVEL,
-                            question=u'Инвестиционный уровень',
-                            choice=choice,
-                            answer=answer)
+                          field=UserChoice.__FIELD_INVESTMENT_LEVEL,
+                          question=u'Инвестиционный уровень',
+                          choice=choice,
+                          answer=answer)
 
     @staticmethod
     def create_process_choice(username, choice, answer):
@@ -366,10 +464,10 @@ class UserChoice(CRUDMixin, db.Model):
         except NoResultFound:
             raise ValueError(u'Не найдена запись в базе данных для пользователя "%s"' % username)
         UserChoice.create(user_id=user.one().id,
-                            field=UserChoice.__FIELD_PROCESS,
-                            question=u'Процесс',
-                            choice=choice,
-                            answer=answer)
+                          field=UserChoice.__FIELD_PROCESS,
+                          question=u'Процесс',
+                          choice=choice,
+                          answer=answer)
 
     @staticmethod
     def create_question_choice(username, process_id, question, choice, answer):
@@ -378,10 +476,10 @@ class UserChoice(CRUDMixin, db.Model):
         except NoResultFound:
             raise ValueError(u'Не найдена запись в базе данных для пользователя "%s"' % username)
         UserChoice.create(user_id=user.one().id,
-                            field=UserChoice.__FIELD_QUESTION + ' %d' % process_id,
-                            question=question,
-                            choice=choice,
-                            answer=answer)
+                          field=UserChoice.__FIELD_QUESTION + ' %d' % process_id,
+                          question=question,
+                          choice=choice,
+                          answer=answer)
 
     @staticmethod
     def user_choice_chosen_investment_level():
@@ -414,4 +512,3 @@ def create_entities():
     Role.create_roles(USER_ROLES)
     User.create_admin()
     ApplicationData.init_application_data()
-
