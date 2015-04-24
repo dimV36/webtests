@@ -5,8 +5,7 @@ from backports.pbkdf2 import pbkdf2_hmac, compare_digest
 from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy_utils import JSONType
+from sqlalchemy.dialects.postgresql import ARRAY, ENUM, JSON
 from webtests.data import CRUDMixin, db
 from roles import USER_ROLES, ROLE_ADMIN
 from config import ADMIN_PASSWORD
@@ -242,7 +241,7 @@ class Process(CRUDMixin, db.Model):
         @:param process_id: идентификатор процесса(int)
         @:return Process
         """
-        return Process.query.filter(Process.id == process_id)
+        return Process.query.filter(Process.id == process_id).one()
 
     @staticmethod
     def processes_by_role(role_id):
@@ -434,59 +433,92 @@ class ApplicationData(CRUDMixin, db.Model):
 
 
 class UserChoice(CRUDMixin, db.Model):
+    """
+    Класс представляет собой таблицу user_choices следующего вида:
+    id          oid             Идентификатор
+    user_id     oid             Идентификатор пользователя, занёсший запись в таблицу
+    type        type_choice     Тип записи, может принимать следующие значения:
+                                'investment_level', 'process', 'question'
+    answer      json            Данные о выборе пользователя
+    """
     __tablename__ = 'user_choices'
-    __FIELD_INVESTMENT_LEVEL = 'investment_level'
-    __FIELD_PROCESS = 'process'
-    __FIELD_QUESTION = 'question'
+    __TYPE_INVESTMENT_LEVEL = 'investment_level'
+    __TYPE_PROCESS = 'process'
+    __TYPE_QUESTION = 'question'
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    field = db.Column(db.Text)
-    question = db.Column(db.Text)
-    choice = db.Column(db.Integer)
-    answer = db.Column(db.Text)
+    type = db.Column(ENUM(__TYPE_INVESTMENT_LEVEL, __TYPE_PROCESS, __TYPE_QUESTION, name='choice_enum'))
+    answer = db.Column(JSON())
 
     @staticmethod
     def __user_choice(field):
         return UserChoice.query.filter(UserChoice.field == field)
 
     @staticmethod
-    def create_investment_level_choice(username, choice, answer):
-        try:
-            user = User.user_by_name(username)
-        except NoResultFound:
-            raise ValueError(u'Не найдена запить в базе данных для пользователя "%s"' % username)
-        UserChoice.create(user_id=user.one().id,
-                          field=UserChoice.__FIELD_INVESTMENT_LEVEL,
-                          question=u'Инвестиционный уровень',
-                          choice=choice,
-                          answer=answer)
+    def create_investment_level_choice(user_id, choice):
+        """
+        Создать запись о выборе инвестиционного уровня пользователем
+        :param user_id: идентификатор пользователя (int)
+        :param choice: выбор пользователя (dict)
+        :return: None
+        """
+        investment_level_name = InvestmentLevel.investment_level(choice).one().name
+        user_choice = {'choice': choice,
+                       'choice_name': investment_level_name
+                       }
+        UserChoice.create(user_id=user_id,
+                          type=UserChoice.__TYPE_INVESTMENT_LEVEL,
+                          answer=user_choice)
 
     @staticmethod
-    def create_process_choice(username, choice, answer):
-        try:
-            user = User.user_by_name(username)
-        except NoResultFound:
-            raise ValueError(u'Не найдена запись в базе данных для пользователя "%s"' % username)
-        UserChoice.create(user_id=user.one().id,
-                          field=UserChoice.__FIELD_PROCESS,
-                          question=u'Процесс',
-                          choice=choice,
-                          answer=answer)
+    def create_process_choice(user_id, choices):
+        """
+        Создать запись о выборе процессов пользователем
+        :param user_id: идентификатор пользователя (int)
+        :param choices: выбор пользователя (dict)
+        :return: None
+        """
+        process_names = []
+        for choice in choices:
+            process_names.append(Process.process_by_id(choice).name.decode('utf-8'))
+        user_choice = {'choice': choices,
+                       'choice_name': process_names}
+        UserChoice.create(user_id=user_id,
+                          type=UserChoice.__TYPE_PROCESS,
+                          answer=user_choice)
 
     @staticmethod
-    def create_question_choice(username, process_id, question, choice, answer):
-        try:
-            user = User.user_by_name(username)
-        except NoResultFound:
-            raise ValueError(u'Не найдена запись в базе данных для пользователя "%s"' % username)
-        UserChoice.create(user_id=user.one().id,
-                          field=UserChoice.__FIELD_QUESTION + ' %d' % process_id,
-                          question=question,
-                          choice=choice,
-                          answer=answer)
+    def create_question_choice(user_id, choice):
+        """
+        Создать запись об ответе на вопрос пользователем
+        :param user_id: идентификатор пользователя (int)
+        :param choice: выбор пользователя (dict)
+        :return: None
+        """
+        UserChoice.create(user_id=user_id,
+                          field=UserChoice.__TYPE_QUESTION,
+                          choice=choice)
+
+    def choice_name(self):
+        """
+        Получить ответ (в текстовом виде)
+        :return: str
+        """
+        return self.answer['choice_name']
+
+    def choice(self):
+        """
+        Получить ответ (в числовом виде, как номер ответа в форме пользователя)
+        :return: int
+        """
+        return self.answer['choice']
 
     @staticmethod
     def user_choice_chosen_investment_level():
-        return UserChoice.query.filter(UserChoice.field == UserChoice.__FIELD_INVESTMENT_LEVEL)
+        """
+        Получить выбор пользователя инвестиционного уровня.
+        :return: BaseQuery
+        """
+        return UserChoice.query.filter(UserChoice.type == UserChoice.__TYPE_INVESTMENT_LEVEL)
 
     @staticmethod
     def user_choice_question(question_name):
@@ -499,7 +531,11 @@ class UserChoice(CRUDMixin, db.Model):
 
     @staticmethod
     def user_choice_processes():
-        return UserChoice.query.filter(UserChoice.field == UserChoice.__FIELD_PROCESS)
+        """
+        Получить выбор пользователя процессов для тестирования.
+        :return: UserChoice
+        """
+        return UserChoice.query.filter(UserChoice.type == UserChoice.__TYPE_PROCESS)
 
     @staticmethod
     def user_choice_processes_by_role(user_role):

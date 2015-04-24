@@ -31,7 +31,7 @@ class HeadmasterForm(Form):
         self.investment_levels.choices = [(level.id, level.name) for level in InvestmentLevel.investment_levels()]
         # Устанавливаем ранее созданные правильные ответы
         if ApplicationData.is_headmaster_started_testing().status:
-            self.investment_levels.process_data(UserChoice.user_choice_chosen_investment_level().one().choice)
+            self.investment_levels.process_data(UserChoice.user_choice_chosen_investment_level().one().choice())
 
 
 class CSOForm(Form):

@@ -7,7 +7,7 @@
 <form action="{{url_for('cso')}}" method="POST">
 {% if is_headmaster_started_testing.status %}
     {% if investment_level %}
-        Инвестиционный уровень: "<b>{{ investment_level.one().answer }}</b>"
+        Инвестиционный уровень: "<b>{{ investment_level.one().choice_name() }}</b>"
     {% endif %}
     {% if not is_cso_choose_processes.status %}
             <p>Выберите процессы организации:</p>
@@ -17,8 +17,8 @@
         {% if processes %}
             <p>Были выбраны следующие процессы:</p>
             <ul>
-            {% for process in processes.all() %}
-                <li>{{ process.answer }}</li>
+            {% for process in processes %}
+                <li>{{ process }}</li>
             {% endfor %}
             </ul>
         {% endif %}

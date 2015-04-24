@@ -75,15 +75,10 @@ def headmaster():
         is_headmaster_started_testing = ApplicationData.is_headmaster_started_testing()
         is_cso_answered_on_questions = ApplicationData.is_cso_answered_on_questions()
         form = HeadmasterForm()
-        try:
-            investment_level = UserChoice.user_choice_chosen_investment_level()
-        except NoResultFound:
-            investment_level = None
         if form.validate_on_submit():
             if not is_headmaster_started_testing.status:
                 choice = form.investment_levels.data
-                answer = InvestmentLevel().investment_level(choice)
-                UserChoice.create_investment_level_choice(g.user.username, choice, answer.one().name)
+                UserChoice.create_investment_level_choice(g.user.id, choice)
             else:
                 choices = UserChoice.query.all()
                 for choice in choices:
@@ -94,7 +89,7 @@ def headmaster():
         return render_template('roles/headmaster.html', form=form,
                                headmaster_is_started_testing=is_headmaster_started_testing,
                                is_cso_answered_on_questions=is_cso_answered_on_questions,
-                               investment_level=investment_level)
+                               investment_level=UserChoice.user_choice_chosen_investment_level())
     else:
         return u'Вы не можете получить доступ к этой странице'
 
@@ -112,23 +107,20 @@ def cso():
                 not is_cso_answered_on_questions.status:
             return redirect(url_for('cso_testing', page=1))
         form = CSOForm()
-        investment_level = UserChoice.user_choice_chosen_investment_level()
         try:
-            processes = UserChoice.user_choice_processes()
+            processes = UserChoice.user_choice_processes().one().choice_name()
         except NoResultFound:
             processes = None
         if form.validate_on_submit():
             if not is_cso_choose_processes.status:
-                for choice in form.processes.data:
-                    answer = Process.process_by_id(choice)
-                    UserChoice.create_process_choice(g.user.username, choice, answer.one().name)
+                UserChoice.create_process_choice(g.user.id, form.processes.data)
             is_cso_choose_processes.status = bool(not is_cso_choose_processes.status)
             is_cso_choose_processes.update()
         return render_template('roles/cso.html', form=form,
                                is_headmaster_started_testing=is_headmaster_started_testing,
                                is_cso_choose_processes=is_cso_choose_processes,
                                is_cso_answered_on_questions=is_cso_answered_on_questions,
-                               investment_level=investment_level,
+                               investment_level=UserChoice.user_choice_chosen_investment_level(),
                                processes=processes)
     else:
         return u'Вы не можете получить доступ к этой странице'
