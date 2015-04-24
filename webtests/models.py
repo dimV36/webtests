@@ -6,6 +6,7 @@ from flask_login import UserMixin
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy_utils import JSONType
 from webtests.data import CRUDMixin, db
 from roles import USER_ROLES, ROLE_ADMIN
 from config import ADMIN_PASSWORD
@@ -281,13 +282,15 @@ class Question(CRUDMixin, db.Model):
     id                  oid     Идентификатор вопроса.
     name                text    Имя вопроса.
     variants            text[]  Предлагаемые варианты ответа.
-    correct_answers     int[]   Правильные варианты ответа.
+    marks               int[]   Оценки, которые получает пользователь за выбор варианта ответа (может быть NULL).
+    correct_answers     int[]   Правильные варианты ответа (может быть NULL).
     weight              int     Вес ответа
     process_id          oid     Идентификатор процесса, которому принадлежит вопрос.
     """
     __tablename__ = 'questions'
     name = db.Column(db.Text)
     variants = db.Column(ARRAY(db.Text))
+    marks = db.Column(ARRAY(db.Integer))
     correct_answers = db.Column(ARRAY(db.Integer))
     weight = db.Column(db.Integer)
     process_id = db.Column(db.Integer, db.ForeignKey('processes.id'))
