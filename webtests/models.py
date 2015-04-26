@@ -479,7 +479,7 @@ class UserChoice(CRUDMixin, db.Model):
         """
         process_names = []
         for choice in choices:
-            process_names.append(Process.process_by_id(choice).name.decode('utf-8'))
+            process_names.append(Process.process_by_id(choice).name)
         user_choice = {'choice': choices,
                        'choice_name': process_names}
         UserChoice.create(user_id=user_id,
@@ -538,10 +538,16 @@ class UserChoice(CRUDMixin, db.Model):
         return UserChoice.query.filter(UserChoice.type == UserChoice.__TYPE_PROCESS)
 
     @staticmethod
-    def user_choice_processes_by_role(user_role):
-        role = Role.role_by_name(user_role).one()
-        user_processes_names = [process.name for process in role.process.all()]
-        return UserChoice.query.filter(UserChoice.answer.in_(user_processes_names))
+    def user_choice_processes_by_role_id(role_id):
+        """
+        Получить процессы, по которым пользователь должен пройти тестирование
+        :param role_id: идентификатор роли
+        :return: BaseQuery
+        """
+        # Получаем выбранные процессы
+        chosen_processes = UserChoice.user_choice_processes().one().choice()
+        # Фильтрем процессы по роли и идентификатору процесса
+        return Process.processes_by_role(role_id).filter(Process.id.in_(chosen_processes))
 
     def __repr__(self):
         return '<UsersChoices #{:d}>'.format(self.id)

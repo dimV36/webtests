@@ -116,6 +116,7 @@ def cso():
                 UserChoice.create_process_choice(g.user.id, form.processes.data)
             is_cso_choose_processes.status = bool(not is_cso_choose_processes.status)
             is_cso_choose_processes.update()
+            return redirect(url_for('cso'))
         return render_template('roles/cso.html', form=form,
                                is_headmaster_started_testing=is_headmaster_started_testing,
                                is_cso_choose_processes=is_cso_choose_processes,
@@ -147,15 +148,14 @@ def save_answers_to_db(entries, user_role, page, process_id):
 def cio(page=1):
     if g.user.role.name == ROLE_HEAD_OF_BASE_LEVEL:
         is_cso_choose_processes = ApplicationData.is_cso_choose_processes()
-        chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_BASE_LEVEL).paginate(page, 1, False)
+        chosen_processes = UserChoice.user_choice_processes_by_role_id(g.user.role_id).paginate(page, 1, False)
         if is_cso_choose_processes.status:
-            current_process = chosen_processes.items[0]
-            questions_by_process = Question.chosen_questions(current_process.choice).all()
-            process = Process.process_by_id(current_process.choice).one()
+            current_process = chosen_processes.items[page - 1]
+            questions_by_process = Question.chosen_questions(current_process.id).all()
         else:
             questions_by_process = []
-            process = None
-        form = TestForm(questions_by_process)
+            current_process = None
+        form = TestForm(questions=questions_by_process)
         is_cio_answered_on_questions = ApplicationData.is_cio_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
@@ -169,10 +169,8 @@ def cio(page=1):
                 save_answers_to_db(form.questions, ROLE_HEAD_OF_BASE_LEVEL, page, process.id)
                 page = chosen_processes.next_num
             return redirect(url_for('cio', page=page))
-        else:
-            print(form.data)
         return render_template('roles/cio.html', form=form,
-                               process_name=process,
+                               process_name=current_process.name,
                                is_cso_choose_processes=is_cso_choose_processes,
                                is_cio_answered_on_questions=is_cio_answered_on_questions,
                                processes=chosen_processes,

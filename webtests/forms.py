@@ -43,8 +43,8 @@ class CSOForm(Form):
 
 
 class TestForm(Form):
-    __MAX_QUESTIONS_WITH_MANY_ANSWERS = 2
-    __MAX_QUESTIONS_WITH_ONE_ANSWER = 13
+    __MAX_QUESTIONS_WITH_MANY_ANSWERS = 1
+    __MAX_QUESTIONS_WITH_ONE_ANSWER = 11
     questions_with_many_answers = fields.FieldList(_MultiCheckboxField(coerce=int, default=0),
                                                    max_entries=__MAX_QUESTIONS_WITH_MANY_ANSWERS)
     questions_with_one_answer = fields.FieldList(fields.SelectField(coerce=int, default=0),
@@ -52,26 +52,44 @@ class TestForm(Form):
     next_page = fields.SubmitField(label=u'Далее')
     finish = fields.SubmitField(label=u'Завершить')
 
+    def __create_entries(self):
+        """
+        Метод создания сущностей формы
+        :return: None
+        """
+        while len(self.questions_with_one_answer.entries) < self.__MAX_QUESTIONS_WITH_ONE_ANSWER:
+            self.questions_with_one_answer.append_entry(fields.SelectField(coerce=int, default=None))
+        while len(self.questions_with_many_answers.entries) < self.__MAX_QUESTIONS_WITH_MANY_ANSWERS:
+            self.questions_with_many_answers.append_entry(_MultiCheckboxField(coerce=int, default=None))
+
     def __init__(self, *args, **kwargs):
         super(self.__class__, self).__init__(*args, **kwargs)
         if 'questions' in kwargs:
             # Установка вопросов в форму
             questions = kwargs['questions']
-            for i in range(0, len(questions)):
-                question = questions[i]
-                # Если количество правильных ответов равно 1, то создаём RadioField для этого вопроса
-                if len(question.correct_answers) == 1:
-                    if len(self.questions_with_one_answer.entries) < self.__MAX_QUESTIONS_WITH_ONE_ANSWER:
-                        self.questions_with_one_answer.append_entry(fields.SelectField(coerce=int, default=None))
-                    # Первые два вопроса предполагают несколько правильных ответов, поэтому смещение тут -2
-                    self.questions_with_one_answer.entries[i - 2].label = question.name
-                    self.questions_with_one_answer.entries[i - 2].choices = question.question_variants(True)
-                # Количество правильных ответов больше одного, создаём MultiCheckBox для этого вопроса
-                elif len(question.correct_answers) != 1:
-                    if len(self.questions_with_many_answers.entries) < self.__MAX_QUESTIONS_WITH_MANY_ANSWERS:
-                        self.questions_with_many_answers.append_entry(_MultiCheckboxField(coerce=int, default=None))
-                    self.questions_with_many_answers.entries[i].label = question.name
-                    self.questions_with_many_answers.entries[i].choices = question.question_variants(False)
+            self.__create_entries()
+            # Разделяем вопросы процесса на те, которые предполагают один правильный ответ
+            # и на те, которые предполагают несколько правильных ответов
+            questions_with_one_answer = []
+            questions_with_many_answers = []
+            for question in questions:
+                correct_answers_length = 0
+                if question.correct_answers:
+                    correct_answers_length = len(question.correct_answers)
+                if correct_answers_length == 1 or question.marks:
+                    questions_with_one_answer.append(question)
+                elif correct_answers_length > 1:
+                    questions_with_many_answers.append(question)
+            # Устанавливаем вопросы
+            for i in range(0, len(questions_with_one_answer)):
+                question = questions_with_one_answer[i]
+                self.questions_with_one_answer.entries[i].label = question.name
+                self.questions_with_one_answer.entries[i].choices = question.question_variants(True)
+            for i in range(0, len(questions_with_many_answers)):
+                question = questions_with_many_answers[i]
+                print(self.questions_with_many_answers.entries)
+                self.questions_with_many_answers.entries[i].label = question.name
+                self.questions_with_many_answers.entries[i].choices = question.question_variants(False)
         else:
             raise ValueError('TestForm needed in questions for set in form')
         self.questions_with_one_answer.errors = []
