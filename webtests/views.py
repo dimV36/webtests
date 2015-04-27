@@ -4,11 +4,10 @@ from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.orm.exc import NoResultFound
 from os.path import exists
 from os import mkdir, remove, listdir
-from json import dump
 
 from webtests.roles import *
 from forms import LoginForm, RegisteredUserForm, HeadmasterForm, CSOForm, DeleteUserForm, TestForm
-from models import ApplicationData, Role, User, UserChoice, Process, InvestmentLevel, Question
+from models import ApplicationData, Role, User, UserChoice, Question
 from config import STATISTIC_DIR
 from webtests import app
 from statistic import make_statistic
@@ -270,7 +269,6 @@ def cso_testing(page=1):
         is_cso_answered_on_questions = ApplicationData.is_cso_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
-                page = chosen_processes.pages
                 save_answers_to_db(form, g.user.role_id, current_process.id)
                 if not is_cso_answered_on_questions.status:
                     is_cso_answered_on_questions.status = bool(not is_cso_answered_on_questions.status)
