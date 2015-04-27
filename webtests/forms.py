@@ -87,7 +87,6 @@ class TestForm(Form):
                 self.questions_with_one_answer.entries[i].choices = question.question_variants(True)
             for i in range(0, len(questions_with_many_answers)):
                 question = questions_with_many_answers[i]
-                print(self.questions_with_many_answers.entries)
                 self.questions_with_many_answers.entries[i].label = question.name
                 self.questions_with_many_answers.entries[i].choices = question.question_variants(False)
         else:

@@ -335,6 +335,17 @@ class Question(CRUDMixin, db.Model):
         """
         return self.variants[choice - 1]
 
+    def question_mark(self, choice):
+        """
+        Получить оценку для ответа на вопрос по его номеру
+        :param choice: номер ответа (int)
+        :return: int
+        """
+        if self.marks is not None:
+            return self.marks[choice - 1]
+        else:
+            return None
+
     def __repr__(self):
         return '<Question #{:d}>'.format(self.id)
 
@@ -495,8 +506,8 @@ class UserChoice(CRUDMixin, db.Model):
         :return: None
         """
         UserChoice.create(user_id=user_id,
-                          field=UserChoice.__TYPE_QUESTION,
-                          choice=choice)
+                          type=UserChoice.__TYPE_QUESTION,
+                          answer=choice)
 
     def choice_name(self):
         """

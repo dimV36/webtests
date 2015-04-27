@@ -4,6 +4,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.orm.exc import NoResultFound
 from os.path import exists
 from os import mkdir, remove, listdir
+from json import dump
 
 from webtests.roles import *
 from forms import LoginForm, RegisteredUserForm, HeadmasterForm, CSOForm, DeleteUserForm, TestForm
@@ -127,19 +128,23 @@ def cso():
         return u'Вы не можете получить доступ к этой странице'
 
 
-def save_answers_to_db(entries, user_role, page, process_id):
-    process = UserChoice.user_choice_processes_by_role(user_role).paginate(page, 1, False).items[0]
-    questions = Question.chosen_questions(process.choice).all()
-    for i in range(0, len(entries)):
-        entry = entries[i]
-        question_name = questions[i].name
-        question = Question.question(question_name, process_id).one()
-        choice = entry.variants.data
-        UserChoice.create_question_choice(username=g.user.username,
-                                          process_id=process_id,
-                                          question=question_name,
-                                          choice=choice,
-                                          answer=question.question_answer(choice))
+def __make_question_choice_for_fields(entries, user_id, process_id):
+    for entry in entries:
+        choice = entry.data
+        question = Question.question(entry.label, process_id).one()
+        user_choice = {'process_id': process_id,
+                       'choice': [choice],
+                       'question_id': question.id,
+                       'mark': question.question_mark(choice),
+                       'weight': question.weight,
+                       'correct_answers': question.correct_answers}
+        UserChoice.create_question_choice(user_id=user_id,
+                                          choice=user_choice)
+
+
+def save_answers_to_db(form, user_id, process_id):
+    __make_question_choice_for_fields(form.questions_with_one_answer.entries, user_id, process_id)
+    __make_question_choice_for_fields(form.questions_with_many_answers.entries, user_id, process_id)
 
 
 @app.route('/cio/', methods=('GET', 'POST'))
@@ -150,23 +155,22 @@ def cio(page=1):
         is_cso_choose_processes = ApplicationData.is_cso_choose_processes()
         chosen_processes = UserChoice.user_choice_processes_by_role_id(g.user.role_id).paginate(page, 1, False)
         if is_cso_choose_processes.status:
-            current_process = chosen_processes.items[page - 1]
+            current_process = chosen_processes.items[0]
             questions_by_process = Question.chosen_questions(current_process.id).all()
         else:
-            questions_by_process = []
             current_process = None
+            questions_by_process = []
         form = TestForm(questions=questions_by_process)
         is_cio_answered_on_questions = ApplicationData.is_cio_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
                 page = chosen_processes.pages
-                # TODO: Реализовать корректное сохранение ответов пользователей
-                save_answers_to_db(form.questions, ROLE_HEAD_OF_BASE_LEVEL, page, process.id)
+                save_answers_to_db(form, g.user.role_id, current_process.id)
                 if not is_cio_answered_on_questions.status:
                     is_cio_answered_on_questions.status = bool(not is_cio_answered_on_questions.status)
                     is_cio_answered_on_questions.update()
             if form.next_page.data:
-                save_answers_to_db(form.questions, ROLE_HEAD_OF_BASE_LEVEL, page, process.id)
+                save_answers_to_db(form, g.user.role_id, current_process.id)
                 page = chosen_processes.next_num
             return redirect(url_for('cio', page=page))
         return render_template('roles/cio.html', form=form,
@@ -185,30 +189,28 @@ def cio(page=1):
 def om(page=1):
     if g.user.role.name == ROLE_HEAD_OF_OPERATIONAL_LEVEL:
         is_cio_answered_on_questions = ApplicationData.is_cio_answered_on_questions()
-        chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_OPERATIONAL_LEVEL).\
-            paginate(page, 1, False)
+        chosen_processes = UserChoice.user_choice_processes_by_role_id(g.user.role_id).paginate(page, 1, False)
         if is_cio_answered_on_questions.status:
             current_process = chosen_processes.items[0]
-            questions_by_process = Question.chosen_questions(current_process.choice).all()
-            process = Process.process_by_id(current_process.choice).one()
+            questions_by_process = Question.chosen_questions(current_process.id).all()
         else:
+            current_process = None
             questions_by_process = []
-            process = None
-        form = TestForm(questions_by_process)
+        form = TestForm(questions=questions_by_process)
         is_om_answered_on_questions = ApplicationData.is_om_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
                 page = chosen_processes.pages
-                save_answers_to_db(form.questions, ROLE_HEAD_OF_OPERATIONAL_LEVEL, page, process.id)
+                save_answers_to_db(form, g.user.role_id, current_process.id)
                 if not is_om_answered_on_questions.status:
                     is_om_answered_on_questions.status = bool(not is_om_answered_on_questions.status)
                     is_om_answered_on_questions.update()
             if form.next_page.data:
-                save_answers_to_db(form.questions, ROLE_HEAD_OF_OPERATIONAL_LEVEL, page, process.id)
+                save_answers_to_db(form, g.user.role_id, current_process.id)
                 page = chosen_processes.next_num
             return redirect(url_for('om', page=page))
         return render_template('roles/om.html', form=form,
-                               process_name=process,
+                               process_name=current_process.name,
                                is_cio_answered_on_questions=is_cio_answered_on_questions,
                                is_om_answered_on_questions=is_om_answered_on_questions,
                                processes=chosen_processes,
@@ -223,30 +225,28 @@ def om(page=1):
 def tm(page=1):
     if g.user.role.name == ROLE_HEAD_OF_TACTICAL_LEVEL:
         is_om_answered_on_questions = ApplicationData.is_om_answered_on_questions()
-        chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_TACTICAL_LEVEL).\
-            paginate(page, 1, False)
+        chosen_processes = UserChoice.user_choice_processes_by_role_id(g.user.role_id).paginate(page, 1, False)
         if is_om_answered_on_questions.status:
             current_process = chosen_processes.items[0]
-            questions_by_process = Question.chosen_questions(current_process.choice).all()
-            process = Process.process_by_id(current_process.choice).one()
+            questions_by_process = Question.chosen_questions(current_process.id).all()
         else:
+            current_process = None
             questions_by_process = []
-            process = None
-        form = TestForm(questions_by_process)
+        form = TestForm(questions=questions_by_process)
         is_tm_answered_on_questions = ApplicationData.is_tm_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
                 page = chosen_processes.pages
-                save_answers_to_db(form.questions, ROLE_HEAD_OF_TACTICAL_LEVEL, page, process.id)
+                save_answers_to_db(form, g.user.role_id, current_process.id)
                 if not is_tm_answered_on_questions.status:
                     is_tm_answered_on_questions.status = bool(not is_tm_answered_on_questions.status)
                     is_tm_answered_on_questions.update()
             if form.next_page.data:
-                save_answers_to_db(form.questions, ROLE_HEAD_OF_TACTICAL_LEVEL, page, process.id)
+                save_answers_to_db(form, g.user.role_id, current_process.id)
                 page = chosen_processes.next_num
             return redirect(url_for('tm', page=page))
         return render_template('roles/tm.html', form=form,
-                               process_name=process,
+                               process_name=current_process.name,
                                is_om_answered_on_questions=is_om_answered_on_questions,
                                is_tm_answered_on_questions=is_tm_answered_on_questions,
                                processes=chosen_processes,
@@ -259,32 +259,30 @@ def tm(page=1):
 def cso_testing(page=1):
     if g.user.role.name == ROLE_HEAD_OF_INFORMATION_SECURITY:
         is_tm_answered_on_questions = ApplicationData.is_tm_answered_on_questions()
-        chosen_processes = UserChoice.user_choice_processes_by_role(ROLE_HEAD_OF_INFORMATION_SECURITY).\
-            paginate(page, 1, False)
+        chosen_processes = UserChoice.user_choice_processes_by_role_id(g.user.role_id).paginate(page, 1, False)
         if is_tm_answered_on_questions.status:
             current_process = chosen_processes.items[0]
-            questions_by_process = Question.chosen_questions(current_process.choice).all()
-            process = Process.process_by_id(current_process.choice).one()
+            questions_by_process = Question.chosen_questions(current_process.id).all()
         else:
+            current_process = None
             questions_by_process = []
-            process = None
-        form = TestForm(questions_by_process)
+        form = TestForm(questions=questions_by_process)
         is_cso_answered_on_questions = ApplicationData.is_cso_answered_on_questions()
         if form.validate_on_submit():
             if form.finish.data:
                 page = chosen_processes.pages
-                save_answers_to_db(form.questions, ROLE_HEAD_OF_INFORMATION_SECURITY, page, process.id)
+                save_answers_to_db(form, g.user.role_id, current_process.id)
                 if not is_cso_answered_on_questions.status:
                     is_cso_answered_on_questions.status = bool(not is_cso_answered_on_questions.status)
                     is_cso_answered_on_questions.update()
                     make_statistic()
                 return redirect(url_for('cso'))
             if form.next_page.data:
-                save_answers_to_db(form.questions, ROLE_HEAD_OF_INFORMATION_SECURITY, page, process.id)
+                save_answers_to_db(form, g.user.role_id, current_process.id)
                 page = chosen_processes.next_num
             return redirect(url_for('cso_testing', page=page))
         return render_template('roles/cso_testing.html', form=form,
-                               process_name=process,
+                               process_name=current_process.name,
                                is_tm_answered_on_questions=is_tm_answered_on_questions,
                                is_cso_answered_on_questions=is_cso_answered_on_questions,
                                processes=chosen_processes,
