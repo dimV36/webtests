@@ -4,6 +4,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.orm.exc import NoResultFound
 from os.path import exists
 from os import mkdir, remove, listdir
+from types import ListType
 
 from webtests.roles import *
 from forms import LoginForm, RegisteredUserForm, HeadmasterForm, CSOForm, DeleteUserForm, TestForm
@@ -130,13 +131,16 @@ def cso():
 def __make_question_choice_for_fields(entries, user_id, process_id):
     for entry in entries:
         choice = entry.data
+
         question = Question.question(entry.label, process_id).one()
         user_choice = {'process_id': process_id,
-                       'choice': [choice],
                        'question_id': question.id,
                        'mark': question.question_mark(choice),
                        'weight': question.weight,
                        'correct_answers': question.correct_answers}
+        if not type(choice) == ListType:
+            choice = [choice]
+        user_choice['choice'] = choice
         UserChoice.create_question_choice(user_id=user_id,
                                           choice=user_choice)
 
@@ -173,7 +177,7 @@ def cio(page=1):
                 page = chosen_processes.next_num
             return redirect(url_for('cio', page=page))
         return render_template('roles/cio.html', form=form,
-                               process_name=current_process.name,
+                               current_process=current_process,
                                is_cso_choose_processes=is_cso_choose_processes,
                                is_cio_answered_on_questions=is_cio_answered_on_questions,
                                processes=chosen_processes,
@@ -209,7 +213,7 @@ def om(page=1):
                 page = chosen_processes.next_num
             return redirect(url_for('om', page=page))
         return render_template('roles/om.html', form=form,
-                               process_name=current_process.name,
+                               current_process=current_process,
                                is_cio_answered_on_questions=is_cio_answered_on_questions,
                                is_om_answered_on_questions=is_om_answered_on_questions,
                                processes=chosen_processes,
@@ -245,7 +249,7 @@ def tm(page=1):
                 page = chosen_processes.next_num
             return redirect(url_for('tm', page=page))
         return render_template('roles/tm.html', form=form,
-                               process_name=current_process.name,
+                               current_process=current_process,
                                is_om_answered_on_questions=is_om_answered_on_questions,
                                is_tm_answered_on_questions=is_tm_answered_on_questions,
                                processes=chosen_processes,
@@ -280,7 +284,7 @@ def cso_testing(page=1):
                 page = chosen_processes.next_num
             return redirect(url_for('cso_testing', page=page))
         return render_template('roles/cso_testing.html', form=form,
-                               process_name=current_process.name,
+                               current_process=current_process,
                                is_tm_answered_on_questions=is_tm_answered_on_questions,
                                is_cso_answered_on_questions=is_cso_answered_on_questions,
                                processes=chosen_processes,

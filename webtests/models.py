@@ -142,7 +142,7 @@ class User(UserMixin, CRUDMixin, db.Model):
         Метод получения пользователя по его имени.
         Эквивалентно запросу SELECT * FROM users WHERE username = <username>;
         :param username: Имя пользователя (str)
-        :return User
+        :return BaseQuery
         """
         return User.query.filter(User.username == username)
 
@@ -152,7 +152,7 @@ class User(UserMixin, CRUDMixin, db.Model):
         Метод получения пользователя по идентификатору роли
         Эквивалентно запросу SELECT * FROM users WHERE role_id = <role_id>;
         :param role_id: Идентификатор роли (int)
-        :return User
+        :return BaseQuery
         """
         return User.query.filter(User.role_id == role_id)
 
@@ -162,7 +162,7 @@ class User(UserMixin, CRUDMixin, db.Model):
         Метод получения пользователя по идентификатору пользователя
         Эквивалентно запросу SELECT * FROM users WHERE id = <user_id>;
         :param user_id: Идентификатор пользователя (int)
-        :return User
+        :return BaseQuery
         """
         return User.query.filter(User.id == user_id)
 
@@ -171,7 +171,7 @@ class User(UserMixin, CRUDMixin, db.Model):
         """
         Метод получения всех пользователей системы.
         Эквивалентно запросу SELECT * FROM users WHERE username != admin;
-        :return list
+        :return BaseQuery
         """
         return User.query.filter(User.username != User.__ADMIN_USER)
 
@@ -202,7 +202,7 @@ class InvestmentLevel(CRUDMixin, db.Model):
         """
         Метод получения инвестиционного уровней.
         Эквивалент запросу SELECT * FROM investment_levels;
-        :return list
+        :return BaseQuery
         """
         return InvestmentLevel.query
 
@@ -212,7 +212,7 @@ class InvestmentLevel(CRUDMixin, db.Model):
         Метод получения инвестиционного уровня по идентификатору.
         Эквивалентно запросу: SELECT * FROM investment_levels WHERE id = <investment_level_id>;
         :param investment_level_id идентификатор инвестиционного уровня (int)
-        :return InvestmentLevel
+        :return BaseQuery
         """
         return InvestmentLevel.query.filter(InvestmentLevel.id == investment_level_id)
 
@@ -239,7 +239,7 @@ class Process(CRUDMixin, db.Model):
         Получить процесс по идентификатору процесса.
         Эквивалентно запросу SELECT * FROM processes WHERE id = <process_id>;
         @:param process_id: идентификатор процесса(int)
-        @:return Process
+        @:return: Process
         """
         return Process.query.filter(Process.id == process_id).one()
 
@@ -249,7 +249,7 @@ class Process(CRUDMixin, db.Model):
         Получить все процессы, приналежащие роли.
         Экивалентно запросу SELECT * FROM processes WHERE role_id = <role_id>;
         @:param role_id: идентификатор роли (int)
-        @:return: List
+        @:return: BaseQuery
         """
         return Process.query.filter(Process.role_id == role_id)
 
@@ -339,10 +339,10 @@ class Question(CRUDMixin, db.Model):
         """
         Получить оценку для ответа на вопрос по его номеру
         :param choice: номер ответа (int)
-        :return: int
+        :return: float
         """
         if self.marks is not None:
-            return self.marks[choice - 1]
+            return self.marks[choice - 1] / float(self.marks[0])
         else:
             return None
 
@@ -401,7 +401,7 @@ class ApplicationData(CRUDMixin, db.Model):
                 data.update()
 
     # Методы получения статуса прохождения пользователями тестов
-    # @return: bool
+    # @return: ApplicationData
     @staticmethod
     def is_headmaster_started_testing():
         return ApplicationData.__application_data(ApplicationData.__HEADMASTER_START_TESTING).one()
@@ -523,6 +523,16 @@ class UserChoice(CRUDMixin, db.Model):
         """
         return self.answer['choice']
 
+    def choice_process_id(self):
+        """
+        Получить идентификатор процесса, ответ на вопрос которого содержится в базе
+        :return: int
+        """
+        if self.type == self.__TYPE_QUESTION:
+            return self.answer['process_id']
+        else:
+            raise ValueError(u'Попытка получить значение процесса для объекта ответа типа %s' % self.type)
+
     @staticmethod
     def user_choice_chosen_investment_level():
         """
@@ -532,13 +542,12 @@ class UserChoice(CRUDMixin, db.Model):
         return UserChoice.query.filter(UserChoice.type == UserChoice.__TYPE_INVESTMENT_LEVEL)
 
     @staticmethod
-    def user_choice_question(question_name):
-        return UserChoice.query.filter(UserChoice.question == question_name)
-
-    @staticmethod
-    def user_choice_question_by_user_id(user_id):
-        return UserChoice.question.filter(UserChoice.field == UserChoice.__FIELD_QUESTION).\
-            filter(UserChoice.user_id == user_id)
+    def user_choice_questions():
+        """
+        Получить выбор пользователей вопросов.
+        :return BaseQuery
+        """
+        return UserChoice.query.filter(UserChoice.type == UserChoice.__TYPE_QUESTION)
 
     @staticmethod
     def user_choice_processes():
@@ -559,6 +568,20 @@ class UserChoice(CRUDMixin, db.Model):
         chosen_processes = UserChoice.user_choice_processes().one().choice()
         # Фильтрем процессы по роли и идентификатору процесса
         return Process.processes_by_role(role_id).filter(Process.id.in_(chosen_processes))
+
+    @staticmethod
+    def user_choice_questions_by_process_id(process_id):
+        """
+        Получить ответы пользователя по процессу
+        :param process_id: идентификатор процесса
+        :return: List
+        """
+        result = []
+        questions = UserChoice.user_choice_questions().all()
+        for question in questions:
+            if question.choice_process_id() == process_id:
+                result.append(question)
+        return result
 
     def __repr__(self):
         return '<UsersChoices #{:d}>'.format(self.id)

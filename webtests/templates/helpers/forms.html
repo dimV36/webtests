@@ -47,16 +47,16 @@
 {% endmacro %}
 
 
-{% macro render_test_form(previous, level, current, form, process_name, processes) %}
+{% macro render_test_form(previous, level, current, form, current_process, processes) %}
     {{ navigation() }}
     <form action="" method="POST">
     {% if previous.status %}
         {% if level %}
-            Инвестиционный уровень: "<b>{{ level.one().choice_name() }}</b>"
+            Инвестиционный уровень: "<b>{{ level.one().choice_name() }}</b>"<br><br>
         {% endif %}
         {% if not current.status %}
             {% if process_name %}
-                <h1>Тестирование пользователя {{g.user.username }} по процессу "{{ process_name }}"</h1>
+                <h1>Тестирование пользователя {{g.user.username }} по процессу "{{ current_process.name }}"</h1>
             {% endif %}
             {% for entry in form.questions_with_many_answers.entries %}
                 {{ entry.label }}
