@@ -98,26 +98,40 @@ def headmaster():
 @app.route('/cso/', methods=('GET', 'POST'))
 @login_required
 def cso():
+    """
+    Отображение страницы для CSO
+    :return: html
+    """
+    # Проверяем полномочия пользователя (пользователь может просматривать страницы только по своему уровню доступа)
     if g.user.role.name == ROLE_HEAD_OF_INFORMATION_SECURITY:
+        # Получаем информацию о состоянии системы
         is_headmaster_started_testing = ApplicationData.is_headmaster_started_testing()
         is_cso_choose_processes = ApplicationData.is_cso_choose_processes()
         is_om_answered_on_questions = ApplicationData.is_om_answered_on_questions()
         is_cso_answered_on_questions = ApplicationData.is_cso_answered_on_questions()
+        # Владелец начал тестирование, OM прошёл его, а CSO не ответил на вопросы?
         if is_headmaster_started_testing.status and \
                 is_om_answered_on_questions.status and \
                 not is_cso_answered_on_questions.status:
+            # Запускаем тестирование для CSO
             return redirect(url_for('cso_testing', page=1))
+        # Создаём форму для пользователя CSO
         form = CSOForm()
+        # Получаем список процессов из БД
         try:
             processes = UserChoice.user_choice_processes().one().choice_name()
         except NoResultFound:
             processes = None
+        # Форма прошла вадидацию и отправлена?
         if form.validate_on_submit():
+            # Если CSO не выбрал процессы, то создаём сущность в БД, содержащий выбор процессов CSO
             if not is_cso_choose_processes.status:
                 UserChoice.create_process_choice(g.user.id, form.processes.data)
-            is_cso_choose_processes.status = bool(not is_cso_choose_processes.status)
-            is_cso_choose_processes.update()
+                # Обновляем информацию о состоянии системы: пользователь CSO выбрал вопросы
+                is_cso_choose_processes.status = bool(not is_cso_choose_processes.status)
+                is_cso_choose_processes.update()
             return redirect(url_for('cso'))
+        # Генерируем форму для отображения (см. roles/cso.html)
         return render_template('roles/cso.html', form=form,
                                is_headmaster_started_testing=is_headmaster_started_testing,
                                is_cso_choose_processes=is_cso_choose_processes,
@@ -129,10 +143,19 @@ def cso():
 
 
 def __make_question_choice_for_fields(entries, user_id, process_id):
+    """
+    Вспомогательная функция сохранения ответов на вопросы пользователя
+    :param entries: список виджетов, которые используются для отображения и получения ответов пользователя (list)
+    :param user_id: идентификатор пользователя (int)
+    :param process_id: идентификатор процесса (int)
+    :return: None
+    """
     for entry in entries:
+        # Получаем ответ пользователя
         choice = entry.data
-
+        # Обращаемся к БД, получаем запись вопроса по его имени и идентификатору процесса
         question = Question.question(entry.label, process_id).one()
+        # Формируем JSON, включая в него список необходимых параметров для анализа
         user_choice = {'process_id': process_id,
                        'question_id': question.id,
                        'mark': question.question_mark(choice),
@@ -141,11 +164,19 @@ def __make_question_choice_for_fields(entries, user_id, process_id):
         if not type(choice) == ListType:
             choice = [choice]
         user_choice['choice'] = choice
+        # Создаём новую запись в таблице UserChoice с типом ответа 'question'
         UserChoice.create_question_choice(user_id=user_id,
                                           choice=user_choice)
 
 
 def save_answers_to_db(form, user_id, process_id):
+    """
+    Главная функция сохранения ответов пользователя.
+    :param form: форма (TestForm)
+    :param user_id: идентификатор пользователя (int)
+    :param process_id: идентификатор процесса
+    :return: None
+    """
     __make_question_choice_for_fields(form.questions_with_one_answer.entries, user_id, process_id)
     __make_question_choice_for_fields(form.questions_with_many_answers.entries, user_id, process_id)
 
@@ -154,28 +185,52 @@ def save_answers_to_db(form, user_id, process_id):
 @app.route('/cio/process<int:page>', methods=['GET', 'POST'])
 @login_required
 def cio(page=1):
+    """
+    Отображение страницы для CIO
+    :param page: номер страницы (int)
+    :return: html
+    """
+    # Проверяем полномочия пользователя (пользователь может просматривать страницы только по своему уровню доступа)
     if g.user.role.name == ROLE_HEAD_OF_BASE_LEVEL:
+        # Получаем информацию о состоянии системы
         is_cso_choose_processes = ApplicationData.is_cso_choose_processes()
+        # Получаем процессы, по которым должен пользователь пройти тестирование
+        # метод paginate(page, count, error_out) возвращает список объектов в количестве count на страницу page
+        # тем самым добиваемся того, что тестирование по 1 процессу является 1 страница
         chosen_processes = UserChoice.user_choice_processes_by_role_id(g.user.role_id).paginate(page, 1, False)
         if is_cso_choose_processes.status:
+            # Определяем текущий процесс и список вопросов, которые нужно будет отрисовать на форме
             current_process = chosen_processes.items[0]
             questions_by_process = Question.chosen_questions(current_process.id).all()
         else:
+            # Эта ветвь необходима для корректного завершения функции (например, когда тестирование не началось,
+            # а CSO прошёл аутентификацию
             current_process = None
             questions_by_process = []
+        # Создаём форму, в которую будут поступать ответы пользователя
         form = TestForm(questions=questions_by_process)
         is_cio_answered_on_questions = ApplicationData.is_cio_answered_on_questions()
+        # Форма прошла валидацию и отправлена?
         if form.validate_on_submit():
+            # Тестирование завершено?
             if form.finish.data:
                 page = chosen_processes.pages
+                # Сохраняем ответы в базу данных
                 save_answers_to_db(form, g.user.role_id, current_process.id)
                 if not is_cio_answered_on_questions.status:
+                    # Изменяем параметр пройденности тестирования пользователя cio на обратное (False -> True)
                     is_cio_answered_on_questions.status = bool(not is_cio_answered_on_questions.status)
+                    # Сохраняем параметр в базе данных
                     is_cio_answered_on_questions.update()
+            # Если пользователю предстоит проходить тестирование по нескольким процессам,
+            # и есть ещё процессы, на вопросы которых он не ответил,
+            # то сохраняем ответы со страницы и изменяем номер страницы на 1
             if form.next_page.data:
                 save_answers_to_db(form, g.user.role_id, current_process.id)
                 page = chosen_processes.next_num
+            # Перенаправление пользователя на новый номер страницы
             return redirect(url_for('cio', page=page))
+        # Отрисовка страницы
         return render_template('roles/cio.html', form=form,
                                current_process=current_process,
                                is_cso_choose_processes=is_cso_choose_processes,

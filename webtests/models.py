@@ -461,10 +461,6 @@ class UserChoice(CRUDMixin, db.Model):
     answer = db.Column(JSON())
 
     @staticmethod
-    def __user_choice(field):
-        return UserChoice.query.filter(UserChoice.field == field)
-
-    @staticmethod
     def create_investment_level_choice(user_id, choice):
         """
         Создать запись о выборе инвестиционного уровня пользователем
@@ -552,7 +548,7 @@ class UserChoice(CRUDMixin, db.Model):
     @staticmethod
     def user_choice_processes():
         """
-        Получить выбор пользователя процессов для тестирования.
+        Получить выбор пользователя CSO процессов для тестирования.
         :return: UserChoice
         """
         return UserChoice.query.filter(UserChoice.type == UserChoice.__TYPE_PROCESS)
@@ -588,6 +584,13 @@ class UserChoice(CRUDMixin, db.Model):
 
 
 def create_entities():
+    """
+    Функция инициализации приложения
+    :return: None
+    """
+    # Создаём роли
     Role.create_roles(USER_ROLES)
+    # Создаём администратора
     User.create_admin()
+    # Создаём параметры системы
     ApplicationData.init_application_data()
