@@ -1,4 +1,5 @@
 # coding=utf-8
+__author__ = 'dimv36'
 from flask_wtf import Form
 from sqlalchemy.orm.exc import MultipleResultsFound, NoResultFound
 from wtforms import fields, widgets
@@ -18,13 +19,16 @@ class _MultiCheckboxField(fields.SelectMultipleField):
 
 
 class HeadmasterForm(Form):
+    """
+    Форма владельца сайта
+    """
     investment_levels = fields.RadioField(coerce=int, default=None)
 
     def __init__(self, *args, **kwargs):
         """
         Метод инициализации формы HeadMasterForm
-        :param args: список неупорядочных параметров (list)
-        :param kwargs: список упорядочных параметров (dict)
+        :param args: список неименованных аргументов (list)
+        :param kwargs: список именованных аргументов (dict)
         :return: self
         """
         super(self.__class__, self).__init__(*args, **kwargs)
@@ -35,14 +39,32 @@ class HeadmasterForm(Form):
 
 
 class CSOForm(Form):
+    """
+    Форма пользователя CSO выбора процессов для тестирования
+    """
     processes = _MultiCheckboxField(coerce=int, default=0, choices=Process.processes())
 
     def validate_processes(self, field):
         if not self.processes.data:
             raise ValidationError(u'Необходимо выбрать хотя бы один процесс')
+        # Дополнительная проверка выбора пользователя:
+        # Пользователю CSO необходимо выбрать хотя бы по одному процессу для каждого пользователя
+        # (это позволяет предотвратить возможные ошибки при входе пользователей)
+        process_owner_ids = []
+        for choice in self.processes.data:
+            owner = Process.process_by_id(choice).role_id
+            if not process_owner_ids.__contains__(owner):
+                process_owner_ids.append(owner)
+        # Идентификаторы тестируемых ролей начинаются с 3 и заканчиваются на 6
+        if not sorted(process_owner_ids) == [3, 4, 5, 6]:
+            raise ValidationError(u'Необходимо выбрать хотя бы по одному процессу '
+                                  u'для каждого тестируемого пользователя')
 
 
 class TestForm(Form):
+    """
+    Форма тестирования пользователей CIO, OM, TM, CSO
+    """
     __MAX_QUESTIONS_WITH_MANY_ANSWERS = 1
     __MAX_QUESTIONS_WITH_ONE_ANSWER = 11
     questions_with_many_answers = fields.FieldList(_MultiCheckboxField(coerce=int, default=0),
@@ -115,6 +137,9 @@ class TestForm(Form):
 
 
 class LoginForm(Form):
+    """
+    Форма входа пользователей
+    """
     username = fields.StringField(u'Логин', validators=[MyInputRequired()])
     password = fields.PasswordField(u'Пароль', validators=[MyInputRequired()])
     user = None
@@ -138,6 +163,9 @@ class LoginForm(Form):
 
 
 class RegisteredUserForm(Form):
+    """
+    Форма создания (регистрации пользователей)
+    """
     username = fields.StringField(u'Логин', validators=[MyInputRequired()])
     password = fields.PasswordField(u'Пароль', validators=[MyInputRequired()])
     retry_password = fields.PasswordField(u'Повтор пароля', validators=[MyInputRequired()])
@@ -173,6 +201,9 @@ class RegisteredUserForm(Form):
 
 
 class DeleteUserForm(Form):
+    """
+    Форма удаления пользователей
+    """
     users = _MultiCheckboxField(coerce=int, default=0)
     prev = fields.SubmitField(u'Назад')
     submit = fields.SubmitField(u'Удалить')

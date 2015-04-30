@@ -4,6 +4,9 @@ from wtforms.validators import StopValidation
 
 
 class MyInputRequired(object):
+    """
+    Класс валидатора для полей, которые требуют ответа
+    """
     field_flags = ('required', )
 
     def __init__(self, message=None):

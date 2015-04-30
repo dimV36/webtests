@@ -257,7 +257,6 @@ class Process(CRUDMixin, db.Model):
     def testing_processes(role_id):
         """
         Получить список все тестируемые (выбранные пользователем CSO) процессы, принадлежащие роли.
-        Эквивалентно запросу SELECT * FROM processes WHERE role_id = <role_id> AND processes.name IN (SELECT
         """
         chosen_processes_names = [process.answer for process in UserChoice.user_choice_processes().all()]
         return Process.query.filter(Process.role_id == role_id).\

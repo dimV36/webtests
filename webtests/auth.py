@@ -1,7 +1,9 @@
+# coding=utf-8
+__author__ = 'dimv36'
 from flask_login import AnonymousUserMixin, LoginManager
-
 from webtests.models import User
 
+# Модуль инициализации менеджера входа пользователей
 
 login_manager = LoginManager()
 

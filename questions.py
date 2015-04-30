@@ -7,11 +7,10 @@ from webtests.models import Process
 from sqlalchemy.orm.exc import NoResultFound
 
 if __name__ == '__main__':
-    # if len(argv) != 2:
-    #     print('Too few arguments for script')
-    #     exit(1)
-    # file_name = argv[1]
-    file_name = 'files/questions'
+    if len(argv) != 2:
+        print('Too few arguments for script')
+        exit(1)
+    file_name = argv[1]
     out_file = open(file_name + '.sql', 'w')
     with open(file_name) as questions_file:
         sql = str()

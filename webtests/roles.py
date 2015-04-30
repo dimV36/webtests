@@ -19,4 +19,4 @@ ROLES = [(ROLE_HEAD_OF_ORGANIZATION, u'Руководитель организа
          (ROLE_HEAD_OF_BASE_LEVEL, u'Начальник базового уровня'),
          (ROLE_HEAD_OF_OPERATIONAL_LEVEL, u'Управляющий оперативного уровня'),
          (ROLE_HEAD_OF_TACTICAL_LEVEL, u'Управляющий тактического уровня')
-]
+         ]

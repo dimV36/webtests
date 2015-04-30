@@ -1,4 +1,5 @@
 # coding=utf-8
+__author__ = 'dimv36'
 from flask import redirect, render_template, url_for, g, flash
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy.orm.exc import NoResultFound
@@ -16,12 +17,21 @@ from statistic import make_statistic
 
 @app.before_request
 def before_request():
+    """
+    Функция, исполняемая до каждого запроса к приложению
+    В ней реализуется определение текущего пользователя, а также некоторая логика приложения
+    :return: None
+    """
     g.user = current_user
     is_headmaster_started_testing = ApplicationData.is_headmaster_started_testing()
+    # Создаём директорию для хранения диаграмм
     if not exists(STATISTIC_DIR):
         mkdir(STATISTIC_DIR)
+    # Если флаг начала тестирования установлен в False,
+    # Сбрасываем все параметры таблицы ApplicationData в False -- начальное состояние системы
     if not is_headmaster_started_testing.status:
         ApplicationData.reset_application_data()
+        # Если остались какие-либо старые диаграммы, удаляем их
         for file_name in listdir(STATISTIC_DIR):
             remove(STATISTIC_DIR + '/' + file_name)
 
@@ -350,11 +360,16 @@ def cso_testing(page=1):
 
 @app.route('/', methods=('GET', 'POST'))
 def login():
+    """
+    Отображение страницы для входа пользователей
+    :return: html
+    """
     form = LoginForm()
+    # Форма прошла валидацию?
     if form.validate_on_submit():
+        # Впускаем пользователя
         login_user(form.user)
-        # There's a subtle security hole in this code, which we will be fixing in our next article.
-        # Don't use this exact pattern in anything important.
+        # Перенапраляем пользователя на его страницу
         return redirect('/%s' % g.user.username)
     return render_template('users/login.html', form=form)
 
@@ -362,13 +377,24 @@ def login():
 @app.route('/logout/')
 @login_required
 def logout():
+    """
+    Функция выхода пользователя из системы
+    :return:
+    """
     logout_user()
+    # Осуществляем перенаправление на страницу входа
     return redirect(url_for('login'))
 
 
 @app.route('/<username>', methods=('GET', 'POST'))
 @login_required
 def user_page(username):
+    """
+    Функция проверки прав доступа к странице (определение роли пользователя по его имени).
+    Функция определяет роль пользователя, после чего выдаёт пользователю страницу согласно его роли.
+    :param username: имя пользователя (str)
+    :return: html
+    """
     user = None
     try:
         user = User.query.filter(User.username == username).one()
