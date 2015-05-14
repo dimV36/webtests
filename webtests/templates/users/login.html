@@ -3,6 +3,7 @@
 {% block title %} Система анкетирования сотрудников для определения уровня зрелости процессов управления информационной безопасностью {% endblock %}
 {% block content %}
 {{super()}}
+<br><br><br><br><br><br><br><br><br><br><br><br>
 <center>
     <form action="{{ url_for('login', next=request.args.get('next', '')) }}" method="POST">
         {{ forms.render(form) }}

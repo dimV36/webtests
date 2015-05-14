@@ -11,12 +11,12 @@
     {% endif %}
     <p>
         {{ forms.render_statistic(is_cso_answered_on_questions) }}
-        <input type="Submit" value="Закончить тестирование">
+        <input type="Submit" value="Закончить анкетирование">
     </p>
 {% else %}
         <p>Выберите инвестиционный уровень организации:</p>
         {{ forms.render_choices(form.investment_levels) }}
-        <p><input type="Submit" value="Начать тестирование"></p>
+        <p><input type="Submit" value="Начать анкетирование"></p>
 {% endif %}
 </form>
 {% endblock %}
