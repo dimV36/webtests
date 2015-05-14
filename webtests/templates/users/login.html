@@ -1,11 +1,13 @@
 {% extends "helpers/layout.html" %}
 {% import "helpers/forms.html" as forms %}
-{% block title %} Войти в систему {% endblock %}
+{% block title %} Система анкетирования сотрудников для определения уровня зрелости процессов управления информационной безопасностью {% endblock %}
 {% block content %}
 {{super()}}
-<form action="{{ url_for('login', next=request.args.get('next', '')) }}" method="POST">
-{{ forms.render(form) }}
-<br>
-<input type="submit" value="Войти">
-</form>
+<center>
+    <form action="{{ url_for('login', next=request.args.get('next', '')) }}" method="POST">
+        {{ forms.render(form) }}
+        <br>
+        <input type="submit" value="Войти">
+    </form>
+</center>
 {% endblock content %}

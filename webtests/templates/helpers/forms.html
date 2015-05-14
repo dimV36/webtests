@@ -40,7 +40,7 @@
 
 {% macro navigation() %}
 <section>
-    <div>
+    <div align="left">
         Вы вошли как пользователь <b>{{ g.user.username }}</b>. <a href="{{ url_for('logout') }}">Выйти</a><br><br>
     </div>
 </section>
@@ -54,6 +54,7 @@
         {% if level %}
             Инвестиционный уровень: "<b>{{ level.one().choice_name() }}</b>"<br><br>
         {% endif %}
+        <hr>
         {% if not current.status %}
             {% if process_name %}
                 <h1>Тестирование пользователя {{g.user.username }} по процессу "{{ current_process.name }}"</h1>
@@ -94,10 +95,10 @@
             {% endif %}
             {{ form.hidden_tag() }}
         {% else %}
-            <p>Тестирование окончено.</p>
+            <p>Анкетирование окончено.</p>
         {% endif %}
     {% else %}
-        <p>Тестирование недоступно.</p>
+        <p>Анкетирование недоступно.</p>
     {% endif %}
     </form>
 {% endmacro %}
