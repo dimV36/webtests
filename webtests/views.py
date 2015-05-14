@@ -207,7 +207,10 @@ def cio(page=1):
         # Получаем процессы, по которым должен пользователь пройти тестирование
         # метод paginate(page, count, error_out) возвращает список объектов в количестве count на страницу page
         # тем самым добиваемся того, что тестирование по 1 процессу является 1 страница
-        chosen_processes = UserChoice.user_choice_processes_by_role_id(g.user.role_id).paginate(page, 1, False)
+        try:
+            chosen_processes = UserChoice.user_choice_processes_by_role_id(g.user.role_id).paginate(page, 1, False)
+        except NoResultFound:
+            chosen_processes = []
         if is_cso_choose_processes.status:
             # Определяем текущий процесс и список вопросов, которые нужно будет отрисовать на форме
             current_process = chosen_processes.items[0]
@@ -257,7 +260,10 @@ def cio(page=1):
 def om(page=1):
     if g.user.role.name == ROLE_HEAD_OF_OPERATIONAL_LEVEL:
         is_cio_answered_on_questions = ApplicationData.is_cio_answered_on_questions()
-        chosen_processes = UserChoice.user_choice_processes_by_role_id(g.user.role_id).paginate(page, 1, False)
+        try:
+            chosen_processes = UserChoice.user_choice_processes_by_role_id(g.user.role_id).paginate(page, 1, False)
+        except NoResultFound:
+            chosen_processes = []
         if is_cio_answered_on_questions.status:
             current_process = chosen_processes.items[0]
             questions_by_process = Question.chosen_questions(current_process.id).all()
@@ -293,7 +299,10 @@ def om(page=1):
 def tm(page=1):
     if g.user.role.name == ROLE_HEAD_OF_TACTICAL_LEVEL:
         is_om_answered_on_questions = ApplicationData.is_om_answered_on_questions()
-        chosen_processes = UserChoice.user_choice_processes_by_role_id(g.user.role_id).paginate(page, 1, False)
+        try:
+            chosen_processes = UserChoice.user_choice_processes_by_role_id(g.user.role_id).paginate(page, 1, False)
+        except NoResultFound:
+            chosen_processes = []
         if is_om_answered_on_questions.status:
             current_process = chosen_processes.items[0]
             questions_by_process = Question.chosen_questions(current_process.id).all()
