@@ -429,6 +429,11 @@ def user_page(username):
 
 
 def __make_tooltips(html):
+    """
+    Функция создания tooltips (Подсказок)
+    :param html: html-страница, unicode
+    :return: unicode
+    """
     html = html.replace(u'ISM3 LEVEL 1', u'<a class="htooltip"> ISM3 LEVEL 1 <span> Этот уровень должен привести '
                                          u'к значительному снижению риска, связанный с техническими угрозами, '
                                          u'при минимальных инвестициях в основные процессы. Этот уровень рекомендуется '
