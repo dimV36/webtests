@@ -52,7 +52,7 @@
     <form action="" method="POST">
     {% if previous.status %}
         {% if level %}
-            Инвестиционный уровень: "<b>{{ level.one().choice_name() }}</b>"<br><br>
+            Инвестиционный уровень: "{{ level.one().choice_name() }}"<br><br>
         {% endif %}
         <hr>
         {% if not current.status %}

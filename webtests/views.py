@@ -97,10 +97,11 @@ def headmaster():
             is_headmaster_started_testing.status = bool(not is_headmaster_started_testing.status)
             is_headmaster_started_testing.update()
             return redirect(url_for('headmaster'))
-        return render_template('roles/headmaster.html', form=form,
+        html = render_template('roles/headmaster.html', form=form,
                                headmaster_is_started_testing=is_headmaster_started_testing,
                                is_cso_answered_on_questions=is_cso_answered_on_questions,
                                investment_level=UserChoice.user_choice_chosen_investment_level())
+        return __make_tooltips(html)
     else:
         return u'Вы не можете получить доступ к этой странице'
 
@@ -142,12 +143,13 @@ def cso():
                 is_cso_choose_processes.update()
             return redirect(url_for('cso'))
         # Генерируем форму для отображения (см. roles/cso.html)
-        return render_template('roles/cso.html', form=form,
+        html = render_template('roles/cso.html', form=form,
                                is_headmaster_started_testing=is_headmaster_started_testing,
                                is_cso_choose_processes=is_cso_choose_processes,
                                is_cso_answered_on_questions=is_cso_answered_on_questions,
                                investment_level=UserChoice.user_choice_chosen_investment_level(),
                                processes=processes)
+        return __make_tooltips(html)
     else:
         return u'Вы не можете получить доступ к этой странице'
 
@@ -244,12 +246,13 @@ def cio(page=1):
             # Перенаправление пользователя на новый номер страницы
             return redirect(url_for('cio', page=page))
         # Отрисовка страницы
-        return render_template('roles/cio.html', form=form,
+        html = render_template('roles/cio.html', form=form,
                                current_process=current_process,
                                is_cso_choose_processes=is_cso_choose_processes,
                                is_cio_answered_on_questions=is_cio_answered_on_questions,
                                processes=chosen_processes,
                                investment_level=UserChoice.user_choice_chosen_investment_level())
+        return __make_tooltips(html)
     else:
         return u'Вы не можете получить доступ к этой странице'
 
@@ -283,12 +286,13 @@ def om(page=1):
                 save_answers_to_db(form, g.user.role_id, current_process.id)
                 page = chosen_processes.next_num
             return redirect(url_for('om', page=page))
-        return render_template('roles/om.html', form=form,
+        html = render_template('roles/om.html', form=form,
                                current_process=current_process,
                                is_cio_answered_on_questions=is_cio_answered_on_questions,
                                is_om_answered_on_questions=is_om_answered_on_questions,
                                processes=chosen_processes,
                                investment_level=UserChoice.user_choice_chosen_investment_level())
+        return __make_tooltips(html)
     else:
         return u'Вы не можете получить доступ к этой странице'
 
@@ -322,12 +326,13 @@ def tm(page=1):
                 save_answers_to_db(form, g.user.role_id, current_process.id)
                 page = chosen_processes.next_num
             return redirect(url_for('tm', page=page))
-        return render_template('roles/tm.html', form=form,
+        html = render_template('roles/tm.html', form=form,
                                current_process=current_process,
                                is_om_answered_on_questions=is_om_answered_on_questions,
                                is_tm_answered_on_questions=is_tm_answered_on_questions,
                                processes=chosen_processes,
                                investment_level=UserChoice.user_choice_chosen_investment_level())
+        return __make_tooltips(html)
     else:
         return u'Вы не можете получить доступ к этой странице'
 
@@ -357,12 +362,13 @@ def cso_testing(page=1):
                 save_answers_to_db(form, g.user.role_id, current_process.id)
                 page = chosen_processes.next_num
             return redirect(url_for('cso_testing', page=page))
-        return render_template('roles/cso_testing.html', form=form,
+        html = render_template('roles/cso_testing.html', form=form,
                                current_process=current_process,
                                is_tm_answered_on_questions=is_tm_answered_on_questions,
                                is_cso_answered_on_questions=is_cso_answered_on_questions,
                                processes=chosen_processes,
                                investment_level=UserChoice.user_choice_chosen_investment_level())
+        return __make_tooltips(html)
     else:
         return u'Вы не можете получить доступ к этой странице'
 
@@ -420,3 +426,37 @@ def user_page(username):
             return redirect(url_for('om'))
         elif user.role.name == ROLE_HEAD_OF_TACTICAL_LEVEL:
             return redirect(url_for('tm'))
+
+
+def __make_tooltips(html):
+    html = html.replace(u'ISM3 LEVEL 1', u'<a class="htooltip"> ISM3 LEVEL 1 <span> Этот уровень должен привести '
+                                         u'к значительному снижению риска, связанный с техническими угрозами, '
+                                         u'при минимальных инвестициях в основные процессы. Этот уровень рекомендуется '
+                                         u'для организаций с невысокими целями ИБ при маловероятном риске. '
+                                         u'</span> </a>')
+    html = html.replace(u'ISM3 LEVEL 2', u'<a class="htooltip"> ISM3 LEVEL 2 <span> Этот уровень должен привести '
+                                         u'к дальнейшему снижению риска от технических угроз при умеренных инвестициях '
+                                         u'в процессы. Этот уровень рекомендуется для организаций с нормальными целями '
+                                         u'ИБ в средне вероятной среде риска, которые должны продемонстрировать '
+                                         u'хорошую практику партнерам и стремление, чтобы избежать инцидентов. '
+                                         u'</span> </a>')
+    html = html.replace(u'ISM3 LEVEL 3', u'<a class="htooltip"> ISM3 LEVEL 3 <span> '
+                                         u'Этот уровень должен привести к сокращению рисков с высокой вероятностью '
+                                         u'технических угроз при серьезных инвестициях в процессы. '
+                                         u'Этот уровень рекомендуется для организаций с высокими целями ИБ в группах '
+                                         u'риска высокой вероятности. </span> </a>')
+    html = html.replace(u'ISM3 LEVEL 4', u'<a class="htooltip"> ISM3 LEVEL 4 <span> Этот уровень должен привести '
+                                         u'к сокращению рисков с самой высокой вероятностью от технических и внутренних'
+                                         u' угроз при серьезных инвестициях в области ИБ процессов. Этот уровень '
+                                         u'рекомендуется для организаций, которые зависят от конкретных требований '
+                                         u'(например, коммунальные услуги, финансовые учреждения) с высокими целями ИБ '
+                                         u'с нормальной или высокой степенью риска. </span> </a>')
+    html = html.replace(u'ISM3 LEVEL 5', u'<a class="htooltip"> ISM3 LEVEL 5 <span> Разница между этим уровнем и '
+                                         u'ISM3 Level 4 является обязательное использование технических показателей. '
+                                         u'Зрелые организации, имеющий некоторый опыт, работающего под управлением '
+                                         u'системы ISM3 Level4, могут оптимизировать и постоянно улучшать свою систему '
+                                         u'ISM на этом уровне. При оценке зрелости процессов 5 уровня входные данные '
+                                         u'по метрикам должны совпадать с базовым описанием всех метрик '
+                                         u'для этого процесса, т.е. наличие всех метрик '
+                                         u'</span> </a>')
+    return html
