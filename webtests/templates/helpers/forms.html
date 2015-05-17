@@ -106,10 +106,14 @@
 
 {% macro render_statistic(is_cso_answered_on_questions) %}
     {% if is_cso_answered_on_questions.status %}
-        <h2>Результаты тестирования</h2>
+        <h2>Результаты анкетирования</h2>
+        <h3> Процессы стратегического уровня: </h3>
         <p><img src="{{resized_img_src('CSO.png', width=500)}}"/></p>
+        <h3> Процессы базового уровня: </h3>
         <p><img src="{{resized_img_src('CIO.png', width=500)}}"/></p>
+        <h3> Процессы оперативного уровня: </h3>
         <p><img src="{{resized_img_src('OM.png', width=500)}}"/></p>
+        <h3> Процессы тактического уровня: </h3>
         <p><img src="{{resized_img_src('TM.png', width=500)}}"/></p>
     {% endif %}
 {% endmacro %}
