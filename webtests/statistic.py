@@ -39,16 +39,16 @@ def __get_statistic(role):
                     break
         short_process_name = m.Process.process_by_id(process.id).name.split(' ')[0]
         if level is None:
-            question_mark = (weighted_marks / all_weights) * 100
-            level = 1
-            if 0 <= question_mark <= 25:
-                level = 2
-            elif 25 < question_mark <= 50:
-                level = 3
-            elif 50 < question_mark <= 75:
-                level = 4
-            elif 75 < question_mark <= 100:
-                level = 5
+            level = int(round(weighted_marks / all_weights))
+            # level = 1
+            # if 0 <= question_mark <= 25:
+            #     level = 2
+            # elif 25 < question_mark <= 50:
+            #     level = 3
+            # elif 50 < question_mark <= 75:
+            #     level = 4
+            # elif 75 < question_mark <= 100:
+            #     level = 5
         results.append((short_process_name, level))
     return results
 
